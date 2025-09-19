@@ -9,7 +9,7 @@ public class Raccolto {
     private LocalDate dataRaccolto;
     private BigDecimal quantitaKg;
     private String note;
-    private Piantagione piantagione;
+    private Integer piantagioneId;
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
 
@@ -17,13 +17,13 @@ public class Raccolto {
     public Raccolto() {}
 
     public Raccolto(Integer id, LocalDate dataRaccolto, BigDecimal quantitaKg, String note,
-                    Piantagione piantagione, LocalDateTime dataCreazione,
+                    Integer piantagione, LocalDateTime dataCreazione,
                     LocalDateTime dataAggiornamento) {
         this.id = id;
         this.dataRaccolto = dataRaccolto;
         this.quantitaKg = quantitaKg;
         this.note = note;
-        this.piantagione = piantagione;
+        this.piantagioneId = piantagione;
         this.dataCreazione = dataCreazione;
         this.dataAggiornamento = dataAggiornamento;
     }
@@ -41,8 +41,8 @@ public class Raccolto {
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
 
-    public Piantagione getPiantagione() { return piantagione; }
-    public void setPiantagione(Piantagione piantagione) { this.piantagione = piantagione; }
+    public Integer getPiantagioneId() { return piantagioneId; }
+    public void setPiantagioneId(Integer piantagioneId) { this.piantagioneId = piantagioneId; }
 
     public LocalDateTime getDataCreazione() { return dataCreazione; }
     public void setDataCreazione(LocalDateTime dataCreazione) { this.dataCreazione = dataCreazione; }

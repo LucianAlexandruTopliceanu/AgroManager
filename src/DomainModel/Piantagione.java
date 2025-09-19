@@ -7,8 +7,8 @@ public class Piantagione {
     private Integer id;
     private Integer quantitaPianta;
     private LocalDate messaADimora;
-    private Pianta pianta;
-    private Zona zona;
+    private Integer piantaId;
+    private Integer zonaId;
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
 
@@ -16,13 +16,13 @@ public class Piantagione {
     public Piantagione() {}
 
     public Piantagione(Integer id, Integer quantitaPianta, LocalDate messaADimora,
-                       Pianta pianta, Zona zona, LocalDateTime dataCreazione,
+                       Integer pianta, Integer zona, LocalDateTime dataCreazione,
                        LocalDateTime dataAggiornamento) {
         this.id = id;
         this.quantitaPianta = quantitaPianta;
         this.messaADimora = messaADimora;
-        this.pianta = pianta;
-        this.zona = zona;
+        this.piantaId = pianta;
+        this.zonaId = zona;
         this.dataCreazione = dataCreazione;
         this.dataAggiornamento = dataAggiornamento;
     }
@@ -37,11 +37,11 @@ public class Piantagione {
     public LocalDate getMessaADimora() { return messaADimora; }
     public void setMessaADimora(LocalDate messaADimora) { this.messaADimora = messaADimora; }
 
-    public Pianta getPianta() { return pianta; }
-    public void setPianta(Pianta pianta) { this.pianta = pianta; }
+    public Integer getPiantaId() { return piantaId; }
+    public void setPiantaId(Integer pianta) { this.piantaId = pianta; }
 
-    public Zona getZona() { return zona; }
-    public void setZona(Zona zona) { this.zona = zona; }
+    public Integer getZonaId() { return zonaId; }
+    public void setZonaId(Integer zona) { this.zonaId = zona; }
 
     public LocalDateTime getDataCreazione() { return dataCreazione; }
     public void setDataCreazione(LocalDateTime dataCreazione) { this.dataCreazione = dataCreazione; }
