@@ -5,7 +5,7 @@ import ORM.ZonaDAO;
 import DomainModel.Zona;
 import java.sql.SQLException;
 import java.util.List;
-import Service.ZonaService;
+import BussinesLogic.ZonaService;
 
 public class ZonaController {
     private final ZonaDAO zonaDAO;
