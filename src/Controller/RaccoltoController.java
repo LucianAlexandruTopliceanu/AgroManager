@@ -1,35 +1,87 @@
 package Controller;
 
-import ORM.DAOFactory;
-import ORM.RaccoltoDAO;
+import BussinesLogic.RaccoltoService;
+import BussinesLogic.PiantagioneService;
 import DomainModel.Raccolto;
-import java.sql.SQLException;
+import DomainModel.Piantagione;
+import View.RaccoltoDialog;
+import View.RaccoltoView;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import java.util.List;
 
 public class RaccoltoController {
-    private final RaccoltoDAO raccoltoDAO;
+    private final RaccoltoService raccoltoService;
+    private final PiantagioneService piantagioneService;
+    private final RaccoltoView raccoltoView;
 
-    public RaccoltoController() {
-        this.raccoltoDAO = DAOFactory.getRaccoltoDAO();
+    public RaccoltoController(RaccoltoService raccoltoService, PiantagioneService piantagioneService, RaccoltoView raccoltoView) {
+        this.raccoltoService = raccoltoService;
+        this.piantagioneService = piantagioneService;
+        this.raccoltoView = raccoltoView;
+        aggiornaView();
+        raccoltoView.setOnNuovoRaccolto(v -> onNuovoRaccolto());
+        raccoltoView.setOnModificaRaccolto(v -> onModificaRaccolto());
+        raccoltoView.setOnEliminaRaccolto(v -> onEliminaRaccolto());
     }
 
-    public void aggiungiRaccolto(Raccolto raccolto) throws SQLException {
-        raccoltoDAO.create(raccolto);
+    private void aggiornaView() {
+        raccoltoView.setRaccolti(raccoltoService.getAllRaccolti());
     }
 
-    public Raccolto getRaccolto(int id) throws SQLException {
-        return raccoltoDAO.read(id);
+    private void onNuovoRaccolto() {
+        List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
+        RaccoltoDialog dialog = new RaccoltoDialog(null, piantagioni);
+        dialog.showAndWait();
+        if (dialog.isConfermato()) {
+            try {
+                raccoltoService.aggiungiRaccolto(dialog.getRaccolto());
+                aggiornaView();
+            } catch (Exception ex) {
+                mostraErrore(ex.getMessage());
+            }
+        }
     }
 
-    public void aggiornaRaccolto(Raccolto raccolto) throws SQLException {
-        raccoltoDAO.update(raccolto);
+    private void onModificaRaccolto() {
+        Raccolto selezionato = raccoltoView.getRaccoltoSelezionato();
+        if (selezionato != null) {
+            List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
+            RaccoltoDialog dialog = new RaccoltoDialog(selezionato, piantagioni);
+            dialog.showAndWait();
+            if (dialog.isConfermato()) {
+                try {
+                    raccoltoService.aggiornaRaccolto(dialog.getRaccolto());
+                    aggiornaView();
+                } catch (Exception ex) {
+                    mostraErrore(ex.getMessage());
+                }
+            }
+        } else {
+            mostraErrore("Seleziona un raccolto da modificare.");
+        }
     }
 
-    public void eliminaRaccolto(int id) throws SQLException {
-        raccoltoDAO.delete(id);
+    private void onEliminaRaccolto() {
+        Raccolto selezionato = raccoltoView.getRaccoltoSelezionato();
+        if (selezionato != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare il raccolto selezionato?", ButtonType.YES, ButtonType.NO);
+            alert.showAndWait();
+            if (alert.getResult() == ButtonType.YES) {
+                try {
+                    raccoltoService.eliminaRaccolto(selezionato.getId());
+                    aggiornaView();
+                } catch (Exception ex) {
+                    mostraErrore(ex.getMessage());
+                }
+            }
+        } else {
+            mostraErrore("Seleziona un raccolto da eliminare.");
+        }
     }
 
-    public List<Raccolto> getAllRaccolti() throws SQLException {
-        return raccoltoDAO.findAll();
+    private void mostraErrore(String msg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
+        alert.showAndWait();
     }
 }

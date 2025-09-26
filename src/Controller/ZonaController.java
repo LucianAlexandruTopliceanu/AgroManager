@@ -1,39 +1,81 @@
 package Controller;
 
-import ORM.DAOFactory;
-import ORM.ZonaDAO;
-import DomainModel.Zona;
-import java.sql.SQLException;
-import java.util.List;
 import BussinesLogic.ZonaService;
+import DomainModel.Zona;
+import View.ZonaDialog;
+import View.ZonaView;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.List;
 
 public class ZonaController {
-    private final ZonaDAO zonaDAO;
     private final ZonaService zonaService;
+    private final ZonaView zonaView;
 
-    public ZonaController() {
-        this.zonaDAO = DAOFactory.getZonaDAO();
-        this.zonaService = new ZonaService();
+    public ZonaController(ZonaService zonaService, ZonaView zonaView) {
+        this.zonaService = zonaService;
+        this.zonaView = zonaView;
+        aggiornaView();
+        zonaView.setOnNuovaZona(v -> onNuovaZona());
+        zonaView.setOnModificaZona(v -> onModificaZona());
+        zonaView.setOnEliminaZona(v -> onEliminaZona());
     }
 
-    public void aggiungiZona(Zona zona) throws SQLException {
-        zonaService.validaZona(zona);
-        zonaDAO.create(zona);
+    private void aggiornaView() {
+        zonaView.setZone(zonaService.getAllZone());
     }
 
-    public Zona getZona(int id) throws SQLException {
-        return zonaDAO.read(id);
+    private void onNuovaZona() {
+        ZonaDialog dialog = new ZonaDialog(null);
+        dialog.showAndWait();
+        if (dialog.isConfermato()) {
+            try {
+                zonaService.aggiungiZona(dialog.getZona());
+                aggiornaView();
+            } catch (Exception ex) {
+                mostraErrore(ex.getMessage());
+            }
+        }
     }
 
-    public void aggiornaZona(Zona zona) throws SQLException {
-        zonaDAO.update(zona);
+    private void onModificaZona() {
+        Zona selezionata = zonaView.getZonaSelezionata();
+        if (selezionata != null) {
+            ZonaDialog dialog = new ZonaDialog(selezionata);
+            dialog.showAndWait();
+            if (dialog.isConfermato()) {
+                try {
+                    zonaService.aggiornaZona(dialog.getZona());
+                    aggiornaView();
+                } catch (Exception ex) {
+                    mostraErrore(ex.getMessage());
+                }
+            }
+        } else {
+            mostraErrore("Seleziona una zona da modificare.");
+        }
     }
 
-    public void eliminaZona(int id) throws SQLException {
-        zonaDAO.delete(id);
+    private void onEliminaZona() {
+        Zona selezionata = zonaView.getZonaSelezionata();
+        if (selezionata != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare la zona selezionata?", ButtonType.YES, ButtonType.NO);
+            alert.showAndWait();
+            if (alert.getResult() == ButtonType.YES) {
+                try {
+                    zonaService.eliminaZona(selezionata.getId());
+                    aggiornaView();
+                } catch (Exception ex) {
+                    mostraErrore(ex.getMessage());
+                }
+            }
+        } else {
+            mostraErrore("Seleziona una zona da eliminare.");
+        }
     }
 
-    public List<Zona> getAllZone() throws SQLException {
-        return zonaDAO.findAll();
+    private void mostraErrore(String msg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
+        alert.showAndWait();
     }
 }

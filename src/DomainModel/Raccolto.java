@@ -49,4 +49,9 @@ public class Raccolto {
 
     public LocalDateTime getDataAggiornamento() { return dataAggiornamento; }
     public void setDataAggiornamento(LocalDateTime dataAggiornamento) { this.dataAggiornamento = dataAggiornamento; }
+
+    // Utility per conversione a int
+    public int getQuantitaKgInt() {
+        return quantitaKg != null ? quantitaKg.intValue() : 0;
+    }
 }

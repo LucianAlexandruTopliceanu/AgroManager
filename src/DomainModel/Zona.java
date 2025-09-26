@@ -41,4 +41,9 @@ public class Zona {
 
     public LocalDateTime getDataAggiornamento() { return dataAggiornamento; }
     public void setDataAggiornamento(LocalDateTime dataAggiornamento) { this.dataAggiornamento = dataAggiornamento; }
+
+    @Override
+    public String toString() {
+        return nome + " (" + dimensione + "ha, " + tipoTerreno + ")";
+    }
 }
