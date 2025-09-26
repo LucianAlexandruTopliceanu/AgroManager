@@ -1,7 +1,7 @@
 package Controller;
 
-import BussinesLogic.RaccoltoService;
-import BussinesLogic.PiantagioneService;
+import BussinesLogic.Service.RaccoltoService;
+import BussinesLogic.Service.PiantagioneService;
 import DomainModel.Raccolto;
 import DomainModel.Piantagione;
 import View.RaccoltoDialog;

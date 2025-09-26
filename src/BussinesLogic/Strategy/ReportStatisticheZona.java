@@ -1,8 +1,8 @@
-package BussinesLogic;
+package BussinesLogic.Strategy;
 
-import BussinesLogic.RaccoltoService;
-import BussinesLogic.PiantagioneService;
-import BussinesLogic.ZonaService;
+import BussinesLogic.Service.RaccoltoService;
+import BussinesLogic.Service.PiantagioneService;
+import BussinesLogic.Service.ZonaService;
 import DomainModel.Raccolto;
 import DomainModel.Piantagione;
 import DomainModel.Zona;

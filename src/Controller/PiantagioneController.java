@@ -1,8 +1,8 @@
 package Controller;
 
-import BussinesLogic.PiantagioneService;
-import BussinesLogic.ZonaService;
-import BussinesLogic.PiantaService;
+import BussinesLogic.Service.PiantagioneService;
+import BussinesLogic.Service.ZonaService;
+import BussinesLogic.Service.PiantaService;
 import DomainModel.Piantagione;
 import View.PiantagioneDialog;
 import View.PiantagioneView;

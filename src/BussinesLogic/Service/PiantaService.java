@@ -1,4 +1,4 @@
-package BussinesLogic;
+package BussinesLogic.Service;
 
 import ORM.PiantaDAO;
 import DomainModel.Pianta;

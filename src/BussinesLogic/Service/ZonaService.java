@@ -1,4 +1,4 @@
-package BussinesLogic;
+package BussinesLogic.Service;
 
 import ORM.ZonaDAO;
 import DomainModel.Zona;

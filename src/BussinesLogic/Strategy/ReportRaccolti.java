@@ -1,11 +1,11 @@
-package BussinesLogic;
+package BussinesLogic.Strategy;
 
-import BussinesLogic.RaccoltoService;
+import BussinesLogic.Service.RaccoltoService;
 import DomainModel.Raccolto;
 
 import java.util.List;
 
-public class ReportRaccolti implements ReportStrategy<String> {
+public class ReportRaccolti implements BussinesLogic.Strategy.ReportStrategy<String> {
     private final RaccoltoService raccoltoService;
 
     public ReportRaccolti(RaccoltoService raccoltoService) {

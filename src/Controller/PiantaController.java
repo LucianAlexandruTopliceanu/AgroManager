@@ -1,6 +1,6 @@
 package Controller;
 
-import BussinesLogic.PiantaService;
+import BussinesLogic.Service.PiantaService;
 import DomainModel.Pianta;
 import View.PiantaDialog;
 import View.PiantaView;

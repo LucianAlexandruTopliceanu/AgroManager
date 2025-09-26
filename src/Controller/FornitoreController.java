@@ -1,6 +1,6 @@
 package Controller;
 
-import BussinesLogic.FornitoreService;
+import BussinesLogic.Service.FornitoreService;
 import DomainModel.Fornitore;
 import View.FornitoreDialog;
 import View.FornitoreView;

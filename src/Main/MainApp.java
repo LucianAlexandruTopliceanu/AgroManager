@@ -5,13 +5,13 @@ import Controller.FornitoreController;
 import Controller.PiantaController;
 import Controller.PiantagioneController;
 import Controller.RaccoltoController;
-import BussinesLogic.ReportRaccolti;
-import BussinesLogic.ReportStrategy;
-import BussinesLogic.ZonaService;
-import BussinesLogic.FornitoreService;
-import BussinesLogic.PiantaService;
-import BussinesLogic.PiantagioneService;
-import BussinesLogic.RaccoltoService;
+import BussinesLogic.Service.ZonaService;
+import BussinesLogic.Service.FornitoreService;
+import BussinesLogic.Service.PiantaService;
+import BussinesLogic.Service.PiantagioneService;
+import BussinesLogic.Service.RaccoltoService;
+import BussinesLogic.Strategy.ReportRaccolti;
+import BussinesLogic.Strategy.ReportStrategy;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -25,6 +25,8 @@ import View.PiantagioneView;
 import View.RaccoltoView;
 import javafx.scene.chart.*;
 import java.util.List;
+
+import java.util.HashMap;
 import DomainModel.Raccolto;
 import DomainModel.Piantagione;
 import DomainModel.Pianta;
@@ -94,8 +96,6 @@ public class MainApp extends Application {
         reportArea.setWrapText(true);
         Button aggiornaBtn = new Button("Genera Report");
         RaccoltoService raccoltoService = new RaccoltoService(ORM.DAOFactory.getRaccoltoDAO());
-        // PiantagioneService piantagioneService = new PiantagioneService(ORM.DAOFactory.getPiantagioneDAO());
-        // RaccoltoController raccoltoController = new RaccoltoController(raccoltoService, piantagioneService, new RaccoltoView());
         aggiornaBtn.setOnAction(e -> {
             ReportStrategy<String> strategy = new ReportRaccolti(raccoltoService);
             String report = strategy.generaReport();
@@ -138,7 +138,7 @@ public class MainApp extends Application {
             List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
             List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
             List<Pianta> piante = piantaService.getAllPiante();
-            java.util.Map<Integer, Integer> raccoltoPerPianta = new java.util.HashMap<>();
+            HashMap<Integer, Integer> raccoltoPerPianta = new HashMap<>();
             for (Raccolto raccolto : raccolti) {
                 Piantagione piantagione = piantagioni.stream().filter(p -> p.getId().equals(raccolto.getPiantagioneId())).findFirst().orElse(null);
                 if (piantagione != null) {
@@ -168,7 +168,7 @@ public class MainApp extends Application {
             List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
             List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
             List<DomainModel.Zona> zone = zonaService.getAllZone();
-            java.util.Map<Integer, Integer> raccoltoPerZona = new java.util.HashMap<>();
+            HashMap<Integer, Integer> raccoltoPerZona = new HashMap<>();
             for (Raccolto raccolto : raccolti) {
                 Piantagione piantagione = piantagioni.stream().filter(p -> p.getId().equals(raccolto.getPiantagioneId())).findFirst().orElse(null);
                 if (piantagione != null) {
