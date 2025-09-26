@@ -1,28 +1,29 @@
 package BussinesLogic;
 
-import Controller.RaccoltoController;
+import BussinesLogic.RaccoltoService;
 import DomainModel.Raccolto;
 
-import java.sql.SQLException;
 import java.util.List;
 
-public class ReportRaccolti implements ReportStrategy {
-    private final RaccoltoController raccoltoController;
+public class ReportRaccolti implements ReportStrategy<String> {
+    private final RaccoltoService raccoltoService;
 
-    public ReportRaccolti(RaccoltoController raccoltoController) {
-        this.raccoltoController = raccoltoController;
+    public ReportRaccolti(RaccoltoService raccoltoService) {
+        this.raccoltoService = raccoltoService;
     }
 
     @Override
-    public void generaReport() {
-        try {
-            List<Raccolto> raccolti = raccoltoController.getAllRaccolti();
-            System.out.println("--- Report Raccolti ---");
-            for (Raccolto r : raccolti) {
-                System.out.println("ID: " + r.getId() + ", Data: " + r.getDataRaccolto() + ", Quantità: " + r.getQuantitaKg() + " kg, Note: " + r.getNote());
-            }
-        } catch (SQLException e) {
-            System.out.println("Errore durante la generazione del report: " + e.getMessage());
+    public String generaReport() {
+        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- Report Raccolti ---\n");
+        for (Raccolto r : raccolti) {
+            String data = r.getDataRaccolto() != null ? r.getDataRaccolto().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+            sb.append("ID: ").append(r.getId())
+              .append(", Data: ").append(data)
+              .append(", Quantità: ").append(r.getQuantitaKg()).append(" kg")
+              .append(", Note: ").append(r.getNote()).append("\n");
         }
+        return sb.toString();
     }
 }

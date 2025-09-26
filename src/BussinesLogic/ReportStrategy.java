@@ -1,6 +1,5 @@
 package BussinesLogic;
 
-public interface ReportStrategy {
-    void generaReport();
+public interface ReportStrategy<T> {
+    T generaReport();
 }
-
