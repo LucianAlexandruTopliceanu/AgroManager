@@ -1,0 +1,114 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+java {
+    modularity.inferModulePath = true
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+def javafxVersion = '21.0.2'
+def javafxPlatform = 'win'
+def javafxModules = ['javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.graphics']
+
+dependencies {
+    // JUnit 5 - Specifichiamo esplicitamente le dipendenze per evitare l'avviso
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // JavaFX per Windows
+    implementation "org.openjfx:javafx-base:${javafxVersion}:${javafxPlatform}"
+    implementation "org.openjfx:javafx-controls:${javafxVersion}:${javafxPlatform}"
+    implementation "org.openjfx:javafx-fxml:${javafxVersion}:${javafxPlatform}"
+    implementation "org.openjfx:javafx-graphics:${javafxVersion}:${javafxPlatform}"
+    // PostgreSQL
+    implementation 'org.postgresql:postgresql:42.7.7'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = 'full'
+        showStandardStreams = true
+        showCauses = true
+        showExceptions = true
+    }
+
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.sql/java.sql=ALL-UNNAMED'
+    ]
+
+    systemProperty 'file.encoding', 'UTF-8'
+
+    // Rimuovo ignoreFailures per vedere i veri fallimenti
+
+    // Esegui solo i test con nomi di classe specifici per evitare problemi di Gradle
+    filter {
+        includeTestsMatching "*Test"
+        includeTestsMatching "*Tests"
+        excludeTestsMatching "Gradle*"
+    }
+
+    // Disabilita la modularità per i test per evitare conflitti
+    doFirst {
+        jvmArgs += ['--add-reads', 'ALL-UNNAMED=ALL-UNNAMED']
+        classpath = sourceSets.main.output +
+                   sourceSets.test.output +
+                   configurations.testRuntimeClasspath
+    }
+
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "Results: ${result.testCount} tests completed, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped"
+            if (result.failedTestCount > 0) {
+                println "ATTENZIONE: ${result.failedTestCount} test hanno fallito!"
+            }
+        }
+    }
+}
+
+application {
+    mainModule = 'AgroManager'
+    mainClass = 'Main.MainApp'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += [
+        '--module-path', classpath.asPath,
+        '--add-modules', javafxModules.join(','),
+        '-Xlint:deprecation',
+        '-Xlint:unchecked'
+    ]
+}
+
+run {
+    jvmArgs = [
+        '--module-path', configurations.runtimeClasspath.asPath,
+        '--add-modules', javafxModules.join(','),
+        '--enable-native-access=javafx.graphics',
+        '--add-exports', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-exports', 'jdk.unsupported/sun.misc=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens', 'jdk.unsupported/sun.misc=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '-Djdk.gtk.version=2',
+        '-Dprism.order=sw',
+        '-Dprism.verbose=false'
+    ]
+}

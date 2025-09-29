@@ -1,7 +1,6 @@
 package ORM;
 import DomainModel.Raccolto;
 import java.sql.*;
-import java.util.List;
 
 public class RaccoltoDAO extends BaseDAO<Raccolto> {
     @Override

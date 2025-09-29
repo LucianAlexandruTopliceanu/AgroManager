@@ -1,7 +1,6 @@
 package ORM;
 import DomainModel.Piantagione;
 import java.sql.*;
-import java.util.List;
 
 public class PiantagioneDAO extends BaseDAO<Piantagione> {
     @Override
