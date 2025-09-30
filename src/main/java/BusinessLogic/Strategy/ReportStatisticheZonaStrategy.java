@@ -1,74 +1,77 @@
 package BusinessLogic.Strategy;
 
-import DomainModel.Piantagione;
-import DomainModel.Raccolto;
-import DomainModel.Zona;
+import DomainModel.*;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * Strategia per generare statistiche per zona
- */
-public class ReportStatisticheZonaStrategy implements DataProcessingStrategy<Map<String, BigDecimal>> {
-
-    private List<Raccolto> raccolti;
-    private List<Piantagione> piantagioni;
-    private List<Zona> zone;
-
+public class ReportStatisticheZonaStrategy implements DataProcessingStrategy<Map<String, Map<String, BigDecimal>>> {
     @Override
-    public Map<String, BigDecimal> execute() {
-        Map<String, BigDecimal> statistiche = new HashMap<>();
+    public ProcessingResult<Map<String, Map<String, BigDecimal>>> execute(Object... data) {
+        validateParameters(data);
 
-        if (raccolti == null || piantagioni == null || zone == null) {
-            return statistiche;
+        List<Raccolto> raccolti = (List<Raccolto>) data[0];
+        List<Piantagione> piantagioni = (List<Piantagione>) data[1];
+        List<Zona> zone = (List<Zona>) data[2];
+
+        // Mappa per tenere traccia delle statistiche per zona
+        Map<String, Map<String, BigDecimal>> statistichePerZona = new LinkedHashMap<>();
+
+        // Calcola le statistiche per ogni zona
+        for (Zona zona : zone) {
+            // Trova tutte le piantagioni in questa zona
+            Set<Integer> piantagioniInZona = piantagioni.stream()
+                .filter(p -> p.getZonaId() != null && p.getZonaId().equals(zona.getId()))
+                .map(Piantagione::getId)
+                .collect(Collectors.toSet());
+
+            // Calcola le statistiche per questa zona
+            BigDecimal produzioneTotale = raccolti.stream()
+                .filter(r -> r.getPiantagioneId() != null &&
+                           piantagioniInZona.contains(r.getPiantagioneId()))
+                .map(Raccolto::getQuantitaKg)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal produzioneMQ = zona.getDimensione() != null && zona.getDimensione() > 0 ?
+                produzioneTotale.divide(new BigDecimal(zona.getDimensione() * 10000), 4, java.math.RoundingMode.HALF_UP) :
+                BigDecimal.ZERO;
+
+            // Salva le statistiche
+            Map<String, BigDecimal> stats = new LinkedHashMap<>();
+            stats.put("produzioneTotale", produzioneTotale);
+            stats.put("produzioneMQ", produzioneMQ);
+            stats.put("numeroPiantagioni", new BigDecimal(piantagioniInZona.size()));
+
+            statistichePerZona.put(zona.getNome(), stats);
         }
 
-        for (Raccolto raccolto : raccolti) {
-            Piantagione piantagione = trovaPiantagionePerId(piantagioni, raccolto.getPiantagioneId());
-            if (piantagione != null) {
-                Zona zona = trovaZonaPerId(zone, piantagione.getZonaId());
-                if (zona != null) {
-                    statistiche.merge(zona.getNome(), raccolto.getQuantitaKg(), BigDecimal::add);
-                }
-            }
-        }
+        // Genera il report formattato
+        StringBuilder report = new StringBuilder();
+        report.append("🗺️ REPORT STATISTICHE PER ZONA\n");
+        report.append("════════════════════════════\n\n");
 
-        return statistiche;
+        statistichePerZona.forEach((nomeZona, stats) -> {
+            report.append(String.format("📍 ZONA: %s\n", nomeZona));
+            report.append(String.format("▸ Produzione totale: %.2f kg\n", stats.get("produzioneTotale")));
+            report.append(String.format("▸ Produzione per m²: %.4f kg/m²\n", stats.get("produzioneMQ")));
+            report.append(String.format("▸ Numero piantagioni: %d\n\n", stats.get("numeroPiantagioni").intValue()));
+        });
+
+        return new ProcessingResult<>(statistichePerZona, report.toString());
     }
 
     @Override
-    public String getProcessingName() {
-        return "Statistiche per Zona";
+    public void validateParameters(Object... data) {
+        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
+        if (data.length < 3) throw new IllegalArgumentException("Necessari: lista raccolti, piantagioni e zone");
+        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
+        if (!(data[1] instanceof List)) throw new IllegalArgumentException("Secondo parametro deve essere List<Piantagione>");
+        if (!(data[2] instanceof List)) throw new IllegalArgumentException("Terzo parametro deve essere List<Zona>");
     }
 
     @Override
-    public ProcessingType getProcessingType() {
+    public ProcessingType getType() {
         return ProcessingType.STATISTICS;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setData(Object... data) {
-        if (data.length >= 3) {
-            this.raccolti = (List<Raccolto>) data[0];
-            this.piantagioni = (List<Piantagione>) data[1];
-            this.zone = (List<Zona>) data[2];
-        }
-    }
-
-    private Piantagione trovaPiantagionePerId(List<Piantagione> piantagioni, Integer id) {
-        return piantagioni.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private Zona trovaZonaPerId(List<Zona> zone, Integer id) {
-        return zone.stream()
-                .filter(z -> z.getId().equals(id))
-                .findFirst()
-                .orElse(null);
     }
 }

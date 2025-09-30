@@ -6,58 +6,54 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-/**
- * Strategia per calcolare la media di produzione per pianta
- */
 public class MediaProduzioneStrategy implements DataProcessingStrategy<BigDecimal> {
-
-    private List<Raccolto> raccolti;
-    private List<Piantagione> piantagioni;
-    private int piantagioneId;
-
-    @Override
-    public BigDecimal execute() {
-        if (raccolti == null || piantagioni == null) {
-            return BigDecimal.ZERO;
-        }
-
-        // Calcola produzione totale
-        BigDecimal totale = raccolti.stream()
-            .filter(r -> r.getPiantagioneId() != null && r.getPiantagioneId().equals(piantagioneId))
-            .map(Raccolto::getQuantitaKg)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // Trova numero piante
-        int numeroPiante = piantagioni.stream()
-            .filter(p -> p.getId() != null && p.getId().equals(piantagioneId))
-            .mapToInt(p -> p.getQuantitaPianta() != null ? p.getQuantitaPianta() : 1)
-            .findFirst()
-            .orElse(1);
-
-        if (numeroPiante == 0) {
-            return BigDecimal.ZERO;
-        }
-
-        return totale.divide(new BigDecimal(numeroPiante), 3, RoundingMode.HALF_UP);
-    }
-
-    @Override
-    public String getProcessingName() {
-        return "Media Produzione per Pianta";
-    }
-
-    @Override
-    public ProcessingType getProcessingType() {
-        return ProcessingType.CALCULATION;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
-    public void setData(Object... data) {
-        if (data.length >= 3) {
-            this.raccolti = (List<Raccolto>) data[0];
-            this.piantagioni = (List<Piantagione>) data[1];
-            this.piantagioneId = (Integer) data[2];
-        }
+    public ProcessingResult<BigDecimal> execute(Object... data) {
+        validateParameters(data);
+
+        List<Raccolto> raccolti = (List<Raccolto>) data[0];
+        List<Piantagione> piantagioni = (List<Piantagione>) data[1];
+        int piantagioneId = (int) data[2];
+
+        // Trova la piantagione
+        Piantagione piantagione = piantagioni.stream()
+            .filter(p -> p.getId() == piantagioneId)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Piantagione non trovata: " + piantagioneId));
+
+        // Calcola il totale dei raccolti
+        BigDecimal totale = raccolti.stream()
+            .filter(r -> r.getPiantagioneId() != null && r.getPiantagioneId() == piantagioneId)
+            .map(Raccolto::getQuantitaKg)
+            .filter(q -> q != null)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Calcola la media per pianta
+        BigDecimal numeroPiante = piantagione.getQuantitaPianta() != null ?
+            new BigDecimal(piantagione.getQuantitaPianta()) : BigDecimal.ONE;
+        BigDecimal media = totale.divide(numeroPiante, 2, RoundingMode.HALF_UP);
+
+        String output = String.format("Media produzione per piantagione %d:\n" +
+            "Totale produzione: %.2f kg\n" +
+            "Numero piante: %s\n" +
+            "Media per pianta: %.2f kg/pianta",
+            piantagioneId, totale, numeroPiante, media);
+
+        return new ProcessingResult<>(media, output);
+    }
+
+    @Override
+    public void validateParameters(Object... data) {
+        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
+        if (data.length < 3) throw new IllegalArgumentException("Necessari: lista raccolti, lista piantagioni e ID piantagione");
+        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
+        if (!(data[1] instanceof List)) throw new IllegalArgumentException("Secondo parametro deve essere List<Piantagione>");
+        if (!(data[2] instanceof Integer)) throw new IllegalArgumentException("Terzo parametro deve essere Integer");
+    }
+
+    @Override
+    public ProcessingType getType() {
+        return ProcessingType.CALCULATION;
     }
 }

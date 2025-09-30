@@ -4,42 +4,37 @@ import DomainModel.Raccolto;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Strategia per calcolare la produzione totale di una piantagione
- */
 public class ProduzioneTotaleStrategy implements DataProcessingStrategy<BigDecimal> {
-
-    private List<Raccolto> raccolti;
-    private int piantagioneId;
-
-    @Override
-    public BigDecimal execute() {
-        if (raccolti == null) {
-            return BigDecimal.ZERO;
-        }
-
-        return raccolti.stream()
-            .filter(r -> r.getPiantagioneId() != null && r.getPiantagioneId().equals(piantagioneId))
-            .map(Raccolto::getQuantitaKg)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Override
-    public String getProcessingName() {
-        return "Produzione Totale Piantagione";
-    }
-
-    @Override
-    public ProcessingType getProcessingType() {
-        return ProcessingType.CALCULATION;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
-    public void setData(Object... data) {
-        if (data.length >= 2) {
-            this.raccolti = (List<Raccolto>) data[0];
-            this.piantagioneId = (Integer) data[1];
-        }
+    public ProcessingResult<BigDecimal> execute(Object... data) {
+        validateParameters(data);
+
+        List<Raccolto> raccolti = (List<Raccolto>) data[0];
+        int piantagioneId = (int) data[1];
+
+        BigDecimal totale = raccolti.stream()
+            .filter(r -> r.getPiantagioneId() != null && r.getPiantagioneId() == piantagioneId)
+            .map(Raccolto::getQuantitaKg)
+            .filter(q -> q != null)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String output = String.format("Produzione totale per piantagione %d: %.2f kg",
+            piantagioneId, totale);
+
+        return new ProcessingResult<>(totale, output);
+    }
+
+    @Override
+    public void validateParameters(Object... data) {
+        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
+        if (data.length < 2) throw new IllegalArgumentException("Necessari: lista raccolti e ID piantagione");
+        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
+        if (!(data[1] instanceof Integer)) throw new IllegalArgumentException("Secondo parametro deve essere Integer");
+    }
+
+    @Override
+    public ProcessingType getType() {
+        return ProcessingType.CALCULATION;
     }
 }

@@ -11,17 +11,47 @@ public class PiantaController {
     private final PiantaService piantaService;
     private final PiantaView piantaView;
 
+    // Stato dei filtri
+    private String filtroTipo = "";
+    private String filtroVarieta = "";
+    private String filtroFornitore = "Tutti";
+
     public PiantaController(PiantaService piantaService, PiantaView piantaView) {
         this.piantaService = piantaService;
         this.piantaView = piantaView;
         aggiornaView();
-        piantaView.setOnNuovaPianta(v -> onNuovaPianta());
-        piantaView.setOnModificaPianta(v -> onModificaPianta());
-        piantaView.setOnEliminaPianta(v -> onEliminaPianta());
+        piantaView.setOnNuovaPianta(this::onNuovaPianta);
+        piantaView.setOnModificaPianta(this::onModificaPianta);
+        piantaView.setOnEliminaPianta(this::onEliminaPianta);
+        // Callback per i filtri
+        piantaView.setOnTestoRicercaTipoChanged(this::onFiltroTipoChanged);
+        piantaView.setOnTestoRicercaVarietaChanged(this::onFiltroVarietaChanged);
+        piantaView.setOnFiltroFornitoreChanged(this::onFiltroFornitoreChanged);
+    }
+
+    private void onFiltroTipoChanged(String nuovoTipo) {
+        filtroTipo = nuovoTipo != null ? nuovoTipo : "";
+        aggiornaView();
+    }
+
+    private void onFiltroVarietaChanged(String nuovaVarieta) {
+        filtroVarieta = nuovaVarieta != null ? nuovaVarieta : "";
+        aggiornaView();
+    }
+
+    private void onFiltroFornitoreChanged(String nuovoFornitore) {
+        filtroFornitore = nuovoFornitore != null ? nuovoFornitore : "Tutti";
+        aggiornaView();
     }
 
     private void aggiornaView() {
-        piantaView.setPiante(piantaService.getAllPiante());
+        java.util.List<Pianta> tutte = piantaService.getAllPiante();
+        java.util.List<Pianta> filtrate = tutte.stream()
+            .filter(p -> filtroTipo.isEmpty() || (p.getTipo() != null && p.getTipo().toLowerCase().contains(filtroTipo.toLowerCase())))
+            .filter(p -> filtroVarieta.isEmpty() || (p.getVarieta() != null && p.getVarieta().toLowerCase().contains(filtroVarieta.toLowerCase())))
+            .filter(p -> filtroFornitore.equals("Tutti") || (p.getFornitoreId() != null && p.getFornitoreId().toString().equals(filtroFornitore)))
+            .toList();
+        piantaView.setPiante(filtrate);
     }
 
     private void onNuovaPianta() {

@@ -10,6 +10,7 @@ module AgroManager {
     exports View to javafx.fxml;
     exports BusinessLogic.Service;
     exports BusinessLogic.Strategy;
+    exports BusinessLogic;
 
     opens Main to javafx.fxml, javafx.graphics;
     opens Controller to javafx.fxml;

@@ -15,6 +15,12 @@ public class PiantagioneController {
     private final PiantaService piantaService;
     private final PiantagioneView piantagioneView;
 
+    // Stato dei filtri
+    private String filtroPianta = "";
+    private String filtroZona = "";
+    private java.time.LocalDate filtroDataDa = null;
+    private java.time.LocalDate filtroDataA = null;
+
 
     public PiantagioneController(PiantagioneService piantagioneService, ZonaService zonaService, PiantaService piantaService, PiantagioneView piantagioneView) {
         this.piantagioneService = piantagioneService;
@@ -22,16 +28,45 @@ public class PiantagioneController {
         this.piantaService = piantaService;
         this.piantagioneView = piantagioneView;
         aggiornaView();
-        piantagioneView.setOnNuovaPiantagione(v -> onNuovaPiantagione());
-        piantagioneView.setOnModificaPiantagione(v -> onModificaPiantagione());
-        piantagioneView.setOnEliminaPiantagione(v -> onEliminaPiantagione());
+        piantagioneView.setOnNuovaPiantagione(this::onNuovaPiantagione);
+        piantagioneView.setOnModificaPiantagione(this::onModificaPiantagione);
+        piantagioneView.setOnEliminaPiantagione(this::onEliminaPiantagione);
+        // Callback per i filtri
+        piantagioneView.setOnFiltroPiantaChanged(this::onFiltroPiantaChanged);
+        piantagioneView.setOnFiltroZonaChanged(this::onFiltroZonaChanged);
+        piantagioneView.setOnFiltroDataDaChanged(this::onFiltroDataDaChanged);
+        piantagioneView.setOnFiltroDataAChanged(this::onFiltroDataAChanged);
+    }
+
+    private void onFiltroPiantaChanged(String nuovaPianta) {
+        filtroPianta = nuovaPianta != null ? nuovaPianta : "";
+        aggiornaView();
+    }
+    private void onFiltroZonaChanged(String nuovaZona) {
+        filtroZona = nuovaZona != null ? nuovaZona : "";
+        aggiornaView();
+    }
+    private void onFiltroDataDaChanged(java.time.LocalDate nuovaDataDa) {
+        filtroDataDa = nuovaDataDa;
+        aggiornaView();
+    }
+    private void onFiltroDataAChanged(java.time.LocalDate nuovaDataA) {
+        filtroDataA = nuovaDataA;
+        aggiornaView();
     }
 
     private void aggiornaView() {
-        piantagioneView.setPiantagioni(piantagioneService.getAllPiantagioni());
+        java.util.List<Piantagione> tutte = piantagioneService.getAllPiantagioni();
+        java.util.List<Piantagione> filtrate = tutte.stream()
+            .filter(p -> filtroPianta.isEmpty() || filtroPianta.equals("Tutte") || (p.getPiantaId() != null && p.getPiantaId().toString().equals(filtroPianta)))
+            .filter(p -> filtroZona.isEmpty() || filtroZona.equals("Tutte") || (p.getZonaId() != null && p.getZonaId().toString().equals(filtroZona)))
+            .filter(p -> filtroDataDa == null || (p.getMessaADimora() != null && !p.getMessaADimora().isBefore(filtroDataDa)))
+            .filter(p -> filtroDataA == null || (p.getMessaADimora() != null && !p.getMessaADimora().isAfter(filtroDataA)))
+            .toList();
+        piantagioneView.setPiantagioni(filtrate);
     }
 
-    private void onNuovaPiantagione() {
+    public void onNuovaPiantagione() {
         PiantagioneDialog dialog = new PiantagioneDialog(null, zonaService.getAllZone(), piantaService.getAllPiante());
         dialog.showAndWait();
         if (dialog.isConfermato()) {

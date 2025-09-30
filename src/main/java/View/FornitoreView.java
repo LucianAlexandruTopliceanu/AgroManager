@@ -23,6 +23,10 @@ public class FornitoreView extends VBox {
     private final TextField ricercaNomeField;
     private final TextField ricercaCittaField;
 
+    // Callback per notificare il controller sui cambiamenti dei filtri
+    private java.util.function.Consumer<String> onTestoRicercaNomeChanged;
+    private java.util.function.Consumer<String> onTestoRicercaCittaChanged;
+
     public FornitoreView() {
         tableFornitori = new TableView<>();
         fornitoriData = FXCollections.observableArrayList();
@@ -106,11 +110,19 @@ public class FornitoreView extends VBox {
         HBox ricercaControls = new HBox(10);
         ricercaNomeField.setPromptText("Cerca per nome...");
         ricercaNomeField.setPrefWidth(200);
-        ricercaNomeField.textProperty().addListener((obs, oldVal, newVal) -> filtraFornitori());
+        ricercaNomeField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (onTestoRicercaNomeChanged != null) {
+                onTestoRicercaNomeChanged.accept(newVal);
+            }
+        });
 
         ricercaCittaField.setPromptText("Cerca per città...");
         ricercaCittaField.setPrefWidth(150);
-        ricercaCittaField.textProperty().addListener((obs, oldVal, newVal) -> filtraFornitori());
+        ricercaCittaField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (onTestoRicercaCittaChanged != null) {
+                onTestoRicercaCittaChanged.accept(newVal);
+            }
+        });
 
         ricercaControls.getChildren().addAll(
             new Label("Nome:"), ricercaNomeField,
@@ -158,10 +170,6 @@ public class FornitoreView extends VBox {
         getChildren().addAll(ricercaBox, azioniBox, tableFornitori);
     }
 
-    private void filtraFornitori() {
-        // Il controller implementerà la logica di filtro
-    }
-
     private void modificaFornitore() {
         if (getFornitoreSelezionato() != null) {
             // Il controller gestirà l'apertura del dialog
@@ -177,27 +185,26 @@ public class FornitoreView extends VBox {
         return tableFornitori.getSelectionModel().getSelectedItem();
     }
 
-    public void setOnNuovoFornitore(Consumer<Void> handler) {
-        nuovoBtn.setOnAction(e -> handler.accept(null));
+    // Handler per i pulsanti principali
+    public void setOnNuovoFornitore(Runnable handler) {
+        nuovoBtn.setOnAction(e -> handler.run());
     }
-
-    public void setOnModificaFornitore(Consumer<Void> handler) {
-        modificaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnModificaFornitore(Runnable handler) {
+        modificaBtn.setOnAction(e -> handler.run());
     }
-
-    public void setOnEliminaFornitore(Consumer<Void> handler) {
-        eliminaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnEliminaFornitore(Runnable handler) {
+        eliminaBtn.setOnAction(e -> handler.run());
     }
 
     public void setOnAggiornaFornitori(Consumer<Void> handler) {
         aggiornaBtn.setOnAction(e -> handler.accept(null));
     }
 
-    public String getTestoRicercaNome() {
-        return ricercaNomeField.getText();
+    // Metodi per il controller per impostare le callback
+    public void setOnTestoRicercaNomeChanged(java.util.function.Consumer<String> handler) {
+        this.onTestoRicercaNomeChanged = handler;
     }
-
-    public String getTestoRicercaCitta() {
-        return ricercaCittaField.getText();
+    public void setOnTestoRicercaCittaChanged(java.util.function.Consumer<String> handler) {
+        this.onTestoRicercaCittaChanged = handler;
     }
 }

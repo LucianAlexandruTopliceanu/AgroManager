@@ -15,21 +15,65 @@ public class RaccoltoController {
     private final PiantagioneService piantagioneService;
     private final RaccoltoView raccoltoView;
 
+    // Stato dei filtri
+    private String filtroPiantagione = "Tutte";
+    private java.time.LocalDate filtroDataDa = null;
+    private java.time.LocalDate filtroDataA = null;
+    private double filtroQuantitaMin = 0.0;
+    private double filtroQuantitaMax = 1000.0;
+
     public RaccoltoController(RaccoltoService raccoltoService, PiantagioneService piantagioneService, RaccoltoView raccoltoView) {
         this.raccoltoService = raccoltoService;
         this.piantagioneService = piantagioneService;
         this.raccoltoView = raccoltoView;
         aggiornaView();
-        raccoltoView.setOnNuovoRaccolto(v -> onNuovoRaccolto());
-        raccoltoView.setOnModificaRaccolto(v -> onModificaRaccolto());
-        raccoltoView.setOnEliminaRaccolto(v -> onEliminaRaccolto());
+        raccoltoView.setOnNuovoRaccolto(this::onNuovoRaccolto);
+        raccoltoView.setOnModificaRaccolto(this::onModificaRaccolto);
+        raccoltoView.setOnEliminaRaccolto(this::onEliminaRaccolto);
+        // Callback per i filtri
+        raccoltoView.setOnFiltroPiantagioneChanged(this::onFiltroPiantagioneChanged);
+        raccoltoView.setOnFiltroDataDaChanged(this::onFiltroDataDaChanged);
+        raccoltoView.setOnFiltroDataAChanged(this::onFiltroDataAChanged);
+        raccoltoView.setOnFiltroQuantitaMinChanged(this::onFiltroQuantitaMinChanged);
+        raccoltoView.setOnFiltroQuantitaMaxChanged(this::onFiltroQuantitaMaxChanged);
+    }
+
+    private void onFiltroPiantagioneChanged(String nuovaPiantagione) {
+        filtroPiantagione = nuovaPiantagione != null ? nuovaPiantagione : "Tutte";
+        aggiornaView();
+    }
+    private void onFiltroDataDaChanged(java.time.LocalDate nuovaDataDa) {
+        filtroDataDa = nuovaDataDa;
+        aggiornaView();
+    }
+    private void onFiltroDataAChanged(java.time.LocalDate nuovaDataA) {
+        filtroDataA = nuovaDataA;
+        aggiornaView();
+    }
+    private void onFiltroQuantitaMinChanged(Double nuovaMin) {
+        filtroQuantitaMin = nuovaMin != null ? nuovaMin : 0.0;
+        aggiornaView();
+    }
+    private void onFiltroQuantitaMaxChanged(Double nuovaMax) {
+        filtroQuantitaMax = nuovaMax != null ? nuovaMax : 1000.0;
+        aggiornaView();
     }
 
     private void aggiornaView() {
-        raccoltoView.setRaccolti(raccoltoService.getAllRaccolti());
+        java.util.List<Raccolto> tutti = raccoltoService.getAllRaccolti();
+        java.util.List<Raccolto> filtrati = tutti.stream()
+            .filter(r -> filtroPiantagione.equals("Tutte") || (r.getPiantagioneId() != null && r.getPiantagioneId().toString().equals(filtroPiantagione)))
+            .filter(r -> filtroDataDa == null || (r.getDataRaccolto() != null && !r.getDataRaccolto().isBefore(filtroDataDa)))
+            .filter(r -> filtroDataA == null || (r.getDataRaccolto() != null && !r.getDataRaccolto().isAfter(filtroDataA)))
+            .filter(r -> {
+                double q = r.getQuantitaKg() != null ? r.getQuantitaKg().doubleValue() : 0.0;
+                return q >= filtroQuantitaMin && q <= filtroQuantitaMax;
+            })
+            .toList();
+        raccoltoView.setRaccolti(filtrati);
     }
 
-    private void onNuovoRaccolto() {
+    public void onNuovoRaccolto() {
         List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
         RaccoltoDialog dialog = new RaccoltoDialog(null, piantagioni);
         dialog.showAndWait();

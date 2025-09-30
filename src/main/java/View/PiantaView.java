@@ -24,6 +24,11 @@ public class PiantaView extends VBox {
     private final TextField ricercaVarietaField;
     private final ComboBox<String> filtroFornitoreCombo;
 
+    // Callback per notificare il controller sui cambiamenti dei filtri
+    private java.util.function.Consumer<String> onTestoRicercaTipoChanged;
+    private java.util.function.Consumer<String> onTestoRicercaVarietaChanged;
+    private java.util.function.Consumer<String> onFiltroFornitoreChanged;
+
     public PiantaView() {
         tablePiante = new TableView<>();
         pianteData = FXCollections.observableArrayList();
@@ -112,15 +117,27 @@ public class PiantaView extends VBox {
         HBox ricercaControls = new HBox(10);
         ricercaTipoField.setPromptText("Cerca per tipo...");
         ricercaTipoField.setPrefWidth(150);
-        ricercaTipoField.textProperty().addListener((obs, oldVal, newVal) -> filtraPiante());
+        ricercaTipoField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (onTestoRicercaTipoChanged != null) {
+                onTestoRicercaTipoChanged.accept(newVal);
+            }
+        });
 
         ricercaVarietaField.setPromptText("Cerca per varietà...");
         ricercaVarietaField.setPrefWidth(150);
-        ricercaVarietaField.textProperty().addListener((obs, oldVal, newVal) -> filtraPiante());
+        ricercaVarietaField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (onTestoRicercaVarietaChanged != null) {
+                onTestoRicercaVarietaChanged.accept(newVal);
+            }
+        });
 
         filtroFornitoreCombo.setPromptText("Filtra per fornitore");
         filtroFornitoreCombo.setPrefWidth(200);
-        filtroFornitoreCombo.setOnAction(e -> filtraPiante());
+        filtroFornitoreCombo.setOnAction(e -> {
+            if (onFiltroFornitoreChanged != null) {
+                onFiltroFornitoreChanged.accept(filtroFornitoreCombo.getValue());
+            }
+        });
 
         ricercaControls.getChildren().addAll(
             new Label("Tipo:"), ricercaTipoField,
@@ -169,10 +186,6 @@ public class PiantaView extends VBox {
         getChildren().addAll(ricercaBox, azioniBox, tablePiante);
     }
 
-    private void filtraPiante() {
-        // Il controller implementerà la logica di filtro
-    }
-
     private void modificaPianta() {
         if (getPiantaSelezionata() != null) {
             // Il controller gestirà l'apertura del dialog
@@ -188,16 +201,15 @@ public class PiantaView extends VBox {
         return tablePiante.getSelectionModel().getSelectedItem();
     }
 
-    public void setOnNuovaPianta(Consumer<Void> handler) {
-        nuovoBtn.setOnAction(e -> handler.accept(null));
+    // Handler per i pulsanti principali
+    public void setOnNuovaPianta(Runnable handler) {
+        nuovoBtn.setOnAction(e -> handler.run());
     }
-
-    public void setOnModificaPianta(Consumer<Void> handler) {
-        modificaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnModificaPianta(Runnable handler) {
+        modificaBtn.setOnAction(e -> handler.run());
     }
-
-    public void setOnEliminaPianta(Consumer<Void> handler) {
-        eliminaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnEliminaPianta(Runnable handler) {
+        eliminaBtn.setOnAction(e -> handler.run());
     }
 
     public void setOnAggiornaPiante(Consumer<Void> handler) {
@@ -221,5 +233,16 @@ public class PiantaView extends VBox {
         filtroFornitoreCombo.getItems().add("Tutti");
         filtroFornitoreCombo.getItems().addAll(fornitori);
         filtroFornitoreCombo.setValue("Tutti");
+    }
+
+    // Metodi per il controller per impostare le callback
+    public void setOnTestoRicercaTipoChanged(java.util.function.Consumer<String> handler) {
+        this.onTestoRicercaTipoChanged = handler;
+    }
+    public void setOnTestoRicercaVarietaChanged(java.util.function.Consumer<String> handler) {
+        this.onTestoRicercaVarietaChanged = handler;
+    }
+    public void setOnFiltroFornitoreChanged(java.util.function.Consumer<String> handler) {
+        this.onFiltroFornitoreChanged = handler;
     }
 }

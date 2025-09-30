@@ -11,17 +11,39 @@ public class FornitoreController {
     private final FornitoreService fornitoreService;
     private final FornitoreView fornitoreView;
 
+    // Stato dei filtri
+    private String filtroNome = "";
+    private String filtroCitta = "";
+
     public FornitoreController(FornitoreService fornitoreService, FornitoreView fornitoreView) {
         this.fornitoreService = fornitoreService;
         this.fornitoreView = fornitoreView;
         aggiornaView();
-        fornitoreView.setOnNuovoFornitore(v -> onNuovoFornitore());
-        fornitoreView.setOnModificaFornitore(v -> onModificaFornitore());
-        fornitoreView.setOnEliminaFornitore(v -> onEliminaFornitore());
+        fornitoreView.setOnNuovoFornitore(this::onNuovoFornitore);
+        fornitoreView.setOnModificaFornitore(this::onModificaFornitore);
+        fornitoreView.setOnEliminaFornitore(this::onEliminaFornitore);
+        // Callback per i filtri
+        fornitoreView.setOnTestoRicercaNomeChanged(this::onFiltroNomeChanged);
+        fornitoreView.setOnTestoRicercaCittaChanged(this::onFiltroCittaChanged);
+    }
+
+    private void onFiltroNomeChanged(String nuovoNome) {
+        filtroNome = nuovoNome != null ? nuovoNome : "";
+        aggiornaView();
+    }
+
+    private void onFiltroCittaChanged(String nuovaCitta) {
+        filtroCitta = nuovaCitta != null ? nuovaCitta : "";
+        aggiornaView();
     }
 
     private void aggiornaView() {
-        fornitoreView.setFornitori(fornitoreService.getAllFornitori());
+        java.util.List<Fornitore> tutti = fornitoreService.getAllFornitori();
+        java.util.List<Fornitore> filtrati = tutti.stream()
+            .filter(f -> filtroNome.isEmpty() || (f.getNome() != null && f.getNome().toLowerCase().contains(filtroNome.toLowerCase())))
+            .filter(f -> filtroCitta.isEmpty() || (f.getIndirizzo() != null && f.getIndirizzo().toLowerCase().contains(filtroCitta.toLowerCase())))
+            .toList();
+        fornitoreView.setFornitori(filtrati);
     }
 
     private void onNuovoFornitore() {

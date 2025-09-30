@@ -26,6 +26,13 @@ public class RaccoltoView extends VBox {
     private final Spinner<Double> filtroQuantitaMin;
     private final Spinner<Double> filtroQuantitaMax;
 
+    // Callback per notificare il controller sui cambiamenti dei filtri
+    private java.util.function.Consumer<String> onFiltroPiantagioneChanged;
+    private java.util.function.Consumer<java.time.LocalDate> onFiltroDataDaChanged;
+    private java.util.function.Consumer<java.time.LocalDate> onFiltroDataAChanged;
+    private java.util.function.Consumer<Double> onFiltroQuantitaMinChanged;
+    private java.util.function.Consumer<Double> onFiltroQuantitaMaxChanged;
+
     public RaccoltoView() {
         tableRaccolti = new TableView<>();
         raccoltiData = FXCollections.observableArrayList();
@@ -129,21 +136,41 @@ public class RaccoltoView extends VBox {
 
         filtroPiantagioneCombo.setPromptText("Filtra per piantagione");
         filtroPiantagioneCombo.setPrefWidth(180);
-        filtroPiantagioneCombo.setOnAction(e -> filtraRaccolti());
+        filtroPiantagioneCombo.setOnAction(e -> {
+            if (onFiltroPiantagioneChanged != null) {
+                onFiltroPiantagioneChanged.accept(filtroPiantagioneCombo.getValue());
+            }
+        });
 
         filtroDataDa.setPromptText("Da data");
         filtroDataDa.setValue(java.time.LocalDate.now().minusMonths(3));
-        filtroDataDa.setOnAction(e -> filtraRaccolti());
+        filtroDataDa.setOnAction(e -> {
+            if (onFiltroDataDaChanged != null) {
+                onFiltroDataDaChanged.accept(filtroDataDa.getValue());
+            }
+        });
 
         filtroDataA.setPromptText("A data");
         filtroDataA.setValue(java.time.LocalDate.now());
-        filtroDataA.setOnAction(e -> filtraRaccolti());
+        filtroDataA.setOnAction(e -> {
+            if (onFiltroDataAChanged != null) {
+                onFiltroDataAChanged.accept(filtroDataA.getValue());
+            }
+        });
 
         filtroQuantitaMin.setEditable(true);
-        filtroQuantitaMin.valueProperty().addListener((obs, oldVal, newVal) -> filtraRaccolti());
+        filtroQuantitaMin.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (onFiltroQuantitaMinChanged != null) {
+                onFiltroQuantitaMinChanged.accept(newVal);
+            }
+        });
 
         filtroQuantitaMax.setEditable(true);
-        filtroQuantitaMax.valueProperty().addListener((obs, oldVal, newVal) -> filtraRaccolti());
+        filtroQuantitaMax.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (onFiltroQuantitaMaxChanged != null) {
+                onFiltroQuantitaMaxChanged.accept(newVal);
+            }
+        });
 
         filtriGrid.add(new Label("Piantagione:"), 0, 0);
         filtriGrid.add(filtroPiantagioneCombo, 1, 0);
@@ -197,10 +224,6 @@ public class RaccoltoView extends VBox {
         getChildren().addAll(filtriBox, azioniBox, tableRaccolti);
     }
 
-    private void filtraRaccolti() {
-        // Il controller implementerà la logica di filtro
-    }
-
     private void modificaRaccolto() {
         if (getRaccoltoSelezionato() != null) {
             // Il controller gestirà l'apertura del dialog
@@ -216,16 +239,15 @@ public class RaccoltoView extends VBox {
         return tableRaccolti.getSelectionModel().getSelectedItem();
     }
 
-    public void setOnNuovoRaccolto(Consumer<Void> handler) {
-        nuovoBtn.setOnAction(e -> handler.accept(null));
+    // Handler per i pulsanti principali
+    public void setOnNuovoRaccolto(Runnable handler) {
+        nuovoBtn.setOnAction(e -> handler.run());
     }
-
-    public void setOnModificaRaccolto(Consumer<Void> handler) {
-        modificaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnModificaRaccolto(Runnable handler) {
+        modificaBtn.setOnAction(e -> handler.run());
     }
-
-    public void setOnEliminaRaccolto(Consumer<Void> handler) {
-        eliminaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnEliminaRaccolto(Runnable handler) {
+        eliminaBtn.setOnAction(e -> handler.run());
     }
 
     public void setOnAggiornaRaccolti(Consumer<Void> handler) {
@@ -258,5 +280,22 @@ public class RaccoltoView extends VBox {
 
     public double getFiltroQuantitaMax() {
         return filtroQuantitaMax.getValue();
+    }
+
+    // Metodi per il controller per impostare le callback
+    public void setOnFiltroPiantagioneChanged(java.util.function.Consumer<String> handler) {
+        this.onFiltroPiantagioneChanged = handler;
+    }
+    public void setOnFiltroDataDaChanged(java.util.function.Consumer<java.time.LocalDate> handler) {
+        this.onFiltroDataDaChanged = handler;
+    }
+    public void setOnFiltroDataAChanged(java.util.function.Consumer<java.time.LocalDate> handler) {
+        this.onFiltroDataAChanged = handler;
+    }
+    public void setOnFiltroQuantitaMinChanged(java.util.function.Consumer<Double> handler) {
+        this.onFiltroQuantitaMinChanged = handler;
+    }
+    public void setOnFiltroQuantitaMaxChanged(java.util.function.Consumer<Double> handler) {
+        this.onFiltroQuantitaMaxChanged = handler;
     }
 }

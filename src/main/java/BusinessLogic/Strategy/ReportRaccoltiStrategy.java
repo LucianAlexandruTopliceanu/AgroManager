@@ -2,59 +2,96 @@ package BusinessLogic.Strategy;
 
 import DomainModel.Raccolto;
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * Strategia per generare un report testuale dei raccolti
- */
 public class ReportRaccoltiStrategy implements DataProcessingStrategy<String> {
-
-    private List<Raccolto> raccolti;
-
     @Override
-    public String execute() {
-        if (raccolti == null || raccolti.isEmpty()) {
-            return "Nessun raccolto registrato.";
-        }
+    public ProcessingResult<String> execute(Object... data) {
+        validateParameters(data);
 
+        List<Raccolto> raccolti = (List<Raccolto>) data[0];
+
+        // Raggruppa i raccolti per mese
+        Map<String, List<Raccolto>> raccoltiPerMese = raccolti.stream()
+            .filter(r -> r.getDataRaccolto() != null)
+            .collect(Collectors.groupingBy(r ->
+                r.getDataRaccolto().format(DateTimeFormatter.ofPattern("yyyy-MM"))));
+
+        // Genera il report
         StringBuilder report = new StringBuilder();
-        report.append("=== REPORT RACCOLTI ===\n");
-        report.append("Totale raccolti: ").append(raccolti.size()).append("\n\n");
+        report.append("📊 REPORT DETTAGLIATO RACCOLTI\n");
+        report.append("═══════════════════════════════\n\n");
 
-        BigDecimal quantitaTotale = raccolti.stream()
+        // Statistiche generali
+        report.append("STATISTICHE GENERALI:\n");
+        report.append("▸ Numero totale raccolti: ").append(raccolti.size()).append("\n");
+        BigDecimal totaleComplessivo = raccolti.stream()
             .map(Raccolto::getQuantitaKg)
+            .filter(Objects::nonNull)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-        report.append("Quantità totale raccolta: ").append(quantitaTotale).append(" kg\n\n");
+        report.append("▸ Produzione totale: ").append(String.format("%.2f kg\n", totaleComplessivo));
+        report.append("▸ Periodo coperto: ").append(getPeriodoCoperto(raccolti)).append("\n\n");
 
-        for (Raccolto raccolto : raccolti) {
-            report.append("ID: ").append(raccolto.getId()).append("\n");
-            report.append("Data: ").append(raccolto.getDataRaccolto()).append("\n");
-            report.append("Quantità: ").append(raccolto.getQuantitaKg()).append(" kg\n");
-            report.append("Piantagione: ").append(raccolto.getPiantagioneId()).append("\n");
-            if (raccolto.getNote() != null && !raccolto.getNote().trim().isEmpty()) {
-                report.append("Note: ").append(raccolto.getNote()).append("\n");
-            }
-            report.append("---\n");
+        // Dettagli per mese
+        report.append("DETTAGLIO MENSILE:\n");
+        raccoltiPerMese.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
+            .forEach(entry -> {
+                String mese = entry.getKey();
+                List<Raccolto> raccoltiMese = entry.getValue();
+                BigDecimal totaleMese = raccoltiMese.stream()
+                    .map(Raccolto::getQuantitaKg)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                report.append(String.format("📅 %s:\n", mese));
+                report.append(String.format("  ▸ Numero raccolti: %d\n", raccoltiMese.size()));
+                report.append(String.format("  ▸ Totale produzione: %.2f kg\n", totaleMese));
+                report.append("  ▸ Piantagioni coinvolte: ").append(
+                    raccoltiMese.stream()
+                        .map(Raccolto::getPiantagioneId)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "))
+                ).append("\n\n");
+            });
+
+        // Il report stesso è sia il risultato che l'output formattato
+        return new ProcessingResult<>(report.toString(), report.toString());
+    }
+
+    private String getPeriodoCoperto(List<Raccolto> raccolti) {
+        Optional<java.time.LocalDate> primaData = raccolti.stream()
+            .map(Raccolto::getDataRaccolto)
+            .filter(Objects::nonNull)
+            .min(java.time.LocalDate::compareTo);
+
+        Optional<java.time.LocalDate> ultimaData = raccolti.stream()
+            .map(Raccolto::getDataRaccolto)
+            .filter(Objects::nonNull)
+            .max(java.time.LocalDate::compareTo);
+
+        if (primaData.isPresent() && ultimaData.isPresent()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            return String.format("dal %s al %s",
+                primaData.get().format(formatter),
+                ultimaData.get().format(formatter));
         }
-
-        return report.toString();
+        return "Nessun dato temporale disponibile";
     }
 
     @Override
-    public String getProcessingName() {
-        return "Report Raccolti";
+    public void validateParameters(Object... data) {
+        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
+        if (data.length < 1) throw new IllegalArgumentException("Necessaria lista raccolti");
+        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
     }
 
     @Override
-    public ProcessingType getProcessingType() {
+    public ProcessingType getType() {
         return ProcessingType.REPORT;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setData(Object... data) {
-        if (data.length >= 1) {
-            this.raccolti = (List<Raccolto>) data[0];
-        }
     }
 }

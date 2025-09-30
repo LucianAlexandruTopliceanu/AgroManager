@@ -12,9 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-
 public class MainApp extends Application {
-
     // Services
     private ZonaService zonaService;
     private FornitoreService fornitoreService;
@@ -29,6 +27,7 @@ public class MainApp extends Application {
     private PiantaController piantaController;
     private PiantagioneController piantagioneController;
     private RaccoltoController raccoltoController;
+    private DataProcessingController dataProcessingController;
 
     // Views
     private ZonaView zonaView;
@@ -43,14 +42,11 @@ public class MainApp extends Application {
         initializeServices();
         initializeViews();
         initializeControllers();
-
+        // Controllers come variabili locali
         primaryStage.setTitle("🌱 AgroManager - Sistema di Gestione Agricola");
         primaryStage.setMaximized(true);
 
-        // Crea layout principale con menu laterale
         BorderPane mainLayout = new BorderPane();
-
-        // Area contenuto principale
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabPane.getTabs().addAll(
@@ -62,17 +58,11 @@ public class MainApp extends Application {
                 creaTabRaccolti(),
                 creaTabElaborazioniDati()
         );
-
-        // Menu laterale con riferimento al TabPane
         VBox menuLaterale = creaMenuLaterale(tabPane);
         mainLayout.setLeft(menuLaterale);
-
         mainLayout.setCenter(tabPane);
-
-        // Barra di stato
         HBox barraStato = creaBarraStato();
         mainLayout.setBottom(barraStato);
-
         Scene scene = new Scene(mainLayout, 1400, 900);
         try {
             scene.getStylesheets().add(getClass().getResource("/styles/application.css").toExternalForm());
@@ -98,7 +88,7 @@ public class MainApp extends Application {
         piantaView = new PiantaView();
         piantagioneView = new PiantagioneView();
         raccoltoView = new RaccoltoView();
-        dataProcessingView = new DataProcessingView(businessLogic);
+        dataProcessingView = new DataProcessingView();
     }
 
     private void initializeControllers() {
@@ -107,146 +97,86 @@ public class MainApp extends Application {
         piantaController = new PiantaController(piantaService, piantaView);
         piantagioneController = new PiantagioneController(piantagioneService, zonaService, piantaService, piantagioneView);
         raccoltoController = new RaccoltoController(raccoltoService, piantagioneService, raccoltoView);
+        dataProcessingController = new DataProcessingController(dataProcessingView, businessLogic);
     }
 
     private VBox creaMenuLaterale(TabPane tabPane) {
-        VBox menu = new VBox(15);
-        menu.setPadding(new Insets(20));
-        menu.setStyle("-fx-background-color: #2C3E50; -fx-min-width: 200px;");
-
-        Label titolo = new Label("🌱 AgroManager");
-        titolo.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
-
-        Button dashboardBtn = creaMenuButton("📊 Dashboard", "Panoramica generale");
-        dashboardBtn.setOnAction(e -> tabPane.getSelectionModel().select(0));
-
-        Button zoneBtn = creaMenuButton("🗺️ Zone", "Gestione zone agricole");
-        zoneBtn.setOnAction(e -> tabPane.getSelectionModel().select(1));
-
-        Button fornitoriBtn = creaMenuButton("🏢 Fornitori", "Gestione fornitori");
-        fornitoriBtn.setOnAction(e -> tabPane.getSelectionModel().select(2));
-
-        Button pianteBtn = creaMenuButton("🌿 Piante", "Catalogo piante");
-        pianteBtn.setOnAction(e -> tabPane.getSelectionModel().select(3));
-
-        Button piantagioniBtn = creaMenuButton("🌱 Piantagioni", "Piantagioni attive");
-        piantagioniBtn.setOnAction(e -> tabPane.getSelectionModel().select(4));
-
-        Button raccoltiBtn = creaMenuButton("🥕 Raccolti", "Registro raccolti");
-        raccoltiBtn.setOnAction(e -> tabPane.getSelectionModel().select(5));
-
-        Button elaborazioniBtn = creaMenuButton("📈 Analisi", "Elaborazioni e report");
-        elaborazioniBtn.setOnAction(e -> tabPane.getSelectionModel().select(6));
+        VBox menu = new VBox(10);
+        menu.setPadding(new Insets(10));
+        menu.setStyle("-fx-background-color: #2C3E50;");
 
         menu.getChildren().addAll(
-                titolo,
-                new Separator(),
-                dashboardBtn, zoneBtn, fornitoriBtn,
-                pianteBtn, piantagioniBtn, raccoltiBtn,
-                new Separator(),
-                elaborazioniBtn
+            new Label("AgroManager"),
+            new Separator(),
+            creaMenuButton("Dashboard", e -> tabPane.getSelectionModel().select(0)),
+            creaMenuButton("Zone", e -> tabPane.getSelectionModel().select(1)),
+            creaMenuButton("Fornitori", e -> tabPane.getSelectionModel().select(2)),
+            creaMenuButton("Piante", e -> tabPane.getSelectionModel().select(3)),
+            creaMenuButton("Piantagioni", e -> tabPane.getSelectionModel().select(4)),
+            creaMenuButton("Raccolti", e -> tabPane.getSelectionModel().select(5)),
+            new Separator(),
+            creaMenuButton("Analisi", e -> tabPane.getSelectionModel().select(6))
         );
 
         return menu;
     }
 
-    private Button creaMenuButton(String testo, String tooltip) {
+    private Button creaMenuButton(String testo, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
         Button btn = new Button(testo);
-        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
-                "-fx-font-size: 14px; -fx-alignment: center-left; -fx-pref-width: 160px;");
-        btn.setTooltip(new Tooltip(tooltip));
-
-        btn.setOnMouseEntered(e -> btn.setStyle(btn.getStyle() + "-fx-background-color: #34495E;"));
-        btn.setOnMouseExited(e -> btn.setStyle(btn.getStyle().replace("-fx-background-color: #34495E;", "")));
-
+        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white;");
+        btn.setPrefWidth(150);
+        btn.setOnAction(action);
         return btn;
     }
 
     private Tab creaTabDashboard(TabPane tabPane) {
-        Tab tab = new Tab("📊 Dashboard");
+        Tab tab = new Tab("Dashboard");
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(10));
 
-        VBox dashboardContent = new VBox(20);
-        dashboardContent.setPadding(new Insets(20));
-
-        // Carte statistiche principali
-        HBox carteStatsBox = new HBox(20);
-        carteStatsBox.getChildren().addAll(
-                creaCartaStatistica("Zone Attive", "12", "#3498DB"),
-                creaCartaStatistica("Piantagioni", "45", "#2ECC71"),
-                creaCartaStatistica("Raccolti Mese", "23", "#E74C3C"),
-                creaCartaStatistica("Produzione Tot.", "1,247 kg", "#F39C12")
+        // Statistiche essenziali
+        GridPane statsGrid = new GridPane();
+        statsGrid.setHgap(10);
+        statsGrid.setVgap(10);
+        statsGrid.addRow(0,
+                new Label("Zone:"), new Label(String.valueOf(zonaService.getAllZone().size())),
+                new Label("Piantagioni:"), new Label(String.valueOf(piantagioneService.getAllPiantagioni().size()))
+        );
+        statsGrid.addRow(1,
+                new Label("Raccolti mensili:"), new Label(String.valueOf(raccoltoService.getRaccoltiDelMese().size())),
+                new Label("Produzione totale:"), new Label(String.format("%.2f kg", raccoltoService.getProduzioneTotale()))
         );
 
-        // Accesso rapido
-        Label accessoRapidoLabel = new Label("🚀 Accesso Rapido");
-        accessoRapidoLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-
-        HBox accessoRapidoBox = new HBox(15);
-
-        Button nuovaZonaBtn = creaButtoneAzione("➕ Nuova Zona", "#3498DB");
-        nuovaZonaBtn.setOnAction(e -> {
-            tabPane.getSelectionModel().select(1); // Vai al tab Zone
-            // Simula click su "Nuova Zona" - il controller gestirà l'apertura del dialog
-            //TODO:zonaController.nuovaZona();
-        });
-
-        Button nuovaPiantagioneBtn = creaButtoneAzione("🌱 Nuova Piantagione", "#2ECC71");
+        // Accesso rapido essenziali
+        HBox actionBox = new HBox(10);
+        Button nuovaPiantagioneBtn = new Button("Nuova Piantagione");
         nuovaPiantagioneBtn.setOnAction(e -> {
-            tabPane.getSelectionModel().select(4); // Vai al tab Piantagioni
-            //TODO:piantagioneController.nuovaPiantagione();
+            tabPane.getSelectionModel().select(4);
+            piantagioneController.onNuovaPiantagione();
         });
 
-        Button nuovoRaccoltoBtn = creaButtoneAzione("📝 Nuovo Raccolto", "#E74C3C");
+        Button nuovoRaccoltoBtn = new Button("Nuovo Raccolto");
         nuovoRaccoltoBtn.setOnAction(e -> {
-            tabPane.getSelectionModel().select(5); // Vai al tab Raccolti
-            //TODO:raccoltoController.nuovoRaccolto();
+            tabPane.getSelectionModel().select(5);
+            raccoltoController.onNuovoRaccolto();
         });
 
-        Button reportVeloceBtn = creaButtoneAzione("📊 Report Veloce", "#9B59B6");
-        reportVeloceBtn.setOnAction(e -> {
-            tabPane.getSelectionModel().select(6); // Vai al tab Analisi
-            // Il DataProcessingView si occuperà del report
-        });
+        actionBox.getChildren().addAll(nuovaPiantagioneBtn, nuovoRaccoltoBtn);
 
-        accessoRapidoBox.getChildren().addAll(
-                nuovaZonaBtn, nuovaPiantagioneBtn, nuovoRaccoltoBtn, reportVeloceBtn
-        );
-
-        dashboardContent.getChildren().addAll(
-                carteStatsBox,
+        content.getChildren().addAll(
+                new Label("Statistiche"),
+                statsGrid,
                 new Separator(),
-                accessoRapidoLabel,
-                accessoRapidoBox
+                new Label("Azioni rapide"),
+                actionBox
         );
 
-        tab.setContent(new ScrollPane(dashboardContent));
+        ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        tab.setContent(scroll);
         return tab;
     }
 
-    private VBox creaCartaStatistica(String titolo, String valore, String colore) {
-        VBox carta = new VBox(10);
-        carta.setPadding(new Insets(20));
-        carta.setStyle("-fx-background-color: white; -fx-border-color: " + colore +
-                "; -fx-border-width: 0 0 3 0; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-        carta.setPrefWidth(200);
-
-        Label titoloLabel = new Label(titolo);
-        titoloLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7F8C8D;");
-
-        Label valoreLabel = new Label(valore);
-        valoreLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: " + colore + ";");
-
-        carta.getChildren().addAll(titoloLabel, valoreLabel);
-        return carta;
-    }
-
-    private Button creaButtoneAzione(String testo, String colore) {
-        Button btn = new Button(testo);
-        btn.setStyle("-fx-background-color: " + colore + "; -fx-text-fill: white; " +
-                "-fx-font-size: 12px; -fx-padding: 10 20 10 20; -fx-background-radius: 5;");
-        btn.setPrefWidth(150);
-        return btn;
-    }
 
     private HBox creaBarraStato() {
         HBox barraStato = new HBox();

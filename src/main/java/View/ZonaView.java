@@ -23,6 +23,10 @@ public class ZonaView extends VBox {
     private final TextField ricercaField;
     private final ComboBox<String> filtroTipoTerreno;
 
+    // Callback per notificare il controller sui cambiamenti dei filtri
+    private Consumer<String> onTestoRicercaChanged;
+    private Consumer<String> onTipoTerrenoChanged;
+
     public ZonaView() {
         // Inizializzazione
         tableZone = new TableView<>();
@@ -106,12 +110,20 @@ public class ZonaView extends VBox {
         HBox ricercaControls = new HBox(10);
         ricercaField.setPromptText("Cerca per nome zona...");
         ricercaField.setPrefWidth(200);
-        ricercaField.textProperty().addListener((obs, oldVal, newVal) -> filtraZone());
+        ricercaField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (onTestoRicercaChanged != null) {
+                onTestoRicercaChanged.accept(newVal);
+            }
+        });
 
         filtroTipoTerreno.setPromptText("Filtra per tipo terreno");
         filtroTipoTerreno.getItems().addAll("Tutti", "Argilloso", "Sabbioso", "Limoso", "Misto");
         filtroTipoTerreno.setValue("Tutti");
-        filtroTipoTerreno.setOnAction(e -> filtraZone());
+        filtroTipoTerreno.setOnAction(e -> {
+            if (onTipoTerrenoChanged != null) {
+                onTipoTerrenoChanged.accept(filtroTipoTerreno.getValue());
+            }
+        });
 
         ricercaControls.getChildren().addAll(
             new Label("Nome:"), ricercaField,
@@ -159,14 +171,6 @@ public class ZonaView extends VBox {
         getChildren().addAll(ricercaBox, azioniBox, tableZone);
     }
 
-    private void filtraZone() {
-        // Implementa logica di filtro
-        String testoCerca = ricercaField.getText().toLowerCase();
-        String tipoFiltro = filtroTipoTerreno.getValue();
-
-        // Per ora mostra tutti i dati - il controller implementerà il filtro reale
-    }
-
     private void modificaZona() {
         if (getZonaSelezionata() != null) {
             // Il controller gestirà l'apertura del dialog di modifica
@@ -196,6 +200,24 @@ public class ZonaView extends VBox {
 
     public void setOnAggiornaZone(Consumer<Void> handler) {
         aggiornaBtn.setOnAction(e -> handler.accept(null));
+    }
+
+    public void setOnNuovaZona(Runnable handler) {
+        nuovoBtn.setOnAction(e -> handler.run());
+    }
+    public void setOnModificaZona(Runnable handler) {
+        modificaBtn.setOnAction(e -> handler.run());
+    }
+    public void setOnEliminaZona(Runnable handler) {
+        eliminaBtn.setOnAction(e -> handler.run());
+    }
+
+    public void setOnTestoRicercaChanged(Consumer<String> handler) {
+        this.onTestoRicercaChanged = handler;
+    }
+
+    public void setOnTipoTerrenoChanged(Consumer<String> handler) {
+        this.onTipoTerrenoChanged = handler;
     }
 
     public String getTestoRicerca() {
