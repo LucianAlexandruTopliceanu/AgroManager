@@ -1,0 +1,237 @@
+/* Stili per AgroManager - Sistema di Gestione Agricola */
+
+.root {
+    -fx-background-color: #F8F9FA;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Tab Pane personalizzato */
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E9ECEF;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8 8 0 0;
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 10 20 10 20;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #007BFF #007BFF transparent #007BFF;
+    -fx-border-width: 2 2 0 2;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #6C757D;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #007BFF;
+}
+
+/* Pulsanti personalizzati */
+.button {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* Pulsante primario */
+.button-primary {
+    -fx-background-color: #007BFF;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 12 24 12 24;
+}
+
+.button-primary:hover {
+    -fx-background-color: #0056B3;
+}
+
+/* Pulsante successo */
+.button-success {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+}
+
+.button-success:hover {
+    -fx-background-color: #1E7E34;
+}
+
+/* Pulsante pericolo */
+.button-danger {
+    -fx-background-color: #DC3545;
+    -fx-text-fill: white;
+}
+
+.button-danger:hover {
+    -fx-background-color: #C82333;
+}
+
+/* TableView personalizzata */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-view .column-header {
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
+    -fx-border-color: #DEE2E6;
+}
+
+.table-view .table-row-cell {
+    -fx-border-color: transparent;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #E3F2FD;
+    -fx-text-fill: #1976D2;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #F5F5F5;
+}
+
+/* ComboBox personalizzato */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #CED4DA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+
+.combo-box:focused {
+    -fx-border-color: #007BFF;
+    -fx-border-width: 2;
+}
+
+/* TextField personalizzato */
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: #CED4DA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+
+.text-field:focused {
+    -fx-border-color: #007BFF;
+    -fx-border-width: 2;
+}
+
+/* TextArea personalizzata */
+.text-area {
+    -fx-background-color: #2C3E50;
+    -fx-text-fill: #ECF0F1;
+    -fx-border-color: #34495E;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.text-area .content {
+    -fx-background-color: #2C3E50;
+    -fx-background-radius: 8;
+}
+
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+/* Progress Indicator */
+.progress-indicator {
+    -fx-accent: #007BFF;
+}
+
+/* Tooltip personalizzato */
+.tooltip {
+    -fx-background-color: #2C3E50;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+    -fx-padding: 8 12 8 12;
+}
+
+/* Menu laterale */
+.menu-laterale {
+    -fx-background-color: linear-gradient(to bottom, #2C3E50, #34495E);
+}
+
+/* Card statistiche */
+.carta-statistica {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+}
+
+.carta-statistica:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* DatePicker personalizzato */
+.date-picker {
+    -fx-background-color: white;
+    -fx-border-color: #CED4DA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.date-picker:focused {
+    -fx-border-color: #007BFF;
+    -fx-border-width: 2;
+}
+
+/* Spinner personalizzato */
+.spinner {
+    -fx-background-color: white;
+    -fx-border-color: #CED4DA;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.spinner:focused {
+    -fx-border-color: #007BFF;
+    -fx-border-width: 2;
+}
+
+/* Separatori */
+.separator .line {
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Animazioni */
+.fade-in {
+    -fx-opacity: 0;
+}
+
+.slide-in {
+    -fx-translate-x: -100;
+}
