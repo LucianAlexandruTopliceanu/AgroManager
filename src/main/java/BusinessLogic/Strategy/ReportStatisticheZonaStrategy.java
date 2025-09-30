@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 public class ReportStatisticheZonaStrategy implements DataProcessingStrategy<Map<String, Map<String, BigDecimal>>> {
     @Override
+    @SuppressWarnings("unchecked")
     public ProcessingResult<Map<String, Map<String, BigDecimal>>> execute(Object... data) {
         validateParameters(data);
 

@@ -23,6 +23,23 @@ public class RaccoltoService {
     }
 
     public void aggiungiRaccolto(Raccolto raccolto) {
+        // Validazioni
+        if (raccolto == null) {
+            throw new IllegalArgumentException("Raccolto non può essere null");
+        }
+        if (raccolto.getDataRaccolto() == null) {
+            throw new IllegalArgumentException("La data di raccolto è obbligatoria");
+        }
+        if (raccolto.getDataRaccolto().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("La data di raccolto non può essere nel futuro");
+        }
+        if (raccolto.getQuantitaKg() == null || raccolto.getQuantitaKg().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("La quantità deve essere positiva");
+        }
+        if (raccolto.getPiantagioneId() == null) {
+            throw new IllegalArgumentException("La piantagione è obbligatoria");
+        }
+
         try {
             raccoltoDAO.create(raccolto);
         } catch (java.sql.SQLException e) {
@@ -31,6 +48,26 @@ public class RaccoltoService {
     }
 
     public void aggiornaRaccolto(Raccolto raccolto) {
+        // Validazioni per aggiornamento
+        if (raccolto == null) {
+            throw new IllegalArgumentException("Raccolto non può essere null");
+        }
+        if (raccolto.getId() == null) {
+            throw new IllegalArgumentException("ID raccolto richiesto per l'aggiornamento");
+        }
+        if (raccolto.getDataRaccolto() == null) {
+            throw new IllegalArgumentException("La data di raccolto è obbligatoria");
+        }
+        if (raccolto.getDataRaccolto().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("La data di raccolto non può essere nel futuro");
+        }
+        if (raccolto.getQuantitaKg() == null || raccolto.getQuantitaKg().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("La quantità deve essere positiva");
+        }
+        if (raccolto.getPiantagioneId() == null) {
+            throw new IllegalArgumentException("L'ID piantagione è obbligatorio");
+        }
+
         try {
             raccoltoDAO.update(raccolto);
         } catch (java.sql.SQLException e) {

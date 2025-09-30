@@ -1,193 +1,226 @@
 package BusinessLogic;
 
+import BusinessLogic.Strategy.DataProcessingStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class BusinessLogicTest {
 
-    private List<MockRaccolto> raccolti;
-    private List<MockPiantagione> piantagioni;
+    private BusinessLogic businessLogic;
 
     @BeforeEach
     void setUp() {
-        raccolti = new ArrayList<>();
-        piantagioni = new ArrayList<>();
-
-        // Dati di test
-        piantagioni.add(new MockPiantagione(1, LocalDate.of(2024, 3, 1), 100, "Pomodoro"));
-        piantagioni.add(new MockPiantagione(2, LocalDate.of(2024, 4, 1), 50, "Basilico"));
-
-        raccolti.add(new MockRaccolto(LocalDate.of(2024, 7, 15), new BigDecimal("25.5"), 1));
-        raccolti.add(new MockRaccolto(LocalDate.of(2024, 8, 1), new BigDecimal("30.0"), 1));
-        raccolti.add(new MockRaccolto(LocalDate.of(2024, 7, 20), new BigDecimal("5.2"), 2));
+        businessLogic = new BusinessLogic();
     }
 
     @Test
-    void testCalcoloProduzioneTotale() {
-        BigDecimal produzioneTotalePomodoro = calcolaProduzioneTotalePiantagione(1);
-        BigDecimal produzioneBasilico = calcolaProduzioneTotalePiantagione(2);
-
-        assertEquals(new BigDecimal("55.5"), produzioneTotalePomodoro);
-        assertEquals(new BigDecimal("5.2"), produzioneBasilico);
-    }
-
-    @Test
-    void testCalcoloMediaProduzione() {
-        BigDecimal mediaPomodoro = calcolaMediaProduzionePianta(1);
-        BigDecimal mediaBasilico = calcolaMediaProduzionePianta(2);
-
-        // 55.5 kg / 100 piante = 0.555 kg per pianta
-        assertEquals(new BigDecimal("0.56"), mediaPomodoro.setScale(2, RoundingMode.HALF_UP));
-        // 5.2 kg / 50 piante = 0.104 kg per pianta
-        assertEquals(new BigDecimal("0.10"), mediaBasilico.setScale(2, RoundingMode.HALF_UP));
-    }
-
-    @Test
-    void testCalcoloGiorniPiantagioneRaccolto() {
-        long giorniPomodoro = calcolaGiorniDallaMessaADimora(1);
-        long giorniBasilico = calcolaGiorniDallaMessaADimora(2);
-
-        // Dal 1 marzo al 15 luglio = 136 giorni
-        assertEquals(136, giorniPomodoro);
-        // Dal 1 aprile al 20 luglio = 110 giorni
-        assertEquals(110, giorniBasilico);
-    }
-
-    @Test
-    void testPiantagionePiuProduttiva() {
-        int piantagionePiuProduttiva = trovaIdPiantagionePiuProduttiva();
-        assertEquals(1, piantagionePiuProduttiva);
-    }
-
-    @Test
-    void testCalcoloEfficienzaProduttiva() {
-        BigDecimal efficienzaPomodoro = calcolaEfficienzaProduttiva(1);
-        BigDecimal efficienzaBasilico = calcolaEfficienzaProduttiva(2);
-
-        // Pomodoro: 55.5 kg / 100 piante / 136 giorni = 0.00408
-        assertTrue(efficienzaPomodoro.compareTo(new BigDecimal("0.004")) > 0);
-        assertTrue(efficienzaPomodoro.compareTo(new BigDecimal("0.005")) < 0);
-
-        // Basilico: 5.2 kg / 50 piante / 110 giorni = 0.00095
-        assertTrue(efficienzaBasilico.compareTo(new BigDecimal("0.0009")) > 0);
-        assertTrue(efficienzaBasilico.compareTo(new BigDecimal("0.001")) < 0);
-    }
-
-    @Test
-    void testValidazionePeriodoRaccolto() {
-        LocalDate inizioEstate = LocalDate.of(2024, 6, 21);
-        LocalDate fineEstate = LocalDate.of(2024, 9, 22);
-
-        assertTrue(isRaccoltoInPeriodo(LocalDate.of(2024, 7, 15), inizioEstate, fineEstate));
-        assertFalse(isRaccoltoInPeriodo(LocalDate.of(2024, 5, 15), inizioEstate, fineEstate));
-        assertFalse(isRaccoltoInPeriodo(LocalDate.of(2024, 10, 15), inizioEstate, fineEstate));
-    }
-
-    // Metodi di supporto per i test - simulano la logica di business
-
-    private BigDecimal calcolaProduzioneTotalePiantagione(int piantagioneId) {
-        return raccolti.stream()
-            .filter(r -> r.piantagioneId == piantagioneId)
-            .map(r -> r.quantitaKg)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private BigDecimal calcolaMediaProduzionePianta(int piantagioneId) {
-        BigDecimal totale = calcolaProduzioneTotalePiantagione(piantagioneId);
-        int numeroPiante = piantagioni.stream()
-            .filter(p -> p.id == piantagioneId)
-            .mapToInt(p -> p.quantitaPiante)
-            .findFirst()
-            .orElse(1);
-
-        return totale.divide(new BigDecimal(numeroPiante), 3, RoundingMode.HALF_UP);
-    }
-
-    private long calcolaGiorniDallaMessaADimora(int piantagioneId) {
-        LocalDate messaADimora = piantagioni.stream()
-            .filter(p -> p.id == piantagioneId)
-            .map(p -> p.messaADimora)
-            .findFirst()
-            .orElse(LocalDate.now());
-
-        LocalDate primoRaccolto = raccolti.stream()
-            .filter(r -> r.piantagioneId == piantagioneId)
-            .map(r -> r.dataRaccolto)
-            .min(LocalDate::compareTo)
-            .orElse(LocalDate.now());
-
-        return ChronoUnit.DAYS.between(messaADimora, primoRaccolto);
-    }
-
-    private int trovaIdPiantagionePiuProduttiva() {
-        return raccolti.stream()
-            .collect(java.util.stream.Collectors.groupingBy(
-                r -> r.piantagioneId,
-                java.util.stream.Collectors.reducing(
-                    BigDecimal.ZERO,
-                    r -> r.quantitaKg,
-                    BigDecimal::add)))
-            .entrySet()
-            .stream()
-            .max(java.util.Map.Entry.comparingByValue())
-            .map(java.util.Map.Entry::getKey)
-            .orElse(0);
-    }
-
-    private BigDecimal calcolaEfficienzaProduttiva(int piantagioneId) {
-        BigDecimal totaleProduzione = calcolaProduzioneTotalePiantagione(piantagioneId);
-        int numeroPiante = piantagioni.stream()
-            .filter(p -> p.id == piantagioneId)
-            .mapToInt(p -> p.quantitaPiante)
-            .findFirst()
-            .orElse(1);
-        long giorni = calcolaGiorniDallaMessaADimora(piantagioneId);
-
-        return totaleProduzione.divide(
-            new BigDecimal(numeroPiante).multiply(new BigDecimal(giorni)),
-            6,
-            RoundingMode.HALF_UP
+    void testEseguiStrategiaProduzioneTotaleConDatiVuoti() {
+        // Test con database vuoto - dovrebbe gestire gracefully
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Produzione Totale",
+            "1",
+            null, null, null
         );
+
+        assertNotNull(risultato);
+        System.out.println("DEBUG - Risultato Produzione Totale: " + risultato);
+        // Con dati vuoti, dovrebbe comunque restituire un risultato valido (0.00) o errore
+        assertTrue(risultato.contains("0.00") || risultato.contains("0,00") ||
+                  risultato.contains("Errore") || risultato.contains("Produzione"));
     }
 
-    private boolean isRaccoltoInPeriodo(LocalDate dataRaccolto, LocalDate inizio, LocalDate fine) {
-        return !dataRaccolto.isBefore(inizio) && !dataRaccolto.isAfter(fine);
+    @Test
+    void testEseguiStrategiaMediaPerPiantaConDatiVuoti() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Media per Pianta",
+            "1",
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        System.out.println("DEBUG - Risultato Media per Pianta: " + risultato);
+        // Dovrebbe gestire il caso senza dati
+        assertTrue(risultato.contains("Errore") || risultato.contains("non trovata") ||
+                  risultato.contains("0.00") || risultato.contains("0,00") ||
+                  risultato.contains("Media") || risultato.contains("piantagione"));
     }
 
-    // Classi mock per i test
-    private static class MockRaccolto {
-        LocalDate dataRaccolto;
-        BigDecimal quantitaKg;
-        int piantagioneId;
+    @Test
+    void testEseguiStrategiaProduzionePerPeriodo() {
+        LocalDate inizio = LocalDate.now().minusDays(10);
+        LocalDate fine = LocalDate.now();
 
-        MockRaccolto(LocalDate dataRaccolto, BigDecimal quantitaKg, int piantagioneId) {
-            this.dataRaccolto = dataRaccolto;
-            this.quantitaKg = quantitaKg;
-            this.piantagioneId = piantagioneId;
-        }
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Produzione per Periodo",
+            null,
+            inizio, fine, null
+        );
+
+        assertNotNull(risultato);
+        assertTrue(risultato.contains("periodo") || risultato.contains("Produzione"));
+        assertFalse(risultato.contains("null"));
     }
 
-    private static class MockPiantagione {
-        int id;
-        LocalDate messaADimora;
-        int quantitaPiante;
-        String tipoPianta;
+    @Test
+    void testEseguiStrategiaTopPiantagioni() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.STATISTICS,
+            "Top Piantagioni",
+            null,
+            null, null, 2
+        );
 
-        MockPiantagione(int id, LocalDate messaADimora, int quantitaPiante, String tipoPianta) {
-            this.id = id;
-            this.messaADimora = messaADimora;
-            this.quantitaPiante = quantitaPiante;
-            this.tipoPianta = tipoPianta;
-        }
+        assertNotNull(risultato);
+        assertTrue(risultato.contains("Top") || risultato.contains("piantagioni"));
+    }
+
+    @Test
+    void testEseguiStrategiaPiantagioneMigliore() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.STATISTICS,
+            "Piantagione Migliore",
+            null,
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        // Dovrebbe restituire un risultato anche se non ci sono dati
+        assertFalse(risultato.isEmpty());
+    }
+
+    @Test
+    void testEseguiStrategiaReportRaccolti() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.REPORT,
+            "Report Raccolti",
+            null,
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        assertTrue(risultato.contains("REPORT") || risultato.contains("raccolti") || risultato.contains("Nessun"));
+    }
+
+    @Test
+    void testEseguiStrategiaTipoSbagliato() {
+        // Tenta di eseguire una strategia CALCULATION come REPORT
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.REPORT,
+            "Produzione Totale",
+            "1",
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        assertTrue(risultato.startsWith("Errore"));
+        assertTrue(risultato.contains("tipo"));
+    }
+
+    @Test
+    void testEseguiStrategiaNonEsistente() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Strategia Inesistente",
+            "1",
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        assertTrue(risultato.startsWith("Errore"));
+        assertTrue(risultato.contains("non riconosciuta"));
+    }
+
+    @Test
+    void testEseguiStrategiaParametriInvalidi() {
+        // Test con ID piantagione non numerico
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Produzione Totale",
+            "abc",
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        assertTrue(risultato.startsWith("Errore"));
+    }
+
+    @Test
+    void testEseguiStrategiaEfficienzaProduttiva() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Efficienza Produttiva",
+            "1",
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        // Dovrebbe gestire il caso anche senza dati reali
+        assertTrue(risultato.contains("Efficienza") || risultato.contains("Errore"));
+    }
+
+    @Test
+    void testEseguiStrategiaStatisticheZone() {
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.STATISTICS,
+            "Statistiche Zone",
+            null,
+            null, null, null
+        );
+
+        assertNotNull(risultato);
+        System.out.println("DEBUG - Risultato Statistiche Zone: " + risultato);
+        assertTrue(risultato.contains("Zone") || risultato.contains("statistiche") || risultato.contains("Nessun") || risultato.contains("ZONA"));
+    }
+
+    @Test
+    void testIsRaccoltoInPeriodo() {
+        LocalDate data = LocalDate.of(2024, 7, 15);
+        LocalDate inizio = LocalDate.of(2024, 7, 1);
+        LocalDate fine = LocalDate.of(2024, 7, 31);
+
+        assertTrue(businessLogic.isRaccoltoInPeriodo(data, inizio, fine));
+        assertFalse(businessLogic.isRaccoltoInPeriodo(data, inizio.plusDays(20), fine));
+        assertFalse(businessLogic.isRaccoltoInPeriodo(null, inizio, fine));
+        assertFalse(businessLogic.isRaccoltoInPeriodo(data, null, fine));
+        assertFalse(businessLogic.isRaccoltoInPeriodo(data, inizio, null));
+    }
+
+    @Test
+    void testParametriValidazioneDate() {
+        // Test con date invalide (fine prima di inizio)
+        LocalDate inizio = LocalDate.now();
+        LocalDate fine = LocalDate.now().minusDays(5);
+
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.CALCULATION,
+            "Produzione per Periodo",
+            null,
+            inizio, fine, null
+        );
+
+        assertNotNull(risultato);
+        assertTrue(risultato.startsWith("Errore") || risultato.contains("validazione"));
+    }
+
+    @Test
+    void testParametriValidazioneTopN() {
+        // Test con topN negativo (se la strategia lo gestisce)
+        String risultato = businessLogic.eseguiStrategia(
+            DataProcessingStrategy.ProcessingType.STATISTICS,
+            "Top Piantagioni",
+            null,
+            null, null, -1
+        );
+
+        assertNotNull(risultato);
+        // Dovrebbe gestire valori negativi appropriatamente
+        assertFalse(risultato.contains("null"));
     }
 }

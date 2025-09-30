@@ -56,11 +56,29 @@ public class BusinessLogic {
                                      Integer topN) {
         // Prepara i parametri in base al tipo di strategia
         if (strategy instanceof ProduzioneTotaleStrategy) {
-            return new Object[]{raccolti, Integer.parseInt(piantagioneId)};
+            // Gestisce il caso di ID piantagione non valido
+            if (piantagioneId == null || piantagioneId.trim().isEmpty()) {
+                throw new IllegalArgumentException("ID piantagione richiesto per questa strategia");
+            }
+            try {
+                return new Object[]{raccolti, Integer.parseInt(piantagioneId)};
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("ID piantagione deve essere un numero valido");
+            }
         } else if (strategy instanceof MediaProduzioneStrategy ||
                    strategy instanceof EfficienzaProduttivaStrategy) {
-            return new Object[]{raccolti, piantagioni, Integer.parseInt(piantagioneId)};
+            if (piantagioneId == null || piantagioneId.trim().isEmpty()) {
+                throw new IllegalArgumentException("ID piantagione richiesto per questa strategia");
+            }
+            try {
+                return new Object[]{raccolti, piantagioni, Integer.parseInt(piantagioneId)};
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("ID piantagione deve essere un numero valido");
+            }
         } else if (strategy instanceof ProduzionePerPeriodoStrategy) {
+            if (dataInizio == null || dataFine == null) {
+                throw new IllegalArgumentException("Date di inizio e fine richieste per questa strategia");
+            }
             return new Object[]{raccolti, dataInizio, dataFine};
         } else if (strategy instanceof TopPiantagioniStrategy) {
             // Per "Piantagione Migliore" usa 1, per "Top Piantagioni" usa il valore specificato
