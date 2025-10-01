@@ -80,7 +80,15 @@ public class FornitoreView extends VBox {
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getPartitaIva()));
         pivaCol.setPrefWidth(120);
 
-        tableFornitori.getColumns().addAll(idCol, nomeCol, indirizzoCol, telefonoCol, emailCol, pivaCol);
+        // Correzione per evitare generic array creation warning
+        tableFornitori.getColumns().clear();
+        tableFornitori.getColumns().add(idCol);
+        tableFornitori.getColumns().add(nomeCol);
+        tableFornitori.getColumns().add(indirizzoCol);
+        tableFornitori.getColumns().add(telefonoCol);
+        tableFornitori.getColumns().add(emailCol);
+        tableFornitori.getColumns().add(pivaCol);
+
         tableFornitori.setItems(fornitoriData);
 
         // Double-click per modifica
