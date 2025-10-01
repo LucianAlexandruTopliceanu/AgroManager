@@ -87,7 +87,15 @@ public class PiantaView extends VBox {
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getNote()));
         noteCol.setPrefWidth(200);
 
-        tablePiante.getColumns().addAll(idCol, tipoCol, varietaCol, costoCol, fornitoreCol, noteCol);
+        // Correzione per evitare generic array creation warning
+        tablePiante.getColumns().clear();
+        tablePiante.getColumns().add(idCol);
+        tablePiante.getColumns().add(tipoCol);
+        tablePiante.getColumns().add(varietaCol);
+        tablePiante.getColumns().add(costoCol);
+        tablePiante.getColumns().add(fornitoreCol);
+        tablePiante.getColumns().add(noteCol);
+
         tablePiante.setItems(pianteData);
 
         // Double-click per modifica

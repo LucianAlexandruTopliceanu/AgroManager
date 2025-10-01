@@ -103,7 +103,15 @@ public class RaccoltoView extends VBox {
         });
         statoCol.setPrefWidth(100);
 
-        tableRaccolti.getColumns().addAll(idCol, piantagioneCol, dataCol, quantitaCol, statoCol, noteCol);
+        // Correzione per evitare generic array creation warning
+        tableRaccolti.getColumns().clear();
+        tableRaccolti.getColumns().add(idCol);
+        tableRaccolti.getColumns().add(piantagioneCol);
+        tableRaccolti.getColumns().add(dataCol);
+        tableRaccolti.getColumns().add(quantitaCol);
+        tableRaccolti.getColumns().add(statoCol);
+        tableRaccolti.getColumns().add(noteCol);
+
         tableRaccolti.setItems(raccoltiData);
 
         // Double-click per modifica

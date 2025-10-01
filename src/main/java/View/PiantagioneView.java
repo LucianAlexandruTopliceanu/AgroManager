@@ -60,7 +60,13 @@ public class PiantagioneView extends VBox {
             cell.getValue().getMessaADimora().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : ""
         ));
 
-        tablePiantagioni.getColumns().addAll(idCol, piantaCol, zonaCol, dataCol);
+        // Correzione per evitare generic array creation warning
+        tablePiantagioni.getColumns().clear();
+        tablePiantagioni.getColumns().add(idCol);
+        tablePiantagioni.getColumns().add(piantaCol);
+        tablePiantagioni.getColumns().add(zonaCol);
+        tablePiantagioni.getColumns().add(dataCol);
+
         tablePiantagioni.setItems(piantagioniData);
 
         // Gestione selezione
