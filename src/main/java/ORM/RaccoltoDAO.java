@@ -54,4 +54,21 @@ public class RaccoltoDAO extends BaseDAO<Raccolto> {
     protected void setEntityId(Raccolto raccolto, int id) {
         raccolto.setId(id);
     }
+
+
+    public java.util.List<Raccolto> findByPiantagione(Integer piantagioneId) throws SQLException {
+        String sql = "SELECT * FROM " + getTableName() + " WHERE piantagione_id = ?";
+        java.util.List<Raccolto> raccolti = new java.util.ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, piantagioneId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    raccolti.add(mapResultSetToEntity(rs));
+                }
+            }
+        }
+        return raccolti;
+    }
 }

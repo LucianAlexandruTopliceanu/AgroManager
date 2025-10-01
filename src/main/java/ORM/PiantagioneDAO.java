@@ -54,4 +54,38 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
     protected void setEntityId(Piantagione piantagione, int id) {
         piantagione.setId(id);
     }
+
+
+    public java.util.List<Piantagione> findByZona(Integer zonaId) throws SQLException {
+        String sql = "SELECT * FROM " + getTableName() + " WHERE id_zona = ?";
+        java.util.List<Piantagione> piantagioni = new java.util.ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, zonaId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    piantagioni.add(mapResultSetToEntity(rs));
+                }
+            }
+        }
+        return piantagioni;
+    }
+
+
+    public java.util.List<Piantagione> findByPianta(Integer piantaId) throws SQLException {
+        String sql = "SELECT * FROM " + getTableName() + " WHERE id_pianta = ?";
+        java.util.List<Piantagione> piantagioni = new java.util.ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, piantaId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    piantagioni.add(mapResultSetToEntity(rs));
+                }
+            }
+        }
+        return piantagioni;
+    }
 }

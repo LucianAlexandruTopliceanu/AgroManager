@@ -57,4 +57,21 @@ public class PiantaDAO extends BaseDAO<Pianta> {
     protected void setEntityId(Pianta pianta, int id) {
         pianta.setId(id);
     }
+
+
+    public java.util.List<Pianta> findByFornitore(Integer fornitoreId) throws SQLException {
+        String sql = "SELECT * FROM " + getTableName() + " WHERE fornitore_id = ?";
+        java.util.List<Pianta> piante = new java.util.ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, fornitoreId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    piante.add(mapResultSetToEntity(rs));
+                }
+            }
+        }
+        return piante;
+    }
 }
