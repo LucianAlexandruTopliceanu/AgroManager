@@ -1,237 +1,306 @@
-/* Stili per AgroManager - Sistema di Gestione Agricola */
+/* AgroManager - Stili dell'applicazione */
 
+/* Reset e stili di base */
 .root {
-    -fx-background-color: #F8F9FA;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f8f9fa;
 }
 
-/* Tab Pane personalizzato */
+/* Colori principali */
+.primary-color { -fx-background-color: #2c3e50; }
+.secondary-color { -fx-background-color: #34495e; }
+.accent-color { -fx-background-color: #3498db; }
+.success-color { -fx-background-color: #27ae60; }
+.warning-color { -fx-background-color: #f39c12; }
+.danger-color { -fx-background-color: #e74c3c; }
+
+/* Miglioramenti per le TabPane */
 .tab-pane {
-    -fx-background-color: transparent;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
 }
 
 .tab-pane .tab-header-area {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E9ECEF;
-    -fx-border-width: 0 0 1 0;
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1px 0;
 }
 
 .tab-pane .tab {
-    -fx-background-color: #F8F9FA;
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px 4px 0 0;
     -fx-border-color: transparent;
-    -fx-border-radius: 8 8 0 0;
-    -fx-background-radius: 8 8 0 0;
-    -fx-padding: 10 20 10 20;
+    -fx-padding: 8px 16px;
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #007BFF #007BFF transparent #007BFF;
-    -fx-border-width: 2 2 0 2;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #3498db;
+    -fx-border-width: 0 0 2px 0;
 }
 
 .tab-pane .tab .tab-label {
-    -fx-text-fill: #6C757D;
-    -fx-font-weight: bold;
+    -fx-text-fill: #6c757d;
+    -fx-font-weight: 500;
 }
 
 .tab-pane .tab:selected .tab-label {
-    -fx-text-fill: #007BFF;
+    -fx-text-fill: #3498db;
+    -fx-font-weight: bold;
 }
 
-/* Pulsanti personalizzati */
-.button {
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
+/* Stili per le TableView */
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 1px 0 0;
+    -fx-padding: 12px 8px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #495057;
     -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #f8f9fa;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 8px 0;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1976d2;
+}
+
+.table-view .table-cell {
+    -fx-padding: 8px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Stili per i Button */
+.button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-font-weight: 500;
     -fx-cursor: hand;
 }
 
 .button:hover {
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
+    -fx-background-color: #2980b9;
 }
 
 .button:pressed {
-    -fx-scale-x: 0.95;
-    -fx-scale-y: 0.95;
+    -fx-background-color: #21618c;
 }
 
-/* Pulsante primario */
-.button-primary {
-    -fx-background-color: #007BFF;
+.button.success {
+    -fx-background-color: #27ae60;
+}
+
+.button.success:hover {
+    -fx-background-color: #229954;
+}
+
+.button.warning {
+    -fx-background-color: #f39c12;
+}
+
+.button.warning:hover {
+    -fx-background-color: #e67e22;
+}
+
+.button.danger {
+    -fx-background-color: #e74c3c;
+}
+
+.button.danger:hover {
+    -fx-background-color: #c0392b;
+}
+
+.button.secondary {
+    -fx-background-color: #6c757d;
     -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 12 24 12 24;
 }
 
-.button-primary:hover {
-    -fx-background-color: #0056B3;
+.button.secondary:hover {
+    -fx-background-color: #5a6268;
 }
 
-/* Pulsante successo */
-.button-success {
-    -fx-background-color: #28A745;
-    -fx-text-fill: white;
+/* Stili per i TextField e ComboBox */
+.text-field, .combo-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
 }
 
-.button-success:hover {
-    -fx-background-color: #1E7E34;
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
 }
 
-/* Pulsante pericolo */
-.button-danger {
-    -fx-background-color: #DC3545;
-    -fx-text-fill: white;
-}
-
-.button-danger:hover {
-    -fx-background-color: #C82333;
-}
-
-/* TableView personalizzata */
-.table-view {
-    -fx-background-color: white;
-    -fx-border-color: #DEE2E6;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.table-view .column-header {
-    -fx-background-color: #F8F9FA;
+/* Stili per i Label */
+.label {
     -fx-text-fill: #495057;
-    -fx-font-weight: bold;
-    -fx-border-color: #DEE2E6;
 }
 
-.table-view .table-row-cell {
+.label.heading {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.label.subheading {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #495057;
+}
+
+.label.error {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: 500;
+}
+
+.label.success {
+    -fx-text-fill: #27ae60;
+    -fx-font-weight: 500;
+}
+
+.label.warning {
+    -fx-text-fill: #f39c12;
+    -fx-font-weight: 500;
+}
+
+/* Stili per gli Alert e Dialog */
+.dialog-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 16px;
+}
+
+.dialog-pane .content {
+    -fx-padding: 16px;
+}
+
+/* Stili per le progress bar e indicatori */
+.progress-indicator {
+    -fx-progress-color: #3498db;
+}
+
+.progress-bar {
+    -fx-accent: #3498db;
+}
+
+/* Stili per i Separator */
+.separator .line {
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* Stili per i ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
-.table-view .table-row-cell:selected {
-    -fx-background-color: #E3F2FD;
-    -fx-text-fill: #1976D2;
-}
-
-.table-view .table-row-cell:hover {
-    -fx-background-color: #F5F5F5;
-}
-
-/* ComboBox personalizzato */
-.combo-box {
-    -fx-background-color: white;
-    -fx-border-color: #CED4DA;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 8 12 8 12;
-}
-
-.combo-box:focused {
-    -fx-border-color: #007BFF;
-    -fx-border-width: 2;
-}
-
-/* TextField personalizzato */
-.text-field {
-    -fx-background-color: white;
-    -fx-border-color: #CED4DA;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 8 12 8 12;
-}
-
-.text-field:focused {
-    -fx-border-color: #007BFF;
-    -fx-border-width: 2;
-}
-
-/* TextArea personalizzata */
-.text-area {
-    -fx-background-color: #2C3E50;
-    -fx-text-fill: #ECF0F1;
-    -fx-border-color: #34495E;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.text-area .content {
-    -fx-background-color: #2C3E50;
-    -fx-background-radius: 8;
-}
-
-.text-area .scroll-pane {
+.scroll-pane .viewport {
     -fx-background-color: transparent;
 }
 
-/* Progress Indicator */
-.progress-indicator {
-    -fx-accent: #007BFF;
+/* Animazioni e transizioni */
+.button, .text-field, .combo-box {
+    -fx-transition: all 0.2s ease;
 }
 
-/* Tooltip personalizzato */
-.tooltip {
-    -fx-background-color: #2C3E50;
+/* Stili specifici per card e dashboard */
+.stats-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);
+}
+
+.action-button {
+    -fx-background-color: #3498db;
     -fx-text-fill: white;
-    -fx-background-radius: 6;
-    -fx-font-size: 12px;
-    -fx-padding: 8 12 8 12;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);
 }
 
-/* Menu laterale */
-.menu-laterale {
-    -fx-background-color: linear-gradient(to bottom, #2C3E50, #34495E);
+.action-button:hover {
+    -fx-background-color: #2980b9;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 4);
 }
 
-/* Card statistiche */
-.carta-statistica {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+/* Stili per il menu laterale */
+.sidebar {
+    -fx-background-color: #2c3e50;
 }
 
-.carta-statistica:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 6);
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
+.sidebar .button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ecf0f1;
+    -fx-border-color: transparent;
+    -fx-background-radius: 4px;
+    -fx-alignment: CENTER_LEFT;
 }
 
-/* DatePicker personalizzato */
-.date-picker {
-    -fx-background-color: white;
-    -fx-border-color: #CED4DA;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+.sidebar .button:hover {
+    -fx-background-color: #34495e;
 }
 
-.date-picker:focused {
-    -fx-border-color: #007BFF;
-    -fx-border-width: 2;
+.sidebar .button:selected {
+    -fx-background-color: #3498db;
 }
 
-/* Spinner personalizzato */
-.spinner {
-    -fx-background-color: white;
-    -fx-border-color: #CED4DA;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-}
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .root {
+        -fx-font-size: 12px;
+    }
 
-.spinner:focused {
-    -fx-border-color: #007BFF;
-    -fx-border-width: 2;
-}
-
-/* Separatori */
-.separator .line {
-    -fx-border-color: #DEE2E6;
-    -fx-border-width: 1 0 0 0;
-}
-
-/* Animazioni */
-.fade-in {
-    -fx-opacity: 0;
-}
-
-.slide-in {
-    -fx-translate-x: -100;
+    .stats-card {
+        -fx-pref-width: 150px;
+        -fx-pref-height: 100px;
+    }
 }
