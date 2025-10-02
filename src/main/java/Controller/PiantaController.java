@@ -79,15 +79,15 @@ public class PiantaController {
         }
     }
 
-    private void onNuovaPianta() {
-        PiantaDialog dialog = new PiantaDialog(null); // Passa null per nuova pianta
+    public void onNuovaPianta() {
+        PiantaDialog dialog = new PiantaDialog(new Pianta());
         dialog.showAndWait();
 
         if (dialog.isConfermato()) {
             Pianta pianta = dialog.getPianta();
             try {
                 piantaService.aggiungiPianta(pianta);
-                NotificationHelper.showSuccess("Pianta aggiunta con successo!");
+                NotificationHelper.showSuccess("Operazione completata", "Pianta aggiunta con successo!");
                 aggiornaView();
 
             } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -98,10 +98,10 @@ public class PiantaController {
         }
     }
 
-    private void onModificaPianta() {
+    public void onModificaPianta() {
         Pianta selezionata = piantaView.getPiantaSelezionata();
         if (selezionata == null) {
-            NotificationHelper.showWarning("Seleziona una pianta da modificare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona una pianta da modificare");
             return;
         }
 
@@ -109,10 +109,9 @@ public class PiantaController {
         dialog.showAndWait();
 
         if (dialog.isConfermato()) {
-            Pianta piantaModificata = dialog.getPianta();
             try {
-                piantaService.aggiornaPianta(piantaModificata);
-                NotificationHelper.showSuccess("Pianta aggiornata con successo!");
+                piantaService.aggiornaPianta(dialog.getPianta());
+                NotificationHelper.showSuccess("Operazione completata", "Pianta aggiornata con successo!");
                 aggiornaView();
 
             } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -123,30 +122,25 @@ public class PiantaController {
         }
     }
 
-    private void onEliminaPianta() {
+    public void onEliminaPianta() {
         Pianta selezionata = piantaView.getPiantaSelezionata();
         if (selezionata == null) {
-            NotificationHelper.showWarning("Seleziona una pianta da eliminare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona una pianta da eliminare");
             return;
         }
 
-        String messaggio = String.format("Sei sicuro di voler eliminare la pianta '%s - %s'?\n" +
-                                        "Questa operazione non può essere annullata.",
-                                        selezionata.getTipo(), selezionata.getVarieta());
+        if (NotificationHelper.confirmCriticalOperation("Eliminazione Pianta",
+                "Pianta: " + selezionata.getTipo() + " - " + selezionata.getVarieta())) {
+            try {
+                piantaService.eliminaPianta(selezionata.getId());
+                NotificationHelper.showSuccess("Operazione completata", "Pianta eliminata con successo!");
+                aggiornaView();
 
-        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
-            if (confermato) {
-                try {
-                    piantaService.eliminaPianta(selezionata.getId());
-                    NotificationHelper.showSuccess("Pianta eliminata con successo!");
-                    aggiornaView();
-
-                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                    ErrorService.handleException(e);
-                } catch (Exception e) {
-                    ErrorService.handleException("eliminazione pianta", e);
-                }
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("eliminazione pianta", e);
             }
-        });
+        }
     }
 }

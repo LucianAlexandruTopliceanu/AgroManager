@@ -102,14 +102,16 @@ public class RaccoltoController {
 
     public void onNuovoRaccolto() {
         try {
+            java.util.List<Raccolto> tutti = raccoltoService.getAllRaccolti();
             List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
             RaccoltoDialog dialog = new RaccoltoDialog(null, piantagioni);
             dialog.showAndWait();
 
             if (dialog.isConfermato()) {
+                Raccolto raccolto = dialog.getRaccolto();
                 try {
-                    raccoltoService.aggiungiRaccolto(dialog.getRaccolto());
-                    NotificationHelper.showSuccess("Raccolto aggiunto con successo!");
+                    raccoltoService.aggiungiRaccolto(raccolto);
+                    NotificationHelper.showSuccess("Operazione completata", "Raccolto aggiunto con successo!");
                     aggiornaView();
 
                 } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -118,18 +120,15 @@ public class RaccoltoController {
                     ErrorService.handleException("aggiunta raccolto", e);
                 }
             }
-
         } catch (DataAccessException e) {
             ErrorService.handleException(e);
-        } catch (Exception e) {
-            ErrorService.handleException("caricamento piantagioni per nuovo raccolto", e);
         }
     }
 
-    private void onModificaRaccolto() {
+    public void onModificaRaccolto() {
         Raccolto selezionato = raccoltoView.getRaccoltoSelezionato();
         if (selezionato == null) {
-            NotificationHelper.showWarning("Seleziona un raccolto da modificare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona un raccolto da modificare");
             return;
         }
 
@@ -141,7 +140,7 @@ public class RaccoltoController {
             if (dialog.isConfermato()) {
                 try {
                     raccoltoService.aggiornaRaccolto(dialog.getRaccolto());
-                    NotificationHelper.showSuccess("Raccolto aggiornato con successo!");
+                    NotificationHelper.showSuccess("Operazione completata", "Raccolto aggiornato con successo!");
                     aggiornaView();
 
                 } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -150,39 +149,30 @@ public class RaccoltoController {
                     ErrorService.handleException("aggiornamento raccolto", e);
                 }
             }
-
         } catch (DataAccessException e) {
             ErrorService.handleException(e);
-        } catch (Exception e) {
-            ErrorService.handleException("caricamento piantagioni per modifica raccolto", e);
         }
     }
 
-    private void onEliminaRaccolto() {
+    public void onEliminaRaccolto() {
         Raccolto selezionato = raccoltoView.getRaccoltoSelezionato();
         if (selezionato == null) {
-            NotificationHelper.showWarning("Seleziona un raccolto da eliminare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona un raccolto da eliminare");
             return;
         }
 
-        String messaggio = String.format("Sei sicuro di voler eliminare il raccolto del %s (%.2f kg)?\n" +
-                                        "Questa operazione non può essere annullata.",
-                                        selezionato.getDataRaccolto(),
-                                        selezionato.getQuantitaKg());
+        if (NotificationHelper.confirmCriticalOperation("Eliminazione Raccolto",
+                "Raccolto del " + selezionato.getDataRaccolto())) {
+            try {
+                raccoltoService.eliminaRaccolto(selezionato.getId());
+                NotificationHelper.showSuccess("Operazione completata", "Raccolto eliminato con successo!");
+                aggiornaView();
 
-        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
-            if (confermato) {
-                try {
-                    raccoltoService.eliminaRaccolto(selezionato.getId());
-                    NotificationHelper.showSuccess("Raccolto eliminato con successo!");
-                    aggiornaView();
-
-                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                    ErrorService.handleException(e);
-                } catch (Exception e) {
-                    ErrorService.handleException("eliminazione raccolto", e);
-                }
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("eliminazione raccolto", e);
             }
-        });
+        }
     }
 }

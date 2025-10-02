@@ -71,15 +71,15 @@ public class FornitoreController {
         }
     }
 
-    private void onNuovoFornitore() {
-        FornitoreDialog dialog = new FornitoreDialog(null); // Passa null per nuovo fornitore
+    public void onNuovoFornitore() {
+        FornitoreDialog dialog = new FornitoreDialog(new Fornitore());
         dialog.showAndWait();
 
         if (dialog.isConfermato()) {
             Fornitore fornitore = dialog.getFornitore();
             try {
                 fornitoreService.aggiungiFornitore(fornitore);
-                NotificationHelper.showSuccess("Fornitore aggiunto con successo!");
+                NotificationHelper.showSuccess("Operazione completata", "Fornitore aggiunto con successo!");
                 aggiornaView();
 
             } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -90,10 +90,10 @@ public class FornitoreController {
         }
     }
 
-    private void onModificaFornitore() {
+    public void onModificaFornitore() {
         Fornitore selezionato = fornitoreView.getFornitoreSelezionato();
         if (selezionato == null) {
-            NotificationHelper.showWarning("Seleziona un fornitore da modificare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona un fornitore da modificare");
             return;
         }
 
@@ -101,10 +101,9 @@ public class FornitoreController {
         dialog.showAndWait();
 
         if (dialog.isConfermato()) {
-            Fornitore fornitoreModificato = dialog.getFornitore();
             try {
-                fornitoreService.aggiornaFornitore(fornitoreModificato);
-                NotificationHelper.showSuccess("Fornitore aggiornato con successo!");
+                fornitoreService.aggiornaFornitore(dialog.getFornitore());
+                NotificationHelper.showSuccess("Operazione completata", "Fornitore aggiornato con successo!");
                 aggiornaView();
 
             } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -115,29 +114,25 @@ public class FornitoreController {
         }
     }
 
-    private void onEliminaFornitore() {
+    public void onEliminaFornitore() {
         Fornitore selezionato = fornitoreView.getFornitoreSelezionato();
         if (selezionato == null) {
-            NotificationHelper.showWarning("Seleziona un fornitore da eliminare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona un fornitore da eliminare");
             return;
         }
 
-        String messaggio = String.format("Sei sicuro di voler eliminare il fornitore '%s'?\n" +
-                                        "Questa operazione non può essere annullata.", selezionato.getNome());
+        if (NotificationHelper.confirmCriticalOperation("Eliminazione Fornitore",
+                "Fornitore: " + selezionato.getNome())) {
+            try {
+                fornitoreService.eliminaFornitore(selezionato.getId());
+                NotificationHelper.showSuccess("Operazione completata", "Fornitore eliminato con successo!");
+                aggiornaView();
 
-        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
-            if (confermato) {
-                try {
-                    fornitoreService.eliminaFornitore(selezionato.getId());
-                    NotificationHelper.showSuccess("Fornitore eliminato con successo!");
-                    aggiornaView();
-
-                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                    ErrorService.handleException(e);
-                } catch (Exception e) {
-                    ErrorService.handleException("eliminazione fornitore", e);
-                }
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("eliminazione fornitore", e);
             }
-        });
+        }
     }
 }

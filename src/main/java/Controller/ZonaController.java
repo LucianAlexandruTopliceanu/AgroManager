@@ -68,14 +68,15 @@ public class ZonaController {
         }
     }
 
-    private void onNuovaZona() {
-        ZonaDialog dialog = new ZonaDialog(null);
+    public void onNuovaZona() {
+        ZonaDialog dialog = new ZonaDialog(new Zona());
         dialog.showAndWait();
 
         if (dialog.isConfermato()) {
+            Zona zona = dialog.getZona();
             try {
-                zonaService.aggiungiZona(dialog.getZona());
-                NotificationHelper.showSuccess("Zona aggiunta con successo!");
+                zonaService.aggiungiZona(zona);
+                NotificationHelper.showSuccess("Operazione completata", "Zona aggiunta con successo!");
                 aggiornaView();
 
             } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -86,10 +87,10 @@ public class ZonaController {
         }
     }
 
-    private void onModificaZona() {
+    public void onModificaZona() {
         Zona selezionata = zonaView.getZonaSelezionata();
         if (selezionata == null) {
-            NotificationHelper.showWarning("Seleziona una zona da modificare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona una zona da modificare");
             return;
         }
 
@@ -99,7 +100,7 @@ public class ZonaController {
         if (dialog.isConfermato()) {
             try {
                 zonaService.aggiornaZona(dialog.getZona());
-                NotificationHelper.showSuccess("Zona aggiornata con successo!");
+                NotificationHelper.showSuccess("Operazione completata", "Zona aggiornata con successo!");
                 aggiornaView();
 
             } catch (ValidationException | BusinessLogicException | DataAccessException e) {
@@ -110,29 +111,25 @@ public class ZonaController {
         }
     }
 
-    private void onEliminaZona() {
+    public void onEliminaZona() {
         Zona selezionata = zonaView.getZonaSelezionata();
         if (selezionata == null) {
-            NotificationHelper.showWarning("Seleziona una zona da eliminare");
+            NotificationHelper.showWarning("Selezione richiesta", "Seleziona una zona da eliminare");
             return;
         }
 
-        String messaggio = String.format("Sei sicuro di voler eliminare la zona '%s'?\n" +
-                                        "Questa operazione non può essere annullata.", selezionata.getNome());
+        if (NotificationHelper.confirmCriticalOperation("Eliminazione Zona",
+                "Zona: " + selezionata.getNome())) {
+            try {
+                zonaService.eliminaZona(selezionata.getId());
+                NotificationHelper.showSuccess("Operazione completata", "Zona eliminata con successo!");
+                aggiornaView();
 
-        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
-            if (confermato) {
-                try {
-                    zonaService.eliminaZona(selezionata.getId());
-                    NotificationHelper.showSuccess("Zona eliminata con successo!");
-                    aggiornaView();
-
-                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                    ErrorService.handleException(e);
-                } catch (Exception e) {
-                    ErrorService.handleException("eliminazione zona", e);
-                }
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("eliminazione zona", e);
             }
-        });
+        }
     }
 }
