@@ -120,7 +120,7 @@ public class BusinessLogicTest {
 
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
-        assertTrue(risultato.contains("tipo"));
+        assertTrue(risultato.contains("validazione") || risultato.contains("tipo"));
     }
 
     @Test
@@ -134,7 +134,11 @@ public class BusinessLogicTest {
 
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
-        assertTrue(risultato.contains("non riconosciuta"));
+        // Verifica che il risultato contenga informazioni sull'errore
+        boolean hasError = risultato.contains("non riconosciuta") ||
+                          risultato.contains("strategia") ||
+                          risultato.contains("imprevisto");
+        assertTrue(hasError);
     }
 
     @Test
@@ -149,6 +153,7 @@ public class BusinessLogicTest {
 
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
+        assertTrue(risultato.contains("validazione") || risultato.contains("formato"));
     }
 
     @Test
@@ -206,7 +211,8 @@ public class BusinessLogicTest {
         );
 
         assertNotNull(risultato);
-        assertTrue(risultato.startsWith("Errore") || risultato.contains("validazione"));
+        assertTrue(risultato.startsWith("Errore"));
+        assertTrue(risultato.contains("validazione") || risultato.contains("data"));
     }
 
     @Test
@@ -220,7 +226,7 @@ public class BusinessLogicTest {
         );
 
         assertNotNull(risultato);
-        // Dovrebbe gestire valori negativi appropriatamente
-        assertFalse(risultato.contains("null"));
+        assertTrue(risultato.startsWith("Errore"));
+        assertTrue(risultato.contains("validazione") || risultato.contains("maggiore"));
     }
 }

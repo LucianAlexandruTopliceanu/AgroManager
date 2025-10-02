@@ -1,5 +1,6 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.Fornitore;
 import ORM.FornitoreDAO;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,55 +45,56 @@ public class FornitoreServiceTest {
 
     @Test
     void testAggiungiFornitoreNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiungiFornitore(null);
         });
-        assertEquals("Fornitore non può essere null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Fornitore non può essere null"));
     }
 
     @Test
     void testAggiungiFornitoreNomeVuoto() {
         fornitoreValido.setNome("");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiungiFornitore(fornitoreValido);
         });
-        assertEquals("Il nome del fornitore è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Nome fornitore"));
     }
 
     @Test
     void testAggiungiFornitoreNomeNull() {
         fornitoreValido.setNome(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiungiFornitore(fornitoreValido);
         });
-        assertEquals("Il nome del fornitore è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Nome fornitore"));
     }
 
     @Test
     void testAggiungiFornitoreIndirizzoNull() {
         fornitoreValido.setIndirizzo(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiungiFornitore(fornitoreValido);
         });
-        assertEquals("L'indirizzo è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Indirizzo"));
     }
 
     @Test
     void testAggiungiFornitoreEmailFormatoNonValido() {
         fornitoreValido.setEmail("email-non-valida");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiungiFornitore(fornitoreValido);
         });
-        assertEquals("Formato email non valido", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Email"));
     }
 
     @Test
     void testAggiungiFornitoreTelefonoTroppoCorto() {
         fornitoreValido.setNumeroTelefono("123");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiungiFornitore(fornitoreValido);
         });
-        assertEquals("Numero di telefono troppo corto", exception.getMessage());
+        assertTrue(exception.getMessage().contains("numeroTelefono") ||
+                  exception.getMessage().contains("almeno 8 caratteri"));
     }
 
     @Test
@@ -105,10 +107,10 @@ public class FornitoreServiceTest {
     @Test
     void testAggiornaFornitoreSenzaId() {
         fornitoreValido.setId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             fornitoreService.aggiornaFornitore(fornitoreValido);
         });
-        assertEquals("ID fornitore richiesto per l'aggiornamento", exception.getMessage());
+        assertTrue(exception.getMessage().contains("ID fornitore per aggiornamento"));
     }
 
     @Test

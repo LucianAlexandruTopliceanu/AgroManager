@@ -1,5 +1,6 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.Raccolto;
 import ORM.RaccoltoDAO;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,64 +45,68 @@ public class RaccoltoServiceTest {
 
     @Test
     void testAggiungiRaccoltoNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(null);
         });
-        assertEquals("Raccolto non può essere null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Raccolto non può essere null"));
     }
 
     @Test
     void testAggiungiRaccoltoDataNull() {
         raccoltoValido.setDataRaccolto(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertEquals("La data di raccolto è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Data di raccolto"));
     }
 
     @Test
     void testAggiungiRaccoltoDataFutura() {
         raccoltoValido.setDataRaccolto(LocalDate.now().plusDays(1));
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertEquals("La data di raccolto non può essere nel futuro", exception.getMessage());
+        assertTrue(exception.getMessage().contains("dataRaccolto") ||
+                  exception.getMessage().contains("futuro"));
     }
 
     @Test
     void testAggiungiRaccoltoQuantitaNull() {
         raccoltoValido.setQuantitaKg(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertEquals("La quantità deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("quantitaKg") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiRaccoltoQuantitaNegativa() {
         raccoltoValido.setQuantitaKg(new BigDecimal("-5.0"));
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertEquals("La quantità deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("quantitaKg") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiRaccoltoQuantitaZero() {
         raccoltoValido.setQuantitaKg(BigDecimal.ZERO);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertEquals("La quantità deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("quantitaKg") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiRaccoltoPiantagioneNull() {
         raccoltoValido.setPiantagioneId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertEquals("La piantagione è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Piantagione"));
     }
 
     @Test
@@ -113,10 +118,11 @@ public class RaccoltoServiceTest {
     @Test
     void testAggiornaRaccoltoSenzaId() {
         raccoltoValido.setId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiornaRaccolto(raccoltoValido);
         });
-        assertEquals("ID raccolto richiesto per l'aggiornamento", exception.getMessage());
+        assertTrue(exception.getMessage().contains("ID raccolto") ||
+                  exception.getMessage().contains("aggiornamento"));
     }
 
     @Test

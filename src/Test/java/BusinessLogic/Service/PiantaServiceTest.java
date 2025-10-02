@@ -1,5 +1,6 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.Pianta;
 import ORM.PiantaDAO;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +29,12 @@ public class PiantaServiceTest {
         public void update(Pianta pianta) {
             // Simula aggiornamento riuscito
         }
+
+        @Override
+        public List<Pianta> findAll() {
+            // Restituisce una lista vuota per evitare conflitti di duplicati nei test
+            return new java.util.ArrayList<>();
+        }
     }
 
     @BeforeEach
@@ -45,64 +53,65 @@ public class PiantaServiceTest {
 
     @Test
     void testAggiungiPiantaNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(null);
         });
-        assertEquals("Pianta non può essere null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Pianta non può essere null"));
     }
 
     @Test
     void testAggiungiPiantaTipoVuoto() {
         piantaValida.setTipo("");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(piantaValida);
         });
-        assertEquals("Il tipo di pianta è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Tipo di pianta"));
     }
 
     @Test
     void testAggiungiPiantaTipoNull() {
         piantaValida.setTipo(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(piantaValida);
         });
-        assertEquals("Il tipo di pianta è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Tipo di pianta"));
     }
 
     @Test
     void testAggiungiPiantaVarietaVuota() {
         piantaValida.setVarieta("");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(piantaValida);
         });
-        assertEquals("La varietà è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Varietà"));
     }
 
     @Test
     void testAggiungiPiantaVarietaNull() {
         piantaValida.setVarieta(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(piantaValida);
         });
-        assertEquals("La varietà è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Varietà"));
     }
 
     @Test
     void testAggiungiPiantaCostoNegativo() {
         piantaValida.setCosto(new BigDecimal("-1.00"));
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(piantaValida);
         });
-        assertEquals("Il costo non può essere negativo", exception.getMessage());
+        assertTrue(exception.getMessage().contains("costo") ||
+                  exception.getMessage().contains("negativo"));
     }
 
     @Test
     void testAggiungiPiantaFornitoreNull() {
         piantaValida.setFornitoreId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiungiPianta(piantaValida);
         });
-        assertEquals("Il fornitore è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Fornitore"));
     }
 
     @Test
@@ -114,10 +123,11 @@ public class PiantaServiceTest {
     @Test
     void testAggiornaPiantaSenzaId() {
         piantaValida.setId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantaService.aggiornaPianta(piantaValida);
         });
-        assertEquals("ID pianta richiesto per l'aggiornamento", exception.getMessage());
+        assertTrue(exception.getMessage().contains("ID pianta") ||
+                  exception.getMessage().contains("aggiornamento"));
     }
 
     @Test

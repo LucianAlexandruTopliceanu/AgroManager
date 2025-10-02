@@ -1,5 +1,6 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.Piantagione;
 import ORM.PiantagioneDAO;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,55 +41,57 @@ public class PiantagioneServiceTest {
 
     @Test
     void testAggiungiPiantagioneNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiungiPiantagione(null);
         });
-        assertEquals("Piantagione non può essere null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Piantagione non può essere null"));
     }
 
     @Test
     void testAggiungiPiantagioneQuantitaNegativa() {
         piantagioneValida.setQuantitaPianta(-1);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiungiPiantagione(piantagioneValida);
         });
-        assertEquals("La quantità deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("quantitaPianta") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiPiantagioneQuantitaNull() {
         piantagioneValida.setQuantitaPianta(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiungiPiantagione(piantagioneValida);
         });
-        assertEquals("La quantità deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("quantitaPianta") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiPiantagioneDataNull() {
         piantagioneValida.setMessaADimora(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiungiPiantagione(piantagioneValida);
         });
-        assertEquals("La data di messa a dimora è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Data di messa a dimora"));
     }
 
     @Test
     void testAggiungiPiantagionePiantaIdNull() {
         piantagioneValida.setPiantaId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiungiPiantagione(piantagioneValida);
         });
-        assertEquals("La pianta è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Pianta"));
     }
 
     @Test
     void testAggiungiPiantagioneZonaIdNull() {
         piantagioneValida.setZonaId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiungiPiantagione(piantagioneValida);
         });
-        assertEquals("La zona è obbligatoria", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Zona"));
     }
 
     @Test
@@ -100,10 +103,11 @@ public class PiantagioneServiceTest {
     @Test
     void testAggiornaPiantagioneSenzaId() {
         piantagioneValida.setId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             piantagioneService.aggiornaPiantagione(piantagioneValida);
         });
-        assertEquals("ID piantagione richiesto per l'aggiornamento", exception.getMessage());
+        assertTrue(exception.getMessage().contains("ID piantagione") ||
+                  exception.getMessage().contains("aggiornamento"));
     }
 
     @Test

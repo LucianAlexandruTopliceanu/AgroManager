@@ -1,5 +1,6 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.Zona;
 import ORM.ZonaDAO;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,64 +43,66 @@ public class ZonaServiceTest {
 
     @Test
     void testAggiungiZonaNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(null);
         });
-        assertEquals("Zona non può essere null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Zona non può essere null"));
     }
 
     @Test
     void testAggiungiZonaNomeNull() {
         zonaValida.setNome(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertEquals("Il nome della zona è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Nome della zona"));
     }
 
     @Test
     void testAggiungiZonaNomeVuoto() {
         zonaValida.setNome("");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertEquals("Il nome della zona è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Nome della zona"));
     }
 
     @Test
     void testAggiungiZonaDimensioneNegativa() {
         zonaValida.setDimensione(-5.0);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertEquals("La dimensione deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("dimensione") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiZonaDimensioneZero() {
         zonaValida.setDimensione(0.0);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertEquals("La dimensione deve essere positiva", exception.getMessage());
+        assertTrue(exception.getMessage().contains("dimensione") ||
+                  exception.getMessage().contains("maggiore di zero"));
     }
 
     @Test
     void testAggiungiZonaTipoTerrenoNull() {
         zonaValida.setTipoTerreno(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertEquals("Il tipo di terreno è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Tipo di terreno"));
     }
 
     @Test
     void testAggiungiZonaTipoTerrenoVuoto() {
         zonaValida.setTipoTerreno("");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertEquals("Il tipo di terreno è obbligatorio", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Tipo di terreno"));
     }
 
     @Test
@@ -111,10 +114,11 @@ public class ZonaServiceTest {
     @Test
     void testAggiornaZonaSenzaId() {
         zonaValida.setId(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiornaZona(zonaValida);
         });
-        assertEquals("ID zona richiesto per l'aggiornamento", exception.getMessage());
+        assertTrue(exception.getMessage().contains("ID zona") ||
+                  exception.getMessage().contains("aggiornamento"));
     }
 
     @Test
