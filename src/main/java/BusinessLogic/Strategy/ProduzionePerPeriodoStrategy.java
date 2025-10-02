@@ -10,11 +10,11 @@ import java.time.temporal.ChronoUnit;
 public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigDecimal> {
 
     @Override
-    @SuppressWarnings("unchecked")
     public ProcessingResult<BigDecimal> execute(Object... data) {
         validateParameters(data);
 
-        List<Raccolto> raccolti = (List<Raccolto>) data[0];
+
+        List<Raccolto> raccolti = castToRaccoltiList(data[0]);
         LocalDate inizio = (LocalDate) data[1];
         LocalDate fine = (LocalDate) data[2];
 
@@ -43,6 +43,11 @@ public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigD
             mediaGiornaliera);
 
         return new ProcessingResult<>(produzione, output);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Raccolto> castToRaccoltiList(Object obj) {
+        return (List<Raccolto>) obj;
     }
 
     private boolean isRaccoltoInPeriodo(LocalDate dataRaccolto, LocalDate inizio, LocalDate fine) {

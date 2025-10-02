@@ -6,12 +6,12 @@ import java.util.List;
 
 public class ProduzioneTotaleStrategy implements DataProcessingStrategy<BigDecimal> {
     @Override
-    @SuppressWarnings("unchecked")
     public ProcessingResult<BigDecimal> execute(Object... data) {
         validateParameters(data);
 
-        List<Raccolto> raccolti = (List<Raccolto>) data[0];
-        int piantagioneId = (int) data[1];
+
+        List<Raccolto> raccolti = castToRaccoltiList(data[0]);
+        int piantagioneId = (Integer) data[1];
 
         BigDecimal totale = raccolti.stream()
             .filter(r -> r.getPiantagioneId() != null && r.getPiantagioneId() == piantagioneId)
@@ -31,6 +31,11 @@ public class ProduzioneTotaleStrategy implements DataProcessingStrategy<BigDecim
         if (data.length < 2) throw new IllegalArgumentException("Necessari: lista raccolti e ID piantagione");
         if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
         if (!(data[1] instanceof Integer)) throw new IllegalArgumentException("Secondo parametro deve essere Integer");
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Raccolto> castToRaccoltiList(Object obj) {
+        return (List<Raccolto>) obj;
     }
 
     @Override

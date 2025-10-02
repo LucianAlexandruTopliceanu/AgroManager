@@ -1,13 +1,16 @@
 package Controller;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Exception.DataAccessException;
+import BusinessLogic.Service.ErrorService;
 import BusinessLogic.Service.PiantagioneService;
 import BusinessLogic.Service.ZonaService;
 import BusinessLogic.Service.PiantaService;
 import DomainModel.Piantagione;
 import View.PiantagioneDialog;
 import View.PiantagioneView;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import View.NotificationHelper;
 
 public class PiantagioneController {
     private final PiantagioneService piantagioneService;
@@ -21,16 +24,22 @@ public class PiantagioneController {
     private java.time.LocalDate filtroDataDa = null;
     private java.time.LocalDate filtroDataA = null;
 
-
-    public PiantagioneController(PiantagioneService piantagioneService, ZonaService zonaService, PiantaService piantaService, PiantagioneView piantagioneView) {
+    public PiantagioneController(PiantagioneService piantagioneService, ZonaService zonaService,
+                                PiantaService piantaService, PiantagioneView piantagioneView) {
         this.piantagioneService = piantagioneService;
         this.zonaService = zonaService;
         this.piantaService = piantaService;
         this.piantagioneView = piantagioneView;
+
+        setupEventHandlers();
         aggiornaView();
+    }
+
+    private void setupEventHandlers() {
         piantagioneView.setOnNuovaPiantagione(this::onNuovaPiantagione);
         piantagioneView.setOnModificaPiantagione(this::onModificaPiantagione);
         piantagioneView.setOnEliminaPiantagione(this::onEliminaPiantagione);
+
         // Callback per i filtri
         piantagioneView.setOnFiltroPiantaChanged(this::onFiltroPiantaChanged);
         piantagioneView.setOnFiltroZonaChanged(this::onFiltroZonaChanged);
@@ -42,81 +51,131 @@ public class PiantagioneController {
         filtroPianta = nuovaPianta != null ? nuovaPianta : "";
         aggiornaView();
     }
+
     private void onFiltroZonaChanged(String nuovaZona) {
         filtroZona = nuovaZona != null ? nuovaZona : "";
         aggiornaView();
     }
+
     private void onFiltroDataDaChanged(java.time.LocalDate nuovaDataDa) {
         filtroDataDa = nuovaDataDa;
         aggiornaView();
     }
+
     private void onFiltroDataAChanged(java.time.LocalDate nuovaDataA) {
         filtroDataA = nuovaDataA;
         aggiornaView();
     }
 
+
     private void aggiornaView() {
-        java.util.List<Piantagione> tutte = piantagioneService.getAllPiantagioni();
-        java.util.List<Piantagione> filtrate = tutte.stream()
-            .filter(p -> filtroPianta.isEmpty() || filtroPianta.equals("Tutte") || (p.getPiantaId() != null && p.getPiantaId().toString().equals(filtroPianta)))
-            .filter(p -> filtroZona.isEmpty() || filtroZona.equals("Tutte") || (p.getZonaId() != null && p.getZonaId().toString().equals(filtroZona)))
-            .filter(p -> filtroDataDa == null || (p.getMessaADimora() != null && !p.getMessaADimora().isBefore(filtroDataDa)))
-            .filter(p -> filtroDataA == null || (p.getMessaADimora() != null && !p.getMessaADimora().isAfter(filtroDataA)))
-            .toList();
-        piantagioneView.setPiantagioni(filtrate);
+        try {
+            java.util.List<Piantagione> tutte = piantagioneService.getAllPiantagioni();
+
+            // Applica i filtri
+            java.util.List<Piantagione> filtrate = tutte.stream()
+                .filter(p -> filtroPianta.isEmpty() || filtroPianta.equals("Tutte") ||
+                            (p.getPiantaId() != null && p.getPiantaId().toString().equals(filtroPianta)))
+                .filter(p -> filtroZona.isEmpty() || filtroZona.equals("Tutte") ||
+                            (p.getZonaId() != null && p.getZonaId().toString().equals(filtroZona)))
+                .filter(p -> filtroDataDa == null ||
+                            (p.getMessaADimora() != null && !p.getMessaADimora().isBefore(filtroDataDa)))
+                .filter(p -> filtroDataA == null ||
+                            (p.getMessaADimora() != null && !p.getMessaADimora().isAfter(filtroDataA)))
+                .toList();
+
+            piantagioneView.setPiantagioni(filtrate);
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento piantagioni", e);
+        }
     }
 
     public void onNuovaPiantagione() {
-        PiantagioneDialog dialog = new PiantagioneDialog(null, zonaService.getAllZone(), piantaService.getAllPiante());
-        dialog.showAndWait();
-        if (dialog.isConfermato()) {
-            try {
-                piantagioneService.aggiungiPiantagione(dialog.getPiantagione());
-                aggiornaView();
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
+        try {
+            PiantagioneDialog dialog = new PiantagioneDialog(null,
+                    zonaService.getAllZone(),
+                    piantaService.getAllPiante());
+            dialog.showAndWait();
+
+            if (dialog.isConfermato()) {
+                try {
+                    piantagioneService.aggiungiPiantagione(dialog.getPiantagione());
+                    NotificationHelper.showSuccess("Piantagione aggiunta con successo!");
+                    aggiornaView();
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("aggiunta piantagione", e);
+                }
             }
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento dati per nuova piantagione", e);
         }
     }
 
     private void onModificaPiantagione() {
         Piantagione selezionata = piantagioneView.getPiantagioneSelezionata();
-        if (selezionata != null) {
-            PiantagioneDialog dialog = new PiantagioneDialog(selezionata, zonaService.getAllZone(), piantaService.getAllPiante());
+        if (selezionata == null) {
+            NotificationHelper.showWarning("Seleziona una piantagione da modificare");
+            return;
+        }
+
+        try {
+            PiantagioneDialog dialog = new PiantagioneDialog(selezionata,
+                    zonaService.getAllZone(),
+                    piantaService.getAllPiante());
             dialog.showAndWait();
+
             if (dialog.isConfermato()) {
                 try {
                     piantagioneService.aggiornaPiantagione(dialog.getPiantagione());
+                    NotificationHelper.showSuccess("Piantagione aggiornata con successo!");
                     aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("aggiornamento piantagione", e);
                 }
             }
-        } else {
-            mostraErrore("Seleziona una piantagione da modificare.");
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento dati per modifica piantagione", e);
         }
     }
 
     private void onEliminaPiantagione() {
         Piantagione selezionata = piantagioneView.getPiantagioneSelezionata();
-        if (selezionata != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare la piantagione selezionata?", ButtonType.YES, ButtonType.NO);
-            alert.showAndWait();
-            if (alert.getResult() == ButtonType.YES) {
+        if (selezionata == null) {
+            NotificationHelper.showWarning("Seleziona una piantagione da eliminare");
+            return;
+        }
+
+        String messaggio = String.format("Sei sicuro di voler eliminare la piantagione nella zona %d?\n" +
+                                        "Questa operazione non può essere annullata.", selezionata.getZonaId());
+
+        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
+            if (confermato) {
                 try {
                     piantagioneService.eliminaPiantagione(selezionata.getId());
+                    NotificationHelper.showSuccess("Piantagione eliminata con successo!");
                     aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("eliminazione piantagione", e);
                 }
             }
-        } else {
-            mostraErrore("Seleziona una piantagione da eliminare.");
-        }
-    }
-
-    private void mostraErrore(String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        alert.showAndWait();
+        });
     }
 }

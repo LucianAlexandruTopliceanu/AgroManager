@@ -8,13 +8,13 @@ import java.util.List;
 
 public class MediaProduzioneStrategy implements DataProcessingStrategy<BigDecimal> {
     @Override
-    @SuppressWarnings("unchecked")
     public ProcessingResult<BigDecimal> execute(Object... data) {
         validateParameters(data);
 
-        List<Raccolto> raccolti = (List<Raccolto>) data[0];
-        List<Piantagione> piantagioni = (List<Piantagione>) data[1];
-        int piantagioneId = (int) data[2];
+
+        List<Raccolto> raccolti = castToRaccoltiList(data[0]);
+        List<Piantagione> piantagioni = castToPiantagioniList(data[1]);
+        int piantagioneId = (Integer) data[2];
 
         // Trova la piantagione
         Piantagione piantagione = piantagioni.stream()
@@ -50,6 +50,16 @@ public class MediaProduzioneStrategy implements DataProcessingStrategy<BigDecima
         if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
         if (!(data[1] instanceof List)) throw new IllegalArgumentException("Secondo parametro deve essere List<Piantagione>");
         if (!(data[2] instanceof Integer)) throw new IllegalArgumentException("Terzo parametro deve essere Integer");
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Raccolto> castToRaccoltiList(Object obj) {
+        return (List<Raccolto>) obj;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Piantagione> castToPiantagioniList(Object obj) {
+        return (List<Piantagione>) obj;
     }
 
     @Override

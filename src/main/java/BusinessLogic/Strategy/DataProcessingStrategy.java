@@ -1,9 +1,6 @@
 package BusinessLogic.Strategy;
 
-/**
- * Interfaccia base per tutte le strategie di elaborazione dati
- * @param <T> Il tipo di risultato prodotto dalla strategia
- */
+
 public interface DataProcessingStrategy<T> {
 
     enum ProcessingType {

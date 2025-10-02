@@ -1,7 +1,11 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Exception.DataAccessException;
 import ORM.FornitoreDAO;
 import DomainModel.Fornitore;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -16,88 +20,107 @@ public class FornitoreService {
     }
 
 
-    private void validaFornitore(Fornitore fornitore) {
+    private void validaFornitore(Fornitore fornitore) throws ValidationException {
         if (fornitore == null) {
-            throw new IllegalArgumentException("Fornitore non può essere null");
+            throw new ValidationException("Fornitore non può essere null");
         }
+
         if (fornitore.getNome() == null || fornitore.getNome().trim().isEmpty()) {
-            throw new IllegalArgumentException("Il nome del fornitore è obbligatorio");
+            throw ValidationException.requiredField("Nome fornitore");
         }
+
         if (fornitore.getIndirizzo() == null || fornitore.getIndirizzo().trim().isEmpty()) {
-            throw new IllegalArgumentException("L'indirizzo è obbligatorio");
+            throw ValidationException.requiredField("Indirizzo");
         }
+
         if (fornitore.getEmail() != null && !fornitore.getEmail().trim().isEmpty()
             && !EMAIL_PATTERN.matcher(fornitore.getEmail()).matches()) {
-            throw new IllegalArgumentException("Formato email non valido");
+            throw ValidationException.invalidFormat("Email", "formato@esempio.com");
         }
+
         if (fornitore.getNumeroTelefono() != null && !fornitore.getNumeroTelefono().trim().isEmpty()
             && fornitore.getNumeroTelefono().trim().length() < 8) {
-            throw new IllegalArgumentException("Numero di telefono troppo corto");
+            throw new ValidationException("numeroTelefono", fornitore.getNumeroTelefono(),
+                    "deve contenere almeno 8 caratteri");
         }
     }
 
-    public void aggiungiFornitore(Fornitore fornitore) {
+    public void aggiungiFornitore(Fornitore fornitore) throws ValidationException, DataAccessException, BusinessLogicException {
         validaFornitore(fornitore);
+
         try {
+            // Verifica duplicati
+            List<Fornitore> esistenti = fornitoreDAO.findAll();
+            boolean duplicato = esistenti.stream()
+                    .anyMatch(f -> f.getNome().equalsIgnoreCase(fornitore.getNome()) ||
+                                  (f.getEmail() != null && fornitore.getEmail() != null &&
+                                   f.getEmail().equalsIgnoreCase(fornitore.getEmail())));
+
+            if (duplicato) {
+                throw BusinessLogicException.duplicateEntry("Fornitore", "nome o email", fornitore.getNome());
+            }
+
             fornitoreDAO.create(fornitore);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante il salvataggio del fornitore: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("inserimento fornitore", e);
         }
     }
 
-    public void aggiornaFornitore(Fornitore fornitore) {
+    public void aggiornaFornitore(Fornitore fornitore) throws ValidationException, DataAccessException, BusinessLogicException {
         validaFornitore(fornitore);
+
         if (fornitore.getId() == null) {
-            throw new IllegalArgumentException("ID fornitore richiesto per l'aggiornamento");
+            throw ValidationException.requiredField("ID fornitore per aggiornamento");
         }
+
         try {
+            // Verifica che il fornitore esista
+            Fornitore esistente = fornitoreDAO.read(fornitore.getId());
+            if (esistente == null) {
+                throw BusinessLogicException.entityNotFound("Fornitore", fornitore.getId());
+            }
+
             fornitoreDAO.update(fornitore);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante l'aggiornamento del fornitore: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("aggiornamento fornitore", e);
         }
     }
 
-    public void eliminaFornitore(Integer id) {
+    public void eliminaFornitore(Integer id) throws ValidationException, DataAccessException, BusinessLogicException {
         if (id == null) {
-            throw new IllegalArgumentException("ID fornitore richiesto per l'eliminazione");
+            throw ValidationException.requiredField("ID fornitore per eliminazione");
         }
+
         try {
+            // Verifica che il fornitore esista
+            Fornitore esistente = fornitoreDAO.read(id);
+            if (esistente == null) {
+                throw BusinessLogicException.entityNotFound("Fornitore", id);
+            }
+
             fornitoreDAO.delete(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante l'eliminazione del fornitore: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("eliminazione fornitore", e);
         }
     }
 
-    public Fornitore getFornitoreById(Integer id) {
+    public Fornitore getFornitoreById(Integer id) throws ValidationException, DataAccessException {
         if (id == null) {
-            throw new IllegalArgumentException("ID fornitore richiesto");
+            throw ValidationException.requiredField("ID fornitore");
         }
+
         try {
             return fornitoreDAO.read(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la lettura del fornitore: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("lettura fornitore", e);
         }
     }
 
-    public List<Fornitore> getAllFornitori() {
+    public List<Fornitore> getAllFornitori() throws DataAccessException {
         try {
             return fornitoreDAO.findAll();
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la lettura dei fornitori: " + e.getMessage(), e);
-        }
-    }
-
-
-    public List<Fornitore> getFornitoriByNome(String nome) {
-        if (nome == null || nome.trim().isEmpty()) {
-            return getAllFornitori();
-        }
-        try {
-            return getAllFornitori().stream()
-                    .filter(f -> f.getNome().toLowerCase().contains(nome.toLowerCase().trim()))
-                    .toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la ricerca dei fornitori: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("lettura lista fornitori", e);
         }
     }
 }

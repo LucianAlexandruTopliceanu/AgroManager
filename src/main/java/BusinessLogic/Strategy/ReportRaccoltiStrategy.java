@@ -11,7 +11,8 @@ public class ReportRaccoltiStrategy implements DataProcessingStrategy<String> {
     public ProcessingResult<String> execute(Object... data) {
         validateParameters(data);
 
-        List<Raccolto> raccolti = (List<Raccolto>) data[0];
+
+        List<Raccolto> raccolti = castToRaccoltiList(data[0]);
 
         // Raggruppa i raccolti per mese
         Map<String, List<Raccolto>> raccoltiPerMese = raccolti.stream()
@@ -93,5 +94,10 @@ public class ReportRaccoltiStrategy implements DataProcessingStrategy<String> {
     @Override
     public ProcessingType getType() {
         return ProcessingType.REPORT;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Raccolto> castToRaccoltiList(Object obj) {
+        return (List<Raccolto>) obj;
     }
 }

@@ -1,13 +1,16 @@
 package Controller;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Exception.DataAccessException;
+import BusinessLogic.Service.ErrorService;
 import BusinessLogic.Service.RaccoltoService;
 import BusinessLogic.Service.PiantagioneService;
 import DomainModel.Raccolto;
 import DomainModel.Piantagione;
 import View.RaccoltoDialog;
 import View.RaccoltoView;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import View.NotificationHelper;
 import java.util.List;
 
 public class RaccoltoController {
@@ -26,10 +29,16 @@ public class RaccoltoController {
         this.raccoltoService = raccoltoService;
         this.piantagioneService = piantagioneService;
         this.raccoltoView = raccoltoView;
+
+        setupEventHandlers();
         aggiornaView();
+    }
+
+    private void setupEventHandlers() {
         raccoltoView.setOnNuovoRaccolto(this::onNuovoRaccolto);
         raccoltoView.setOnModificaRaccolto(this::onModificaRaccolto);
         raccoltoView.setOnEliminaRaccolto(this::onEliminaRaccolto);
+
         // Callback per i filtri
         raccoltoView.setOnFiltroPiantagioneChanged(this::onFiltroPiantagioneChanged);
         raccoltoView.setOnFiltroDataDaChanged(this::onFiltroDataDaChanged);
@@ -42,90 +51,138 @@ public class RaccoltoController {
         filtroPiantagione = nuovaPiantagione != null ? nuovaPiantagione : "Tutte";
         aggiornaView();
     }
+
     private void onFiltroDataDaChanged(java.time.LocalDate nuovaDataDa) {
         filtroDataDa = nuovaDataDa;
         aggiornaView();
     }
+
     private void onFiltroDataAChanged(java.time.LocalDate nuovaDataA) {
         filtroDataA = nuovaDataA;
         aggiornaView();
     }
+
     private void onFiltroQuantitaMinChanged(Double nuovaMin) {
         filtroQuantitaMin = nuovaMin != null ? nuovaMin : 0.0;
         aggiornaView();
     }
+
     private void onFiltroQuantitaMaxChanged(Double nuovaMax) {
         filtroQuantitaMax = nuovaMax != null ? nuovaMax : 1000.0;
         aggiornaView();
     }
 
+
     private void aggiornaView() {
-        java.util.List<Raccolto> tutti = raccoltoService.getAllRaccolti();
-        java.util.List<Raccolto> filtrati = tutti.stream()
-            .filter(r -> filtroPiantagione.equals("Tutte") || (r.getPiantagioneId() != null && r.getPiantagioneId().toString().equals(filtroPiantagione)))
-            .filter(r -> filtroDataDa == null || (r.getDataRaccolto() != null && !r.getDataRaccolto().isBefore(filtroDataDa)))
-            .filter(r -> filtroDataA == null || (r.getDataRaccolto() != null && !r.getDataRaccolto().isAfter(filtroDataA)))
-            .filter(r -> {
-                double q = r.getQuantitaKg() != null ? r.getQuantitaKg().doubleValue() : 0.0;
-                return q >= filtroQuantitaMin && q <= filtroQuantitaMax;
-            })
-            .toList();
-        raccoltoView.setRaccolti(filtrati);
+        try {
+            java.util.List<Raccolto> tutti = raccoltoService.getAllRaccolti();
+
+            // Applica i filtri
+            java.util.List<Raccolto> filtrati = tutti.stream()
+                .filter(r -> filtroPiantagione.equals("Tutte") ||
+                            (r.getPiantagioneId() != null && r.getPiantagioneId().toString().equals(filtroPiantagione)))
+                .filter(r -> filtroDataDa == null ||
+                            (r.getDataRaccolto() != null && !r.getDataRaccolto().isBefore(filtroDataDa)))
+                .filter(r -> filtroDataA == null ||
+                            (r.getDataRaccolto() != null && !r.getDataRaccolto().isAfter(filtroDataA)))
+                .filter(r -> {
+                    double q = r.getQuantitaKg() != null ? r.getQuantitaKg().doubleValue() : 0.0;
+                    return q >= filtroQuantitaMin && q <= filtroQuantitaMax;
+                })
+                .toList();
+
+            raccoltoView.setRaccolti(filtrati);
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento raccolti", e);
+        }
     }
 
     public void onNuovoRaccolto() {
-        List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
-        RaccoltoDialog dialog = new RaccoltoDialog(null, piantagioni);
-        dialog.showAndWait();
-        if (dialog.isConfermato()) {
-            try {
-                raccoltoService.aggiungiRaccolto(dialog.getRaccolto());
-                aggiornaView();
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
+        try {
+            List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
+            RaccoltoDialog dialog = new RaccoltoDialog(null, piantagioni);
+            dialog.showAndWait();
+
+            if (dialog.isConfermato()) {
+                try {
+                    raccoltoService.aggiungiRaccolto(dialog.getRaccolto());
+                    NotificationHelper.showSuccess("Raccolto aggiunto con successo!");
+                    aggiornaView();
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("aggiunta raccolto", e);
+                }
             }
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento piantagioni per nuovo raccolto", e);
         }
     }
 
     private void onModificaRaccolto() {
         Raccolto selezionato = raccoltoView.getRaccoltoSelezionato();
-        if (selezionato != null) {
+        if (selezionato == null) {
+            NotificationHelper.showWarning("Seleziona un raccolto da modificare");
+            return;
+        }
+
+        try {
             List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
             RaccoltoDialog dialog = new RaccoltoDialog(selezionato, piantagioni);
             dialog.showAndWait();
+
             if (dialog.isConfermato()) {
                 try {
                     raccoltoService.aggiornaRaccolto(dialog.getRaccolto());
+                    NotificationHelper.showSuccess("Raccolto aggiornato con successo!");
                     aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("aggiornamento raccolto", e);
                 }
             }
-        } else {
-            mostraErrore("Seleziona un raccolto da modificare.");
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento piantagioni per modifica raccolto", e);
         }
     }
 
     private void onEliminaRaccolto() {
         Raccolto selezionato = raccoltoView.getRaccoltoSelezionato();
-        if (selezionato != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare il raccolto selezionato?", ButtonType.YES, ButtonType.NO);
-            alert.showAndWait();
-            if (alert.getResult() == ButtonType.YES) {
+        if (selezionato == null) {
+            NotificationHelper.showWarning("Seleziona un raccolto da eliminare");
+            return;
+        }
+
+        String messaggio = String.format("Sei sicuro di voler eliminare il raccolto del %s (%.2f kg)?\n" +
+                                        "Questa operazione non può essere annullata.",
+                                        selezionato.getDataRaccolto(),
+                                        selezionato.getQuantitaKg());
+
+        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
+            if (confermato) {
                 try {
                     raccoltoService.eliminaRaccolto(selezionato.getId());
+                    NotificationHelper.showSuccess("Raccolto eliminato con successo!");
                     aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("eliminazione raccolto", e);
                 }
             }
-        } else {
-            mostraErrore("Seleziona un raccolto da eliminare.");
-        }
-    }
-
-    private void mostraErrore(String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        alert.showAndWait();
+        });
     }
 }

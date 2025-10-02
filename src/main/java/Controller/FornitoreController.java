@@ -1,11 +1,14 @@
 package Controller;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Exception.DataAccessException;
+import BusinessLogic.Service.ErrorService;
 import BusinessLogic.Service.FornitoreService;
 import DomainModel.Fornitore;
 import View.FornitoreDialog;
 import View.FornitoreView;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import View.NotificationHelper;
 
 public class FornitoreController {
     private final FornitoreService fornitoreService;
@@ -18,13 +21,23 @@ public class FornitoreController {
     public FornitoreController(FornitoreService fornitoreService, FornitoreView fornitoreView) {
         this.fornitoreService = fornitoreService;
         this.fornitoreView = fornitoreView;
+
+        // Inizializza i listener per la gestione errori
+        setupEventHandlers();
         aggiornaView();
+    }
+
+    private void setupEventHandlers() {
         fornitoreView.setOnNuovoFornitore(this::onNuovoFornitore);
         fornitoreView.setOnModificaFornitore(this::onModificaFornitore);
         fornitoreView.setOnEliminaFornitore(this::onEliminaFornitore);
+
         // Callback per i filtri
         fornitoreView.setOnTestoRicercaNomeChanged(this::onFiltroNomeChanged);
         fornitoreView.setOnTestoRicercaCittaChanged(this::onFiltroCittaChanged);
+
+        // Callback per aggiornamento dati
+        fornitoreView.setOnAggiornaFornitori(v -> aggiornaView());
     }
 
     private void onFiltroNomeChanged(String nuovoNome) {
@@ -38,65 +51,93 @@ public class FornitoreController {
     }
 
     private void aggiornaView() {
-        java.util.List<Fornitore> tutti = fornitoreService.getAllFornitori();
-        java.util.List<Fornitore> filtrati = tutti.stream()
-            .filter(f -> filtroNome.isEmpty() || (f.getNome() != null && f.getNome().toLowerCase().contains(filtroNome.toLowerCase())))
-            .filter(f -> filtroCitta.isEmpty() || (f.getIndirizzo() != null && f.getIndirizzo().toLowerCase().contains(filtroCitta.toLowerCase())))
-            .toList();
-        fornitoreView.setFornitori(filtrati);
+        try {
+            java.util.List<Fornitore> tutti = fornitoreService.getAllFornitori();
+
+            // Applica i filtri
+            java.util.List<Fornitore> filtrati = tutti.stream()
+                .filter(f -> filtroNome.isEmpty() ||
+                            f.getNome().toLowerCase().contains(filtroNome.toLowerCase()))
+                .filter(f -> filtroCitta.isEmpty() ||
+                            f.getIndirizzo().toLowerCase().contains(filtroCitta.toLowerCase()))
+                .toList();
+
+            fornitoreView.setFornitori(filtrati);
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento fornitori", e);
+        }
     }
 
     private void onNuovoFornitore() {
-        FornitoreDialog dialog = new FornitoreDialog(null);
+        FornitoreDialog dialog = new FornitoreDialog(null); // Passa null per nuovo fornitore
         dialog.showAndWait();
+
         if (dialog.isConfermato()) {
+            Fornitore fornitore = dialog.getFornitore();
             try {
-                fornitoreService.aggiungiFornitore(dialog.getFornitore());
+                fornitoreService.aggiungiFornitore(fornitore);
+                NotificationHelper.showSuccess("Fornitore aggiunto con successo!");
                 aggiornaView();
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
+
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("aggiunta fornitore", e);
             }
         }
     }
 
     private void onModificaFornitore() {
         Fornitore selezionato = fornitoreView.getFornitoreSelezionato();
-        if (selezionato != null) {
-            FornitoreDialog dialog = new FornitoreDialog(selezionato);
-            dialog.showAndWait();
-            if (dialog.isConfermato()) {
-                try {
-                    fornitoreService.aggiornaFornitore(dialog.getFornitore());
-                    aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
-                }
+        if (selezionato == null) {
+            NotificationHelper.showWarning("Seleziona un fornitore da modificare");
+            return;
+        }
+
+        FornitoreDialog dialog = new FornitoreDialog(selezionato);
+        dialog.showAndWait();
+
+        if (dialog.isConfermato()) {
+            Fornitore fornitoreModificato = dialog.getFornitore();
+            try {
+                fornitoreService.aggiornaFornitore(fornitoreModificato);
+                NotificationHelper.showSuccess("Fornitore aggiornato con successo!");
+                aggiornaView();
+
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("aggiornamento fornitore", e);
             }
-        } else {
-            mostraErrore("Seleziona un fornitore da modificare.");
         }
     }
 
     private void onEliminaFornitore() {
         Fornitore selezionato = fornitoreView.getFornitoreSelezionato();
-        if (selezionato != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare il fornitore selezionato?", ButtonType.YES, ButtonType.NO);
-            alert.showAndWait();
-            if (alert.getResult() == ButtonType.YES) {
+        if (selezionato == null) {
+            NotificationHelper.showWarning("Seleziona un fornitore da eliminare");
+            return;
+        }
+
+        String messaggio = String.format("Sei sicuro di voler eliminare il fornitore '%s'?\n" +
+                                        "Questa operazione non può essere annullata.", selezionato.getNome());
+
+        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
+            if (confermato) {
                 try {
                     fornitoreService.eliminaFornitore(selezionato.getId());
+                    NotificationHelper.showSuccess("Fornitore eliminato con successo!");
                     aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("eliminazione fornitore", e);
                 }
             }
-        } else {
-            mostraErrore("Seleziona un fornitore da eliminare.");
-        }
-    }
-
-    private void mostraErrore(String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        alert.showAndWait();
+        });
     }
 }

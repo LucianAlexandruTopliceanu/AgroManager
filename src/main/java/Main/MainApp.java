@@ -2,6 +2,7 @@ package Main;
 
 import BusinessLogic.BusinessLogic;
 import BusinessLogic.Service.*;
+import BusinessLogic.Exception.DataAccessException;
 import Controller.*;
 import ORM.DAOFactory;
 import View.*;
@@ -39,6 +40,9 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        // Inizializza il sistema di notifiche PRIMA di tutto
+        NotificationHelper.initialize();
+
         initializeServices();
         initializeViews();
         initializeControllers();
@@ -134,18 +138,49 @@ public class MainApp extends Application {
         VBox content = new VBox(10);
         content.setPadding(new Insets(10));
 
-        // Statistiche essenziali
+        // Statistiche essenziali con gestione errori
         GridPane statsGrid = new GridPane();
         statsGrid.setHgap(10);
         statsGrid.setVgap(10);
-        statsGrid.addRow(0,
-                new Label("Zone:"), new Label(String.valueOf(zonaService.getAllZone().size())),
-                new Label("Piantagioni:"), new Label(String.valueOf(piantagioneService.getAllPiantagioni().size()))
-        );
-        statsGrid.addRow(1,
-                new Label("Raccolti mensili:"), new Label(String.valueOf(raccoltoService.getRaccoltiDelMese().size())),
-                new Label("Produzione totale:"), new Label(String.format("%.2f kg", raccoltoService.getProduzioneTotale()))
-        );
+
+        try {
+            // Prima riga di statistiche
+            statsGrid.addRow(0,
+                    new Label("Zone:"), new Label(String.valueOf(zonaService.getAllZone().size())),
+                    new Label("Piantagioni:"), new Label(String.valueOf(piantagioneService.getAllPiantagioni().size()))
+            );
+
+            // Seconda riga di statistiche
+            statsGrid.addRow(1,
+                    new Label("Raccolti mensili:"), new Label(String.valueOf(raccoltoService.getRaccoltiDelMese().size())),
+                    new Label("Produzione totale:"), new Label(String.format("%.2f kg", raccoltoService.getProduzioneTotale()))
+            );
+        } catch (DataAccessException e) {
+            // In caso di errore nel caricamento statistiche, mostra valori di default
+            statsGrid.addRow(0,
+                    new Label("Zone:"), new Label("Errore"),
+                    new Label("Piantagioni:"), new Label("Errore")
+            );
+            statsGrid.addRow(1,
+                    new Label("Raccolti mensili:"), new Label("Errore"),
+                    new Label("Produzione totale:"), new Label("Errore")
+            );
+
+            // Log dell'errore per debugging ma non interrompe l'avvio dell'app
+            System.err.println("Errore caricamento statistiche dashboard: " + e.getMessage());
+        } catch (Exception e) {
+            // Gestione di qualsiasi altro errore imprevisto
+            statsGrid.addRow(0,
+                    new Label("Zone:"), new Label("N/A"),
+                    new Label("Piantagioni:"), new Label("N/A")
+            );
+            statsGrid.addRow(1,
+                    new Label("Raccolti mensili:"), new Label("N/A"),
+                    new Label("Produzione totale:"), new Label("N/A")
+            );
+
+            System.err.println("Errore imprevisto nel dashboard: " + e.getMessage());
+        }
 
         // Accesso rapido essenziali
         HBox actionBox = new HBox(10);

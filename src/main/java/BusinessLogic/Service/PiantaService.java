@@ -1,113 +1,137 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Exception.DataAccessException;
 import ORM.PiantaDAO;
 import DomainModel.Pianta;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.List;
 
-
 public class PiantaService {
+
     private final PiantaDAO piantaDAO;
 
     public PiantaService(PiantaDAO piantaDAO) {
         this.piantaDAO = piantaDAO;
     }
 
-
-    private void validaPianta(Pianta pianta) {
+    /**
+     * Valida una pianta utilizzando le nuove eccezioni custom
+     */
+    private void validaPianta(Pianta pianta) throws ValidationException {
         if (pianta == null) {
-            throw new IllegalArgumentException("Pianta non può essere null");
+            throw new ValidationException("Pianta non può essere null");
         }
+
         if (pianta.getTipo() == null || pianta.getTipo().trim().isEmpty()) {
-            throw new IllegalArgumentException("Il tipo di pianta è obbligatorio");
+            throw ValidationException.requiredField("Tipo di pianta");
         }
+
         if (pianta.getVarieta() == null || pianta.getVarieta().trim().isEmpty()) {
-            throw new IllegalArgumentException("La varietà è obbligatoria");
+            throw ValidationException.requiredField("Varietà");
         }
+
         if (pianta.getCosto() != null && pianta.getCosto().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Il costo non può essere negativo");
+            throw new ValidationException("costo", pianta.getCosto().toString(),
+                    "non può essere negativo");
         }
+
         if (pianta.getFornitoreId() == null) {
-            throw new IllegalArgumentException("Il fornitore è obbligatorio");
+            throw ValidationException.requiredField("Fornitore");
         }
     }
 
-    public void aggiungiPianta(Pianta pianta) {
+    public void aggiungiPianta(Pianta pianta) throws ValidationException, DataAccessException, BusinessLogicException {
         validaPianta(pianta);
+
         try {
+            // Verifica duplicati per tipo e varietà
+            List<Pianta> esistenti = piantaDAO.findAll();
+            boolean duplicato = esistenti.stream()
+                    .anyMatch(p -> p.getTipo().equalsIgnoreCase(pianta.getTipo()) &&
+                                  p.getVarieta().equalsIgnoreCase(pianta.getVarieta()) &&
+                                  p.getFornitoreId().equals(pianta.getFornitoreId()));
+
+            if (duplicato) {
+                throw BusinessLogicException.duplicateEntry("Pianta",
+                        "tipo e varietà", pianta.getTipo() + " - " + pianta.getVarieta());
+            }
+
             piantaDAO.create(pianta);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante il salvataggio della pianta: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("inserimento pianta", e);
         }
     }
 
-    public void aggiornaPianta(Pianta pianta) {
+    public void aggiornaPianta(Pianta pianta) throws ValidationException, DataAccessException, BusinessLogicException {
         validaPianta(pianta);
+
         if (pianta.getId() == null) {
-            throw new IllegalArgumentException("ID pianta richiesto per l'aggiornamento");
+            throw ValidationException.requiredField("ID pianta per aggiornamento");
         }
+
         try {
+            // Verifica che la pianta esista
+            Pianta esistente = piantaDAO.read(pianta.getId());
+            if (esistente == null) {
+                throw BusinessLogicException.entityNotFound("Pianta", pianta.getId());
+            }
+
             piantaDAO.update(pianta);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante l'aggiornamento della pianta: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("aggiornamento pianta", e);
         }
     }
 
-    public void eliminaPianta(Integer id) {
+    public void eliminaPianta(Integer id) throws ValidationException, DataAccessException, BusinessLogicException {
         if (id == null) {
-            throw new IllegalArgumentException("ID pianta richiesto per l'eliminazione");
+            throw ValidationException.requiredField("ID pianta per eliminazione");
         }
+
         try {
+            // Verifica che la pianta esista
+            Pianta esistente = piantaDAO.read(id);
+            if (esistente == null) {
+                throw BusinessLogicException.entityNotFound("Pianta", id);
+            }
+
             piantaDAO.delete(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante l'eliminazione della pianta: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("eliminazione pianta", e);
         }
     }
 
-    public Pianta getPiantaById(Integer id) {
+    public Pianta getPiantaById(Integer id) throws ValidationException, DataAccessException {
         if (id == null) {
-            throw new IllegalArgumentException("ID pianta richiesto");
+            throw ValidationException.requiredField("ID pianta");
         }
+
         try {
             return piantaDAO.read(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la lettura della pianta: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("lettura pianta", e);
         }
     }
 
-    public List<Pianta> getAllPiante() {
+    public List<Pianta> getAllPiante() throws DataAccessException {
         try {
             return piantaDAO.findAll();
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la lettura delle piante: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("lettura lista piante", e);
         }
     }
 
-
-    public List<Pianta> getPianteByTipo(String tipo) {
-        if (tipo == null || tipo.trim().isEmpty()) {
-            return getAllPiante();
-        }
-        try {
-            return getAllPiante().stream()
-                    .filter(p -> p.getTipo().toLowerCase().contains(tipo.toLowerCase().trim()))
-                    .toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la ricerca delle piante: " + e.getMessage(), e);
-        }
-    }
-
-
-    public List<Pianta> getPianteByFornitore(Integer fornitoreId) {
+    public List<Pianta> getPianteByFornitore(Integer fornitoreId) throws ValidationException, DataAccessException {
         if (fornitoreId == null) {
-            throw new IllegalArgumentException("ID fornitore richiesto");
+            throw ValidationException.requiredField("ID fornitore");
         }
+
         try {
-            return getAllPiante().stream()
-                    .filter(p -> p.getFornitoreId().equals(fornitoreId))
-                    .toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante la ricerca delle piante per fornitore: " + e.getMessage(), e);
+            return piantaDAO.findByFornitore(fornitoreId);
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("lettura piante per fornitore", e);
         }
     }
 }

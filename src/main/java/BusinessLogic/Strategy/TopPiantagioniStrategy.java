@@ -7,12 +7,11 @@ import java.util.stream.Collectors;
 
 public class TopPiantagioniStrategy implements DataProcessingStrategy<Map<Integer, BigDecimal>> {
     @Override
-    @SuppressWarnings("unchecked")
     public ProcessingResult<Map<Integer, BigDecimal>> execute(Object... data) {
         validateParameters(data);
 
-        List<Raccolto> raccolti = (List<Raccolto>) data[0];
-        int topN = data.length > 1 ? (int) data[1] : 1; // Se non specificato, prende solo la migliore
+        List<Raccolto> raccolti = castToRaccoltiList(data[0]);
+        int topN = data.length > 1 ? (Integer) data[1] : 1; // Se non specificato, prende solo la migliore
 
         // Raggruppa per piantagione e somma le quantità
         Map<Integer, BigDecimal> produzioniPerPiantagione = raccolti.stream()
@@ -66,9 +65,14 @@ public class TopPiantagioniStrategy implements DataProcessingStrategy<Map<Intege
         if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
         if (data.length > 1) {
             if (!(data[1] instanceof Integer)) throw new IllegalArgumentException("Secondo parametro deve essere Integer");
-            int topN = (int) data[1];
+            int topN = (Integer) data[1];
             if (topN <= 0) throw new IllegalArgumentException("Il numero di piantagioni deve essere positivo");
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Raccolto> castToRaccoltiList(Object obj) {
+        return (List<Raccolto>) obj;
     }
 
     @Override

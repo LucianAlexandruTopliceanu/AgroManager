@@ -1,11 +1,14 @@
 package Controller;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Exception.DataAccessException;
+import BusinessLogic.Service.ErrorService;
 import BusinessLogic.Service.ZonaService;
 import DomainModel.Zona;
 import View.ZonaDialog;
 import View.ZonaView;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import View.NotificationHelper;
 
 public class ZonaController {
     private final ZonaService zonaService;
@@ -18,10 +21,16 @@ public class ZonaController {
     public ZonaController(ZonaService zonaService, ZonaView zonaView) {
         this.zonaService = zonaService;
         this.zonaView = zonaView;
+
+        setupEventHandlers();
         aggiornaView();
+    }
+
+    private void setupEventHandlers() {
         zonaView.setOnNuovaZona(this::onNuovaZona);
         zonaView.setOnModificaZona(this::onModificaZona);
         zonaView.setOnEliminaZona(this::onEliminaZona);
+
         // Callback per i filtri
         zonaView.setOnTestoRicercaChanged(this::onFiltroNomeChanged);
         zonaView.setOnTipoTerrenoChanged(this::onFiltroTipoChanged);
@@ -37,66 +46,93 @@ public class ZonaController {
         aggiornaView();
     }
 
+
     private void aggiornaView() {
-        java.util.List<Zona> tutteLeZone = zonaService.getAllZone();
-        java.util.List<Zona> filtrate = tutteLeZone.stream()
-            .filter(z -> filtroNome.isEmpty() || (z.getNome() != null && z.getNome().toLowerCase().contains(filtroNome.toLowerCase())))
-            .filter(z -> filtroTipo.equals("Tutti") || (z.getTipoTerreno() != null && z.getTipoTerreno().equalsIgnoreCase(filtroTipo)))
-            .toList();
-        zonaView.setZone(filtrate);
+        try {
+            java.util.List<Zona> tutteLeZone = zonaService.getAllZone();
+
+            // Applica i filtri
+            java.util.List<Zona> filtrate = tutteLeZone.stream()
+                .filter(z -> filtroNome.isEmpty() ||
+                            (z.getNome() != null && z.getNome().toLowerCase().contains(filtroNome.toLowerCase())))
+                .filter(z -> filtroTipo.equals("Tutti") ||
+                            (z.getTipoTerreno() != null && z.getTipoTerreno().equalsIgnoreCase(filtroTipo)))
+                .toList();
+
+            zonaView.setZone(filtrate);
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento zone", e);
+        }
     }
 
     private void onNuovaZona() {
         ZonaDialog dialog = new ZonaDialog(null);
         dialog.showAndWait();
+
         if (dialog.isConfermato()) {
             try {
                 zonaService.aggiungiZona(dialog.getZona());
+                NotificationHelper.showSuccess("Zona aggiunta con successo!");
                 aggiornaView();
-            } catch (Exception ex) {
-                mostraErrore(ex.getMessage());
+
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("aggiunta zona", e);
             }
         }
     }
 
     private void onModificaZona() {
         Zona selezionata = zonaView.getZonaSelezionata();
-        if (selezionata != null) {
-            ZonaDialog dialog = new ZonaDialog(selezionata);
-            dialog.showAndWait();
-            if (dialog.isConfermato()) {
-                try {
-                    zonaService.aggiornaZona(dialog.getZona());
-                    aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
-                }
+        if (selezionata == null) {
+            NotificationHelper.showWarning("Seleziona una zona da modificare");
+            return;
+        }
+
+        ZonaDialog dialog = new ZonaDialog(selezionata);
+        dialog.showAndWait();
+
+        if (dialog.isConfermato()) {
+            try {
+                zonaService.aggiornaZona(dialog.getZona());
+                NotificationHelper.showSuccess("Zona aggiornata con successo!");
+                aggiornaView();
+
+            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                ErrorService.handleException(e);
+            } catch (Exception e) {
+                ErrorService.handleException("aggiornamento zona", e);
             }
-        } else {
-            mostraErrore("Seleziona una zona da modificare.");
         }
     }
 
     private void onEliminaZona() {
         Zona selezionata = zonaView.getZonaSelezionata();
-        if (selezionata != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare la zona selezionata?", ButtonType.YES, ButtonType.NO);
-            alert.showAndWait();
-            if (alert.getResult() == ButtonType.YES) {
+        if (selezionata == null) {
+            NotificationHelper.showWarning("Seleziona una zona da eliminare");
+            return;
+        }
+
+        String messaggio = String.format("Sei sicuro di voler eliminare la zona '%s'?\n" +
+                                        "Questa operazione non può essere annullata.", selezionata.getNome());
+
+        ErrorService.requestConfirmation("Conferma eliminazione", messaggio, confermato -> {
+            if (confermato) {
                 try {
                     zonaService.eliminaZona(selezionata.getId());
+                    NotificationHelper.showSuccess("Zona eliminata con successo!");
                     aggiornaView();
-                } catch (Exception ex) {
-                    mostraErrore(ex.getMessage());
+
+                } catch (ValidationException | BusinessLogicException | DataAccessException e) {
+                    ErrorService.handleException(e);
+                } catch (Exception e) {
+                    ErrorService.handleException("eliminazione zona", e);
                 }
             }
-        } else {
-            mostraErrore("Seleziona una zona da eliminare.");
-        }
-    }
-
-    private void mostraErrore(String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        alert.showAndWait();
+        });
     }
 }
