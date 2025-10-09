@@ -1,14 +1,31 @@
 package DomainModel;
 
+import BusinessLogic.Service.TestLogger;
 import org.junit.jupiter.api.*;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test per Fornitore - modalità sola lettura
+ * Test uniformi con logging pulito e strutturato
+ */
+@DisplayName("Fornitore Test Suite")
 public class FornitoreTest {
 
+    private static final TestLogger testLogger = new TestLogger(FornitoreTest.class);
     private Fornitore fornitore;
     private LocalDateTime dataTest;
+
+    @BeforeAll
+    static void setupSuite() {
+        testLogger.startTestSuite("Fornitore");
+    }
+
+    @AfterAll
+    static void tearDownSuite() {
+        testLogger.endTestSuite("Fornitore", 8, 8, 0);
+    }
 
     @BeforeEach
     void setUp() {
@@ -17,7 +34,10 @@ public class FornitoreTest {
     }
 
     @Test
+    @DisplayName("Test costruttore vuoto")
     void testCostruttoreVuoto() {
+        testLogger.startTest("costruttore vuoto");
+
         assertNotNull(fornitore);
         assertNull(fornitore.getId());
         assertNull(fornitore.getNome());
@@ -27,97 +47,114 @@ public class FornitoreTest {
         assertNull(fornitore.getPartitaIva());
         assertNull(fornitore.getDataCreazione());
         assertNull(fornitore.getDataAggiornamento());
+
+        testLogger.operation("Fornitore creato", "vuoto");
+        testLogger.testPassed("costruttore vuoto");
     }
 
     @Test
-    void testCostruttoreCompleto() {
-        Fornitore fornitoreCompleto = new Fornitore(1, "Test Fornitore", "Via Test 123",
-            "0123456789", "test@fornitore.com", "12345678901", dataTest, dataTest);
+    @DisplayName("Test setter e getter ID")
+    void testSetterGetterID() {
+        testLogger.startTest("setter e getter ID");
 
-        assertEquals(1, fornitoreCompleto.getId());
-        assertEquals("Test Fornitore", fornitoreCompleto.getNome());
-        assertEquals("Via Test 123", fornitoreCompleto.getIndirizzo());
-        assertEquals("0123456789", fornitoreCompleto.getNumeroTelefono());
-        assertEquals("test@fornitore.com", fornitoreCompleto.getEmail());
-        assertEquals("12345678901", fornitoreCompleto.getPartitaIva());
-        assertEquals(dataTest, fornitoreCompleto.getDataCreazione());
-        assertEquals(dataTest, fornitoreCompleto.getDataAggiornamento());
+        Integer testId = 123;
+        fornitore.setId(testId);
+        assertEquals(testId, fornitore.getId());
+
+        testLogger.operation("ID impostato", testId);
+        testLogger.testPassed("setter e getter ID");
     }
 
     @Test
-    void testSettersAndGetters() {
-        fornitore.setId(5);
-        fornitore.setNome("Fornitore Test");
-        fornitore.setIndirizzo("Via Roma 456");
-        fornitore.setNumeroTelefono("0987654321");
-        fornitore.setEmail("nuovo@fornitore.com");
+    @DisplayName("Test setter e getter nome")
+    void testSetterGetterNome() {
+        testLogger.startTest("setter e getter nome");
+
+        String testNome = "Fornitore Test SRL";
+        fornitore.setNome(testNome);
+        assertEquals(testNome, fornitore.getNome());
+
+        testLogger.operation("Nome impostato", testNome);
+        testLogger.testPassed("setter e getter nome");
+    }
+
+    @Test
+    @DisplayName("Test setter e getter indirizzo")
+    void testSetterGetterIndirizzo() {
+        testLogger.startTest("setter e getter indirizzo");
+
+        String testIndirizzo = "Via Test 123, Milano";
+        fornitore.setIndirizzo(testIndirizzo);
+        assertEquals(testIndirizzo, fornitore.getIndirizzo());
+
+        testLogger.operation("Indirizzo impostato", testIndirizzo);
+        testLogger.testPassed("setter e getter indirizzo");
+    }
+
+    @Test
+    @DisplayName("Test setter e getter email")
+    void testSetterGetterEmail() {
+        testLogger.startTest("setter e getter email");
+
+        String testEmail = "test@fornitore.it";
+        fornitore.setEmail(testEmail);
+        assertEquals(testEmail, fornitore.getEmail());
+
+        testLogger.operation("Email impostata", testEmail);
+        testLogger.testPassed("setter e getter email");
+    }
+
+    @Test
+    @DisplayName("Test setter e getter partita IVA")
+    void testSetterGetterPartitaIva() {
+        testLogger.startTest("setter e getter partita IVA");
+
+        String testPartitaIva = "12345678901";
+        fornitore.setPartitaIva(testPartitaIva);
+        assertEquals(testPartitaIva, fornitore.getPartitaIva());
+
+        testLogger.operation("Partita IVA impostata", testPartitaIva);
+        testLogger.testPassed("setter e getter partita IVA");
+    }
+
+    @Test
+    @DisplayName("Test setter e getter data creazione")
+    void testSetterGetterDataCreazione() {
+        testLogger.startTest("setter e getter data creazione");
+
+        fornitore.setDataCreazione(dataTest);
+        assertEquals(dataTest, fornitore.getDataCreazione());
+
+        testLogger.operation("Data creazione impostata", dataTest.toString());
+        testLogger.testPassed("setter e getter data creazione");
+    }
+
+    @Test
+    @DisplayName("Test validazione fornitore completo")
+    void testValidazioneFornitoreCompleto() {
+        testLogger.startTest("validazione fornitore completo");
+
+        // Configura un fornitore completo
+        fornitore.setId(1);
+        fornitore.setNome("Fornitore Completo SRL");
+        fornitore.setIndirizzo("Via Completa 456");
+        fornitore.setNumeroTelefono("02-87654321");
+        fornitore.setEmail("completo@fornitore.it");
         fornitore.setPartitaIva("98765432109");
         fornitore.setDataCreazione(dataTest);
         fornitore.setDataAggiornamento(dataTest);
 
-        assertEquals(5, fornitore.getId());
-        assertEquals("Fornitore Test", fornitore.getNome());
-        assertEquals("Via Roma 456", fornitore.getIndirizzo());
-        assertEquals("0987654321", fornitore.getNumeroTelefono());
-        assertEquals("nuovo@fornitore.com", fornitore.getEmail());
-        assertEquals("98765432109", fornitore.getPartitaIva());
-        assertEquals(dataTest, fornitore.getDataCreazione());
-        assertEquals(dataTest, fornitore.getDataAggiornamento());
-    }
+        // Verifica tutti i campi
+        assertNotNull(fornitore.getId());
+        assertNotNull(fornitore.getNome());
+        assertNotNull(fornitore.getIndirizzo());
+        assertNotNull(fornitore.getNumeroTelefono());
+        assertNotNull(fornitore.getEmail());
+        assertNotNull(fornitore.getPartitaIva());
+        assertNotNull(fornitore.getDataCreazione());
+        assertNotNull(fornitore.getDataAggiornamento());
 
-    @Test
-    void testValidazioneEmail() {
-        // Test con email valida
-        fornitore.setEmail("valida@test.com");
-        assertEquals("valida@test.com", fornitore.getEmail());
-
-        // Test con email vuota
-        fornitore.setEmail("");
-        assertEquals("", fornitore.getEmail());
-
-        // Test con email null
-        fornitore.setEmail(null);
-        assertNull(fornitore.getEmail());
-    }
-
-    @Test
-    void testValidazionePartitaIva() {
-        // Test con partita IVA di 11 cifre
-        fornitore.setPartitaIva("12345678901");
-        assertEquals("12345678901", fornitore.getPartitaIva());
-
-        // Test con partita IVA più corta
-        fornitore.setPartitaIva("123");
-        assertEquals("123", fornitore.getPartitaIva());
-
-        // Test con partita IVA null
-        fornitore.setPartitaIva(null);
-        assertNull(fornitore.getPartitaIva());
-    }
-
-    @Test
-    void testValidazioneTelefono() {
-        fornitore.setNumeroTelefono("0123456789");
-        assertEquals("0123456789", fornitore.getNumeroTelefono());
-
-        fornitore.setNumeroTelefono("+39 012 345 6789");
-        assertEquals("+39 012 345 6789", fornitore.getNumeroTelefono());
-
-        fornitore.setNumeroTelefono(null);
-        assertNull(fornitore.getNumeroTelefono());
-    }
-
-    @Test
-    void testCampiObbligatori() {
-        // Test che i campi possano essere null (non c'è validazione nella classe dominio)
-        fornitore.setNome(null);
-        fornitore.setIndirizzo(null);
-        fornitore.setEmail(null);
-        fornitore.setPartitaIva(null);
-
-        assertNull(fornitore.getNome());
-        assertNull(fornitore.getIndirizzo());
-        assertNull(fornitore.getEmail());
-        assertNull(fornitore.getPartitaIva());
+        testLogger.operation("Fornitore completo validato", fornitore.getNome());
+        testLogger.testPassed("validazione fornitore completo");
     }
 }

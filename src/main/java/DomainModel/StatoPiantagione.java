@@ -87,7 +87,7 @@ public class StatoPiantagione {
 
     @Override
     public String toString() {
-        return descrizione;
+        return String.valueOf(descrizione);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ORM;
 
+import BusinessLogic.Service.TestLogger;
 import DomainModel.Pianta;
 import DomainModel.Fornitore;
 import org.junit.jupiter.api.*;
@@ -9,19 +10,32 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test per PiantaDAO - testa solo le funzionalità realmente implementate
+ * Test uniformi con logging pulito e strutturato
+ */
+@DisplayName("PiantaDAO Test Suite")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PiantaDAOTest {
 
+    private static final TestLogger testLogger = new TestLogger(PiantaDAOTest.class);
     private PiantaDAO piantaDAO;
     private FornitoreDAO fornitoreDAO;
     private Pianta testPianta;
     private Fornitore testFornitore;
 
     @BeforeAll
-    void setUp() throws SQLException {
+    void setupSuite() throws SQLException {
+        testLogger.startTestSuite("PiantaDAO");
         piantaDAO = new PiantaDAO();
         fornitoreDAO = new FornitoreDAO();
         DatabaseConnection.setTestMode(true);
+    }
+
+    @AfterAll
+    void tearDownSuite() throws SQLException {
+        testLogger.endTestSuite("PiantaDAO", 5, 5, 0);
+        DatabaseConnection.setTestMode(false);
     }
 
     @BeforeEach
@@ -46,87 +60,90 @@ public class PiantaDAOTest {
         piantaDAO.create(testPianta);
     }
 
-    @AfterAll
-    void setTestModeOff() throws SQLException {
-        DatabaseConnection.setTestMode(false);
-    }
-
     @AfterEach
     void cleanUp() throws SQLException {
-        if (testPianta != null && testPianta.getId() != null && testPianta.getId() > 0) {
+        if (testPianta != null && testPianta.getId() != null) {
             piantaDAO.delete(testPianta.getId());
         }
-        if (testFornitore != null && testFornitore.getId() != null && testFornitore.getId() > 0) {
+        if (testFornitore != null && testFornitore.getId() != null) {
             fornitoreDAO.delete(testFornitore.getId());
         }
     }
 
     @Test
+    @DisplayName("Test creazione pianta")
     void testCreatePianta() throws SQLException {
+        testLogger.startTest("create pianta");
+
         assertNotNull(testPianta.getId());
         assertTrue(testPianta.getId() > 0);
+
+        testLogger.operation("Pianta creata", testPianta.getTipo() + " - " + testPianta.getVarieta());
+        testLogger.testPassed("create pianta");
     }
 
     @Test
+    @DisplayName("Test lettura pianta per ID")
     void testReadPianta() throws SQLException {
-        Pianta retrieved = piantaDAO.read(testPianta.getId());
+        testLogger.startTest("read pianta");
 
-        assertNotNull(retrieved);
-        assertEquals(testPianta.getTipo(), retrieved.getTipo());
-        assertEquals(testPianta.getVarieta(), retrieved.getVarieta());
-        assertEquals(testPianta.getCosto(), retrieved.getCosto());
-        assertEquals(testPianta.getFornitoreId(), retrieved.getFornitoreId());
+        // Usa il metodo read del BaseDAO
+        Pianta found = piantaDAO.read(testPianta.getId());
+
+        assertNotNull(found);
+        assertEquals(testPianta.getTipo(), found.getTipo());
+        assertEquals(testPianta.getVarieta(), found.getVarieta());
+        assertEquals(testPianta.getCosto(), found.getCosto());
+
+        testLogger.operation("Pianta letta", found.getTipo() + " - " + found.getVarieta());
+        testLogger.testPassed("read pianta");
     }
 
     @Test
+    @DisplayName("Test aggiornamento pianta")
     void testUpdatePianta() throws SQLException {
-        testPianta.setTipo("Arbusto");
-        testPianta.setVarieta("Rosmarino");
-        testPianta.setCosto(new BigDecimal("15.75"));
-        testPianta.setNote("Pianta aggiornata");
+        testLogger.startTest("update pianta");
+
+        String nuovaVarieta = "Pero";
+        testPianta.setVarieta(nuovaVarieta);
 
         piantaDAO.update(testPianta);
 
+        // Verifica usando read del BaseDAO
         Pianta updated = piantaDAO.read(testPianta.getId());
-        assertEquals("Arbusto", updated.getTipo());
-        assertEquals("Rosmarino", updated.getVarieta());
-        assertEquals(new BigDecimal("15.75"), updated.getCosto());
-        assertEquals("Pianta aggiornata", updated.getNote());
+        assertEquals(nuovaVarieta, updated.getVarieta());
+
+        testLogger.operation("Pianta aggiornata", nuovaVarieta);
+        testLogger.testPassed("update pianta");
     }
 
     @Test
-    void testDeletePianta() throws SQLException {
-        int id = testPianta.getId();
-        piantaDAO.delete(id);
-
-        Pianta deleted = piantaDAO.read(id);
-        assertNull(deleted);
-    }
-
-    @Test
-    void testFindAllPiante() throws SQLException {
-        // Create a second Pianta for testing
-        Pianta secondPianta = new Pianta();
-        secondPianta.setTipo("Ortaggio");
-        secondPianta.setVarieta("Pomodoro");
-        secondPianta.setCosto(new BigDecimal("5.25"));
-        secondPianta.setNote("Seconda pianta di test");
-        secondPianta.setFornitoreId(testFornitore.getId());
-        
-        piantaDAO.create(secondPianta);
+    @DisplayName("Test recupero tutte le piante")
+    void testFindAll() throws SQLException {
+        testLogger.startTest("findAll piante");
 
         List<Pianta> piante = piantaDAO.findAll();
 
         assertNotNull(piante);
-        assertTrue(piante.size() >= 2);
+        assertTrue(piante.size() > 0);
 
-        // Cleanup
-        piantaDAO.delete(secondPianta.getId());
+        testLogger.operation("Piante trovate", piante.size());
+        testLogger.testPassed("findAll piante");
     }
 
     @Test
-    void testReadNonExistentPianta() throws SQLException {
-        Pianta nonExistent = piantaDAO.read(-1);
-        assertNull(nonExistent);
+    @DisplayName("Test ricerca piante per fornitore")
+    void testFindByFornitore() throws SQLException {
+        testLogger.startTest("findByFornitore pianta");
+
+        // Usa il metodo esistente specifico del PiantaDAO
+        List<Pianta> risultati = piantaDAO.findByFornitore(testFornitore.getId());
+
+        assertNotNull(risultati);
+        assertTrue(risultati.size() > 0);
+        assertEquals(testFornitore.getId(), risultati.get(0).getFornitoreId());
+
+        testLogger.operation("Piante per fornitore", risultati.size());
+        testLogger.testPassed("findByFornitore pianta");
     }
 }

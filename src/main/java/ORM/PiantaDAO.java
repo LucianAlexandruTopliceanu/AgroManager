@@ -1,6 +1,7 @@
 package ORM;
 import DomainModel.Pianta;
 import java.sql.*;
+import java.util.List;
 
 public class PiantaDAO extends BaseDAO<Pianta> {
     @Override
@@ -17,7 +18,6 @@ public class PiantaDAO extends BaseDAO<Pianta> {
         pianta.setCosto(rs.getBigDecimal("costo"));
         pianta.setNote(rs.getString("note"));
         pianta.setFornitoreId(rs.getInt("fornitore_id"));
-        // altri campi se necessari
         return pianta;
     }
 
@@ -58,10 +58,10 @@ public class PiantaDAO extends BaseDAO<Pianta> {
         pianta.setId(id);
     }
 
-
-    public java.util.List<Pianta> findByFornitore(Integer fornitoreId) throws SQLException {
+    // Metodo esistente specifico per PiantaDAO
+    public List<Pianta> findByFornitore(Integer fornitoreId) throws SQLException {
         String sql = "SELECT * FROM " + getTableName() + " WHERE fornitore_id = ?";
-        java.util.List<Pianta> piante = new java.util.ArrayList<>();
+        List<Pianta> piante = new java.util.ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

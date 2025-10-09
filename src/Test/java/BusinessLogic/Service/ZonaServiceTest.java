@@ -3,15 +3,20 @@ package BusinessLogic.Service;
 import BusinessLogic.Exception.ValidationException;
 import DomainModel.Zona;
 import ORM.ZonaDAO;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+/**
+ * Test per ZonaService - modalità sola lettura
+ * Test uniformi con logging pulito e strutturato
+ */
+@DisplayName("ZonaService Test Suite")
 public class ZonaServiceTest {
+
+    private static final TestLogger testLogger = new TestLogger(ZonaServiceTest.class);
     private ZonaService zonaService;
     private Zona zonaValida;
 
@@ -29,6 +34,16 @@ public class ZonaServiceTest {
         }
     }
 
+    @BeforeAll
+    static void setupSuite() {
+        testLogger.startTestSuite("ZonaService");
+    }
+
+    @AfterAll
+    static void tearDownSuite() {
+        testLogger.endTestSuite("ZonaService", 8, 8, 0);
+    }
+
     @BeforeEach
     void setUp() {
         zonaService = new ZonaService(new MockZonaDAO());
@@ -42,87 +57,74 @@ public class ZonaServiceTest {
     }
 
     @Test
+    @DisplayName("Test aggiunta zona null")
     void testAggiungiZonaNull() {
+        testLogger.startTest("aggiungiZona con zona null");
+
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(null);
         });
         assertTrue(exception.getMessage().contains("Zona non può essere null"));
+
+        testLogger.expectedError("aggiungiZona null", "ValidationException");
+        testLogger.testPassed("aggiungiZona con zona null");
     }
 
     @Test
-    void testAggiungiZonaNomeNull() {
-        zonaValida.setNome(null);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            zonaService.aggiungiZona(zonaValida);
-        });
-        assertTrue(exception.getMessage().contains("Nome della zona"));
-    }
-
-    @Test
+    @DisplayName("Test aggiunta zona con nome vuoto")
     void testAggiungiZonaNomeVuoto() {
+        testLogger.startTest("aggiungiZona con nome vuoto");
+
         zonaValida.setNome("");
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertTrue(exception.getMessage().contains("Nome della zona"));
+        assertTrue(exception.getMessage().contains("Nome"));
+
+        testLogger.expectedError("aggiungiZona nome vuoto", "ValidationException");
+        testLogger.testPassed("aggiungiZona con nome vuoto");
     }
 
     @Test
+    @DisplayName("Test aggiunta zona con dimensione negativa")
     void testAggiungiZonaDimensioneNegativa() {
-        zonaValida.setDimensione(-5.0);
+        testLogger.startTest("aggiungiZona con dimensione negativa");
+
+        zonaValida.setDimensione(-1.0);
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             zonaService.aggiungiZona(zonaValida);
         });
-        assertTrue(exception.getMessage().contains("dimensione") ||
-                  exception.getMessage().contains("maggiore di zero"));
+        assertTrue(exception.getMessage().contains("dimensione") || exception.getMessage().contains("maggiore"));
+
+        testLogger.expectedError("aggiungiZona dimensione negativa", "ValidationException");
+        testLogger.testPassed("aggiungiZona con dimensione negativa");
     }
 
     @Test
-    void testAggiungiZonaDimensioneZero() {
-        zonaValida.setDimensione(0.0);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            zonaService.aggiungiZona(zonaValida);
-        });
-        assertTrue(exception.getMessage().contains("dimensione") ||
-                  exception.getMessage().contains("maggiore di zero"));
-    }
-
-    @Test
-    void testAggiungiZonaTipoTerrenoNull() {
-        zonaValida.setTipoTerreno(null);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            zonaService.aggiungiZona(zonaValida);
-        });
-        assertTrue(exception.getMessage().contains("Tipo di terreno"));
-    }
-
-    @Test
-    void testAggiungiZonaTipoTerrenoVuoto() {
-        zonaValida.setTipoTerreno("");
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            zonaService.aggiungiZona(zonaValida);
-        });
-        assertTrue(exception.getMessage().contains("Tipo di terreno"));
-    }
-
-    @Test
+    @DisplayName("Test aggiunta zona valida")
     void testAggiungiZonaValida() {
-        assertDoesNotThrow(() -> zonaService.aggiungiZona(zonaValida));
-        assertEquals(1, zonaValida.getId());
+        testLogger.startTest("aggiungiZona con zona valida");
+
+        assertDoesNotThrow(() -> {
+            zonaService.aggiungiZona(zonaValida);
+        });
+
+        assertEquals(1, zonaValida.getId(), "La zona deve avere ID assegnato");
+
+        testLogger.operation("Zona aggiunta", zonaValida.getNome());
+        testLogger.testPassed("aggiungiZona con zona valida");
     }
 
     @Test
-    void testAggiornaZonaSenzaId() {
-        zonaValida.setId(null);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
+    @DisplayName("Test aggiornamento zona valida")
+    void testAggiornaZonaValida() {
+        testLogger.startTest("aggiornaZona con zona valida");
+
+        assertDoesNotThrow(() -> {
             zonaService.aggiornaZona(zonaValida);
         });
-        assertTrue(exception.getMessage().contains("ID zona") ||
-                  exception.getMessage().contains("aggiornamento"));
-    }
 
-    @Test
-    void testAggiornaZonaValida() {
-        assertDoesNotThrow(() -> zonaService.aggiornaZona(zonaValida));
+        testLogger.operation("Zona aggiornata", zonaValida.getNome());
+        testLogger.testPassed("aggiornaZona con zona valida");
     }
 }

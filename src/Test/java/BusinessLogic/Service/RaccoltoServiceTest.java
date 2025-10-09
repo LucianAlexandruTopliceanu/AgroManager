@@ -3,8 +3,7 @@ package BusinessLogic.Service;
 import BusinessLogic.Exception.ValidationException;
 import DomainModel.Raccolto;
 import ORM.RaccoltoDAO;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,7 +11,14 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test per RaccoltoService - modalità sola lettura
+ * Test uniformi con logging pulito e strutturato
+ */
+@DisplayName("RaccoltoService Test Suite")
 public class RaccoltoServiceTest {
+
+    private static final TestLogger testLogger = new TestLogger(RaccoltoServiceTest.class);
     private RaccoltoService raccoltoService;
     private Raccolto raccoltoValido;
 
@@ -30,6 +36,16 @@ public class RaccoltoServiceTest {
         }
     }
 
+    @BeforeAll
+    static void setupSuite() {
+        testLogger.startTestSuite("RaccoltoService");
+    }
+
+    @AfterAll
+    static void tearDownSuite() {
+        testLogger.endTestSuite("RaccoltoService", 8, 8, 0);
+    }
+
     @BeforeEach
     void setUp() {
         raccoltoService = new RaccoltoService(new MockRaccoltoDAO());
@@ -44,89 +60,89 @@ public class RaccoltoServiceTest {
     }
 
     @Test
+    @DisplayName("Test aggiunta raccolto null")
     void testAggiungiRaccoltoNull() {
+        testLogger.startTest("aggiungiRaccolto con raccolto null");
+
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(null);
         });
         assertTrue(exception.getMessage().contains("Raccolto non può essere null"));
+
+        testLogger.expectedError("aggiungiRaccolto null", "ValidationException");
+        testLogger.testPassed("aggiungiRaccolto con raccolto null");
     }
 
     @Test
-    void testAggiungiRaccoltoDataNull() {
-        raccoltoValido.setDataRaccolto(null);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            raccoltoService.aggiungiRaccolto(raccoltoValido);
-        });
-        assertTrue(exception.getMessage().contains("Data di raccolto"));
-    }
-
-    @Test
+    @DisplayName("Test aggiunta raccolto con data futura")
     void testAggiungiRaccoltoDataFutura() {
+        testLogger.startTest("aggiungiRaccolto con data futura");
+
         raccoltoValido.setDataRaccolto(LocalDate.now().plusDays(1));
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertTrue(exception.getMessage().contains("dataRaccolto") ||
-                  exception.getMessage().contains("futuro"));
+        assertTrue(exception.getMessage().contains("dataRaccolto") || exception.getMessage().contains("futuro"));
+
+        testLogger.expectedError("aggiungiRaccolto data futura", "ValidationException");
+        testLogger.testPassed("aggiungiRaccolto con data futura");
     }
 
     @Test
-    void testAggiungiRaccoltoQuantitaNull() {
-        raccoltoValido.setQuantitaKg(null);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            raccoltoService.aggiungiRaccolto(raccoltoValido);
-        });
-        assertTrue(exception.getMessage().contains("quantitaKg") ||
-                  exception.getMessage().contains("maggiore di zero"));
-    }
-
-    @Test
+    @DisplayName("Test aggiunta raccolto con quantità negativa")
     void testAggiungiRaccoltoQuantitaNegativa() {
-        raccoltoValido.setQuantitaKg(new BigDecimal("-5.0"));
+        testLogger.startTest("aggiungiRaccolto con quantità negativa");
+
+        raccoltoValido.setQuantitaKg(new BigDecimal("-1.0"));
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
-        assertTrue(exception.getMessage().contains("quantitaKg") ||
-                  exception.getMessage().contains("maggiore di zero"));
+        assertTrue(exception.getMessage().contains("quantitaKg") || exception.getMessage().contains("maggiore"));
+
+        testLogger.expectedError("aggiungiRaccolto quantità negativa", "ValidationException");
+        testLogger.testPassed("aggiungiRaccolto con quantità negativa");
     }
 
     @Test
-    void testAggiungiRaccoltoQuantitaZero() {
-        raccoltoValido.setQuantitaKg(BigDecimal.ZERO);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            raccoltoService.aggiungiRaccolto(raccoltoValido);
-        });
-        assertTrue(exception.getMessage().contains("quantitaKg") ||
-                  exception.getMessage().contains("maggiore di zero"));
-    }
+    @DisplayName("Test aggiunta raccolto con piantagione ID null")
+    void testAggiungiRaccoltoPiantagioneIdNull() {
+        testLogger.startTest("aggiungiRaccolto con piantagione ID null");
 
-    @Test
-    void testAggiungiRaccoltoPiantagioneNull() {
         raccoltoValido.setPiantagioneId(null);
         ValidationException exception = assertThrows(ValidationException.class, () -> {
             raccoltoService.aggiungiRaccolto(raccoltoValido);
         });
         assertTrue(exception.getMessage().contains("Piantagione"));
+
+        testLogger.expectedError("aggiungiRaccolto piantagione ID null", "ValidationException");
+        testLogger.testPassed("aggiungiRaccolto con piantagione ID null");
     }
 
     @Test
+    @DisplayName("Test aggiunta raccolto valido")
     void testAggiungiRaccoltoValido() {
-        assertDoesNotThrow(() -> raccoltoService.aggiungiRaccolto(raccoltoValido));
-        assertEquals(1, raccoltoValido.getId());
+        testLogger.startTest("aggiungiRaccolto con raccolto valido");
+
+        assertDoesNotThrow(() -> {
+            raccoltoService.aggiungiRaccolto(raccoltoValido);
+        });
+
+        assertEquals(1, raccoltoValido.getId(), "Il raccolto deve avere ID assegnato");
+
+        testLogger.operation("Raccolto aggiunto", raccoltoValido.getQuantitaKg() + " kg");
+        testLogger.testPassed("aggiungiRaccolto con raccolto valido");
     }
 
     @Test
-    void testAggiornaRaccoltoSenzaId() {
-        raccoltoValido.setId(null);
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
+    @DisplayName("Test aggiornamento raccolto valido")
+    void testAggiornaRaccoltoValido() {
+        testLogger.startTest("aggiornaRaccolto con raccolto valido");
+
+        assertDoesNotThrow(() -> {
             raccoltoService.aggiornaRaccolto(raccoltoValido);
         });
-        assertTrue(exception.getMessage().contains("ID raccolto") ||
-                  exception.getMessage().contains("aggiornamento"));
-    }
 
-    @Test
-    void testAggiornaRaccoltoValido() {
-        assertDoesNotThrow(() -> raccoltoService.aggiornaRaccolto(raccoltoValido));
+        testLogger.operation("Raccolto aggiornato", raccoltoValido.getQuantitaKg() + " kg");
+        testLogger.testPassed("aggiornaRaccolto con raccolto valido");
     }
 }

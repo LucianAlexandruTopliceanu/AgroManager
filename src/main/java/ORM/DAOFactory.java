@@ -17,5 +17,5 @@ public class DAOFactory {
     public static RaccoltoDAO getRaccoltoDAO() {
         return new RaccoltoDAO();
     }
+    public static StatoPiantagioneDAO getStatoPiantagioneDAO() {return new StatoPiantagioneDAO(); }
 }
-

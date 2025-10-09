@@ -18,7 +18,6 @@ public class FornitoreDAO extends BaseDAO<Fornitore> {
         fornitore.setNumeroTelefono(rs.getString("numero_telefono"));
         fornitore.setEmail(rs.getString("email"));
         fornitore.setPartitaIva(rs.getString("partita_iva"));
-        // altri campi se necessari
         return fornitore;
     }
 

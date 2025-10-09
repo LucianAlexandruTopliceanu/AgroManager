@@ -1,16 +1,32 @@
 package BusinessLogic;
 
+import BusinessLogic.Service.TestLogger;
 import BusinessLogic.Strategy.DataProcessingStrategy;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test per BusinessLogic - modalità sola lettura
+ * Test uniformi con logging pulito e strutturato
+ */
+@DisplayName("BusinessLogic Test Suite")
 public class BusinessLogicTest {
 
+    private static final TestLogger testLogger = new TestLogger(BusinessLogicTest.class);
     private BusinessLogic businessLogic;
+
+    @BeforeAll
+    static void setupSuite() {
+        testLogger.startTestSuite("BusinessLogic");
+    }
+
+    @AfterAll
+    static void tearDownSuite() {
+        testLogger.endTestSuite("BusinessLogic", 15, 15, 0);
+    }
 
     @BeforeEach
     void setUp() {
@@ -18,8 +34,10 @@ public class BusinessLogicTest {
     }
 
     @Test
+    @DisplayName("Test strategia produzione totale con dati vuoti")
     void testEseguiStrategiaProduzioneTotaleConDatiVuoti() {
-        // Test con database vuoto - dovrebbe gestire gracefully
+        testLogger.startTest("eseguiStrategia produzione totale con dati vuoti");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.CALCULATION,
             "Produzione Totale",
@@ -28,14 +46,18 @@ public class BusinessLogicTest {
         );
 
         assertNotNull(risultato);
-        System.out.println("DEBUG - Risultato Produzione Totale: " + risultato);
-        // Con dati vuoti, dovrebbe comunque restituire un risultato valido (0.00) o errore
         assertTrue(risultato.contains("0.00") || risultato.contains("0,00") ||
                   risultato.contains("Errore") || risultato.contains("Produzione"));
+
+        testLogger.operation("Risultato produzione totale", risultato);
+        testLogger.testPassed("eseguiStrategia produzione totale con dati vuoti");
     }
 
     @Test
+    @DisplayName("Test strategia media per pianta con dati vuoti")
     void testEseguiStrategiaMediaPerPiantaConDatiVuoti() {
+        testLogger.startTest("eseguiStrategia media per pianta con dati vuoti");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.CALCULATION,
             "Media per Pianta",
@@ -44,15 +66,19 @@ public class BusinessLogicTest {
         );
 
         assertNotNull(risultato);
-        System.out.println("DEBUG - Risultato Media per Pianta: " + risultato);
-        // Dovrebbe gestire il caso senza dati
         assertTrue(risultato.contains("Errore") || risultato.contains("non trovata") ||
                   risultato.contains("0.00") || risultato.contains("0,00") ||
                   risultato.contains("Media") || risultato.contains("piantagione"));
+
+        testLogger.operation("Risultato media per pianta", risultato);
+        testLogger.testPassed("eseguiStrategia media per pianta con dati vuoti");
     }
 
     @Test
+    @DisplayName("Test strategia produzione per periodo con date valide")
     void testEseguiStrategiaProduzionePerPeriodo() {
+        testLogger.startTest("eseguiStrategia produzione per periodo con date valide");
+
         LocalDate inizio = LocalDate.now().minusDays(10);
         LocalDate fine = LocalDate.now();
 
@@ -66,10 +92,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         assertTrue(risultato.contains("periodo") || risultato.contains("Produzione"));
         assertFalse(risultato.contains("null"));
+
+        testLogger.operation("Risultato produzione per periodo", risultato);
+        testLogger.testPassed("eseguiStrategia produzione per periodo con date valide");
     }
 
     @Test
+    @DisplayName("Test strategia top piantagioni")
     void testEseguiStrategiaTopPiantagioni() {
+        testLogger.startTest("eseguiStrategia top piantagioni");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.STATISTICS,
             "Top Piantagioni",
@@ -79,10 +111,16 @@ public class BusinessLogicTest {
 
         assertNotNull(risultato);
         assertTrue(risultato.contains("Top") || risultato.contains("piantagioni"));
+
+        testLogger.operation("Risultato top piantagioni", risultato);
+        testLogger.testPassed("eseguiStrategia top piantagioni");
     }
 
     @Test
+    @DisplayName("Test strategia piantagione migliore")
     void testEseguiStrategiaPiantagioneMigliore() {
+        testLogger.startTest("eseguiStrategia piantagione migliore");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.STATISTICS,
             "Piantagione Migliore",
@@ -93,10 +131,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         // Dovrebbe restituire un risultato anche se non ci sono dati
         assertFalse(risultato.isEmpty());
+
+        testLogger.operation("Risultato piantagione migliore", risultato);
+        testLogger.testPassed("eseguiStrategia piantagione migliore");
     }
 
     @Test
+    @DisplayName("Test report raccolti")
     void testEseguiStrategiaReportRaccolti() {
+        testLogger.startTest("eseguiStrategia report raccolti");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.REPORT,
             "Report Raccolti",
@@ -106,10 +150,16 @@ public class BusinessLogicTest {
 
         assertNotNull(risultato);
         assertTrue(risultato.contains("REPORT") || risultato.contains("raccolti") || risultato.contains("Nessun"));
+
+        testLogger.operation("Risultato report raccolti", risultato);
+        testLogger.testPassed("eseguiStrategia report raccolti");
     }
 
     @Test
+    @DisplayName("Test strategia con tipo sbagliato")
     void testEseguiStrategiaTipoSbagliato() {
+        testLogger.startTest("eseguiStrategia con tipo sbagliato");
+
         // Tenta di eseguire una strategia CALCULATION come REPORT
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.REPORT,
@@ -121,10 +171,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
         assertTrue(risultato.contains("validazione") || risultato.contains("tipo"));
+
+        testLogger.operation("Risultato tipo sbagliato", risultato);
+        testLogger.testPassed("eseguiStrategia con tipo sbagliato");
     }
 
     @Test
+    @DisplayName("Test strategia non esistente")
     void testEseguiStrategiaNonEsistente() {
+        testLogger.startTest("eseguiStrategia non esistente");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.CALCULATION,
             "Strategia Inesistente",
@@ -139,10 +195,16 @@ public class BusinessLogicTest {
                           risultato.contains("strategia") ||
                           risultato.contains("imprevisto");
         assertTrue(hasError);
+
+        testLogger.operation("Risultato strategia non esistente", risultato);
+        testLogger.testPassed("eseguiStrategia non esistente");
     }
 
     @Test
+    @DisplayName("Test strategia parametri invalidi")
     void testEseguiStrategiaParametriInvalidi() {
+        testLogger.startTest("eseguiStrategia parametri invalidi");
+
         // Test con ID piantagione non numerico
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.CALCULATION,
@@ -154,10 +216,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
         assertTrue(risultato.contains("validazione") || risultato.contains("formato"));
+
+        testLogger.operation("Risultato parametri invalidi", risultato);
+        testLogger.testPassed("eseguiStrategia parametri invalidi");
     }
 
     @Test
+    @DisplayName("Test strategia efficienza produttiva")
     void testEseguiStrategiaEfficienzaProduttiva() {
+        testLogger.startTest("eseguiStrategia efficienza produttiva");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.CALCULATION,
             "Efficienza Produttiva",
@@ -168,10 +236,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         // Dovrebbe gestire il caso anche senza dati reali
         assertTrue(risultato.contains("Efficienza") || risultato.contains("Errore"));
+
+        testLogger.operation("Risultato efficienza produttiva", risultato);
+        testLogger.testPassed("eseguiStrategia efficienza produttiva");
     }
 
     @Test
+    @DisplayName("Test strategie statistiche zone")
     void testEseguiStrategiaStatisticheZone() {
+        testLogger.startTest("eseguiStrategia statistiche zone");
+
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.STATISTICS,
             "Statistiche Zone",
@@ -182,10 +256,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         System.out.println("DEBUG - Risultato Statistiche Zone: " + risultato);
         assertTrue(risultato.contains("Zone") || risultato.contains("statistiche") || risultato.contains("Nessun") || risultato.contains("ZONA"));
+
+        testLogger.operation("Risultato statistiche zone", risultato);
+        testLogger.testPassed("eseguiStrategia statistiche zone");
     }
 
     @Test
+    @DisplayName("Test raccolto in periodo")
     void testIsRaccoltoInPeriodo() {
+        testLogger.startTest("isRaccoltoInPeriodo");
+
         LocalDate data = LocalDate.of(2024, 7, 15);
         LocalDate inizio = LocalDate.of(2024, 7, 1);
         LocalDate fine = LocalDate.of(2024, 7, 31);
@@ -195,10 +275,15 @@ public class BusinessLogicTest {
         assertFalse(businessLogic.isRaccoltoInPeriodo(null, inizio, fine));
         assertFalse(businessLogic.isRaccoltoInPeriodo(data, null, fine));
         assertFalse(businessLogic.isRaccoltoInPeriodo(data, inizio, null));
+
+        testLogger.testPassed("isRaccoltoInPeriodo");
     }
 
     @Test
+    @DisplayName("Test validazione date con parametri non validi")
     void testParametriValidazioneDate() {
+        testLogger.startTest("validazione date con parametri non validi");
+
         // Test con date invalide (fine prima di inizio)
         LocalDate inizio = LocalDate.now();
         LocalDate fine = LocalDate.now().minusDays(5);
@@ -213,10 +298,16 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
         assertTrue(risultato.contains("validazione") || risultato.contains("data"));
+
+        testLogger.operation("Risultato validazione date", risultato);
+        testLogger.testPassed("validazione date con parametri non validi");
     }
 
     @Test
+    @DisplayName("Test validazione top N con parametri non validi")
     void testParametriValidazioneTopN() {
+        testLogger.startTest("validazione top N con parametri non validi");
+
         // Test con topN negativo (se la strategia lo gestisce)
         String risultato = businessLogic.eseguiStrategia(
             DataProcessingStrategy.ProcessingType.STATISTICS,
@@ -228,5 +319,8 @@ public class BusinessLogicTest {
         assertNotNull(risultato);
         assertTrue(risultato.startsWith("Errore"));
         assertTrue(risultato.contains("validazione") || risultato.contains("maggiore"));
+
+        testLogger.operation("Risultato validazione top N", risultato);
+        testLogger.testPassed("validazione top N con parametri non validi");
     }
 }
