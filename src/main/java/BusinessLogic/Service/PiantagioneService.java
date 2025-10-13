@@ -7,11 +7,9 @@ import ORM.PiantagioneDAO;
 import ORM.DAOFactory;
 import DomainModel.Piantagione;
 import DomainModel.StatoPiantagione;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 public class PiantagioneService {
     private final PiantagioneDAO piantagioneDAO;
@@ -56,7 +54,7 @@ public class PiantagioneService {
             throw ValidationException.requiredField("Zona");
         }
 
-        // NUOVO: Validazione stato piantagione
+        // Validazione stato piantagione
         if (piantagione.getIdStatoPiantagione() != null) {
             try {
                 StatoPiantagione stato = statoPiantagioneService.getStatoById(piantagione.getIdStatoPiantagione());
@@ -72,7 +70,7 @@ public class PiantagioneService {
     public void aggiungiPiantagione(Piantagione piantagione) throws ValidationException, DataAccessException, BusinessLogicException {
         validaPiantagione(piantagione);
 
-        // NUOVO: Assicura che abbia uno stato valido (default: ATTIVA)
+        // Assicura che abbia uno stato valido (default: ATTIVA)
         if (piantagione.getIdStatoPiantagione() == null) {
             StatoPiantagione statoAttiva = statoPiantagioneService.getStatoByCodice(StatoPiantagione.ATTIVA);
             piantagione.setIdStatoPiantagione(statoAttiva.getId());
@@ -105,94 +103,17 @@ public class PiantagioneService {
         }
     }
 
-    // NUOVI METODI per gestione stati
-
-    /**
-     * Cambia lo stato di una piantagione
-     */
-    public void cambiaStatoPiantagione(Integer piantagioneId, String codiceStat) throws ValidationException, DataAccessException, BusinessLogicException {
+    public void cambiaStatoPiantagione(Integer piantagioneId, String codiceStato) throws ValidationException, DataAccessException, BusinessLogicException {
         if (piantagioneId == null) {
             throw ValidationException.requiredField("ID piantagione");
         }
 
-        StatoPiantagione nuovoStato = statoPiantagioneService.getStatoByCodice(codiceStat);
+        StatoPiantagione nuovoStato = statoPiantagioneService.getStatoByCodice(codiceStato);
 
         try {
             piantagioneDAO.cambiaStato(piantagioneId, nuovoStato.getId());
         } catch (Exception e) {
             throw DataAccessException.queryError("cambio stato piantagione", e);
-        }
-    }
-
-    /**
-     * Rimuove una piantagione (cambia stato a RIMOSSA)
-     */
-    public void rimuoviPiantagione(Integer piantagioneId) throws ValidationException, DataAccessException, BusinessLogicException {
-        cambiaStatoPiantagione(piantagioneId, StatoPiantagione.RIMOSSA);
-    }
-
-    /**
-     * Completa una piantagione
-     */
-    public void completaPiantagione(Integer piantagioneId) throws ValidationException, DataAccessException, BusinessLogicException {
-        cambiaStatoPiantagione(piantagioneId, StatoPiantagione.COMPLETATA);
-    }
-
-    /**
-     * Riattiva una piantagione
-     */
-    public void riattivaPiantagione(Integer piantagioneId) throws ValidationException, DataAccessException, BusinessLogicException {
-        cambiaStatoPiantagione(piantagioneId, StatoPiantagione.ATTIVA);
-    }
-
-    /**
-     * Ottiene tutte le piantagioni con i loro stati
-     */
-    public List<Piantagione> getTutteLePiantagioniConStato() {
-        return piantagioneDAO.findAllWithStato();
-    }
-
-    /**
-     * Ottiene solo le piantagioni attive
-     */
-    public List<Piantagione> getPiantagioniAttive() {
-        return piantagioneDAO.findAttive();
-    }
-
-    /**
-     * Ottiene piantagioni per stato
-     */
-    public List<Piantagione> getPiantagioniPerStato(String codiceStato) {
-        return piantagioneDAO.findByStato(codiceStato);
-    }
-
-    public void eliminaPiantagione(Integer id) throws ValidationException, DataAccessException, BusinessLogicException {
-        if (id == null) {
-            throw ValidationException.requiredField("ID piantagione per eliminazione");
-        }
-
-        try {
-            // Verifica che la piantagione esista
-            Piantagione esistente = piantagioneDAO.read(id);
-            if (esistente == null) {
-                throw BusinessLogicException.entityNotFound("Piantagione", id);
-            }
-
-            piantagioneDAO.delete(id);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("eliminazione piantagione", e);
-        }
-    }
-
-    public Piantagione getPiantagioneById(Integer id) throws ValidationException, DataAccessException {
-        if (id == null) {
-            throw ValidationException.requiredField("ID piantagione");
-        }
-
-        try {
-            return piantagioneDAO.read(id);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura piantagione", e);
         }
     }
 
@@ -204,27 +125,15 @@ public class PiantagioneService {
         }
     }
 
-    public List<Piantagione> getPiantagioniByZona(Integer zonaId) throws ValidationException, DataAccessException {
-        if (zonaId == null) {
-            throw ValidationException.requiredField("ID zona");
+    public Piantagione getPiantagioneById(Integer id) throws ValidationException, DataAccessException {
+        if (id == null) {
+            throw ValidationException.requiredField("ID piantagione");
         }
 
         try {
-            return piantagioneDAO.findByZona(zonaId);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura piantagioni per zona", e);
-        }
-    }
-
-    public List<Piantagione> getPiantagioniByPianta(Integer piantaId) throws ValidationException, DataAccessException {
-        if (piantaId == null) {
-            throw ValidationException.requiredField("ID pianta");
-        }
-
-        try {
-            return piantagioneDAO.findByPianta(piantaId);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura piantagioni per pianta", e);
+            return piantagioneDAO.read(id);
+        } catch (Exception e) {
+            throw DataAccessException.queryError("lettura piantagione", e);
         }
     }
 }
