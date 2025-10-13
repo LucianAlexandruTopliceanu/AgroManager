@@ -58,7 +58,7 @@ public class PiantaDAO extends BaseDAO<Pianta> {
         pianta.setId(id);
     }
 
-    // Metodo esistente specifico per PiantaDAO
+    //TODO: Valutare se meglio cercare nel db o nelle liste gia caricate in memoria
     public List<Pianta> findByFornitore(Integer fornitoreId) throws SQLException {
         String sql = "SELECT * FROM " + getTableName() + " WHERE fornitore_id = ?";
         List<Pianta> piante = new java.util.ArrayList<>();

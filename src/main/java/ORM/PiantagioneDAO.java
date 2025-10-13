@@ -26,7 +26,6 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         piantagione.setZonaId(rs.getInt("id_zona"));
         piantagione.setIdStatoPiantagione(rs.getInt("id_stato_piantagione")); // NUOVO
 
-        // Gestione timestamp
         Timestamp dataCreazione = rs.getTimestamp("data_creazione");
         if (dataCreazione != null) {
             piantagione.setDataCreazione(dataCreazione.toLocalDateTime());
@@ -40,13 +39,9 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         return piantagione;
     }
 
-    /**
-     * Mappa ResultSet includendo i dati dello stato (per query con JOIN)
-     */
     protected Piantagione mapResultSetWithStato(ResultSet rs) throws SQLException {
         Piantagione piantagione = mapResultSetToEntity(rs);
 
-        // Aggiungi i dati dello stato se presenti
         try {
             StatoPiantagione stato = new StatoPiantagione();
             stato.setId(rs.getInt("stato_id"));
@@ -54,7 +49,6 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
             stato.setDescrizione(rs.getString("stato_descrizione"));
             piantagione.setStatoPiantagione(stato);
         } catch (SQLException e) {
-            // Ignora se le colonne dello stato non sono presenti
         }
 
         return piantagione;
@@ -92,9 +86,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         return "UPDATE piantagione SET quantita_pianta = ?, messa_a_dimora = ?, id_pianta = ?, id_zona = ?, id_stato_piantagione = ?, data_aggiornamento = ? WHERE id = ?";
     }
 
-    /**
-     * Trova tutte le piantagioni con i loro stati
-     */
+    //TODO:Controllare se meglio la ricerca nel db o nelle liste gia caricate in memoria
     public List<Piantagione> findAllWithStato() {
         String query = """
             SELECT p.*, s.id as stato_id, s.codice as stato_codice, s.descrizione as stato_descrizione
@@ -119,9 +111,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         return piantagioni;
     }
 
-    /**
-     * Trova piantagioni per stato
-     */
+
     public List<Piantagione> findByStato(String codiceStato) {
         String query = """
             SELECT p.*, s.id as stato_id, s.codice as stato_codice, s.descrizione as stato_descrizione
@@ -150,16 +140,11 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         return piantagioni;
     }
 
-    /**
-     * Trova solo piantagioni attive
-     */
+
     public List<Piantagione> findAttive() {
         return findByStato(StatoPiantagione.ATTIVA);
     }
 
-    /**
-     * Cambia stato di una piantagione
-     */
     public void cambiaStato(Integer piantagioneId, Integer nuovoStatoId) {
         String query = "UPDATE piantagione SET id_stato_piantagione = ?, data_aggiornamento = ? WHERE id = ?";
 

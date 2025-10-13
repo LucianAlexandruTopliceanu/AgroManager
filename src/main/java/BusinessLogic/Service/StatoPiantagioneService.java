@@ -6,10 +6,7 @@ import DomainModel.StatoPiantagione;
 import ORM.StatoPiantagioneDAO;
 import java.util.List;
 
-/**
- * Service per la gestione degli stati delle piantagioni - MODALITÀ SOLA LETTURA
- * Gli stati sono pre-inseriti nel database e non possono essere modificati
- */
+
 public class StatoPiantagioneService {
     private final StatoPiantagioneDAO statoPiantagioneDAO;
 
@@ -17,16 +14,12 @@ public class StatoPiantagioneService {
         this.statoPiantagioneDAO = statoPiantagioneDAO;
     }
 
-    /**
-     * Recupera tutti gli stati disponibili
-     */
+
     public List<StatoPiantagione> getAllStati() {
         return statoPiantagioneDAO.findAllOrdered();
     }
 
-    /**
-     * Trova uno stato per codice con validazione business
-     */
+
     public StatoPiantagione getStatoByCodice(String codice) throws ValidationException, BusinessLogicException {
         if (codice == null || codice.trim().isEmpty()) {
             throw ValidationException.requiredField("Codice stato");
@@ -40,9 +33,7 @@ public class StatoPiantagioneService {
         return stato;
     }
 
-    /**
-     * Trova uno stato per ID con validazione business
-     */
+
     public StatoPiantagione getStatoById(Integer id) throws ValidationException, BusinessLogicException {
         if (id == null) {
             throw ValidationException.requiredField("ID stato");
@@ -56,9 +47,7 @@ public class StatoPiantagioneService {
         return stato;
     }
 
-    /**
-     * Verifica se uno stato esiste per codice
-     */
+
     public boolean existsStatoByCodice(String codice) {
         if (codice == null || codice.trim().isEmpty()) {
             return false;
@@ -66,16 +55,12 @@ public class StatoPiantagioneService {
         return statoPiantagioneDAO.existsByCodice(codice);
     }
 
-    /**
-     * Conta il numero totale di stati disponibili
-     */
+
     public int countStatiDisponibili() {
         return statoPiantagioneDAO.countStati();
     }
 
-    /**
-     * Verifica che il sistema abbia tutti gli stati standard
-     */
+
     public boolean verificaStatiStandard() throws BusinessLogicException {
         List<String> statiStandard = List.of(
             StatoPiantagione.ATTIVA,
@@ -97,16 +82,12 @@ public class StatoPiantagioneService {
         return true;
     }
 
-    /**
-     * Ottiene lo stato di default per nuove piantagioni
-     */
+
     public StatoPiantagione getStatoDefault() throws ValidationException, BusinessLogicException {
         return getStatoByCodice(StatoPiantagione.ATTIVA);
     }
 
-    /**
-     * Valida che uno stato sia utilizzabile per una piantagione
-     */
+
     public boolean isStatoValido(String codice) {
         try {
             getStatoByCodice(codice);
@@ -116,9 +97,6 @@ public class StatoPiantagioneService {
         }
     }
 
-    /**
-     * Ottiene la descrizione di uno stato senza lanciare eccezioni
-     */
     public String getDescrizioneStato(String codice) {
         try {
             StatoPiantagione stato = getStatoByCodice(codice);

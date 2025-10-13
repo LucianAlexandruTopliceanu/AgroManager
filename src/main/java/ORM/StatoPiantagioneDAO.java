@@ -81,9 +81,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 
-    /**
-     * Trova uno stato per codice con gestione errori via ErrorService
-     */
+    //TODO:Controllare se e meglio fare le query o cercare nelle liste in memoria
     public StatoPiantagione findByCodice(String codice) {
         if (codice == null || codice.trim().isEmpty()) {
             DataAccessException ex = new DataAccessException(
@@ -121,9 +119,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
         }
     }
 
-    /**
-     * Trova uno stato per ID con gestione errori via ErrorService
-     */
+
     public StatoPiantagione findById(Integer id) {
         if (id == null || id <= 0) {
             DataAccessException ex = new DataAccessException(
@@ -148,9 +144,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
         }
     }
 
-    /**
-     * Restituisce tutti gli stati ordinati per ID con gestione errori via ErrorService
-     */
+
     public List<StatoPiantagione> findAllOrdered() {
         String query = "SELECT * FROM stato_piantagione ORDER BY id";
         List<StatoPiantagione> stati = new ArrayList<>();
@@ -185,16 +179,11 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
         }
     }
 
-    /**
-     * Verifica l'esistenza di uno stato per codice
-     */
     public boolean existsByCodice(String codice) {
         return findByCodice(codice) != null;
     }
 
-    /**
-     * Conta il numero totale di stati disponibili
-     */
+
     public int countStati() {
         String query = "SELECT COUNT(*) FROM stato_piantagione";
 

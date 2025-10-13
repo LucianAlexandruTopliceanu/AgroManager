@@ -17,9 +17,7 @@ public class PiantaService {
         this.piantaDAO = piantaDAO;
     }
 
-    /**
-     * Valida una pianta utilizzando le nuove eccezioni custom
-     */
+
     private void validaPianta(Pianta pianta) throws ValidationException {
         if (pianta == null) {
             throw new ValidationException("Pianta non può essere null");

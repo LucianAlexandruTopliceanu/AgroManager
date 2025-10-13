@@ -16,7 +16,6 @@ public class RaccoltoDAO extends BaseDAO<Raccolto> {
         raccolto.setQuantitaKg(rs.getBigDecimal("quantita_kg"));
         raccolto.setNote(rs.getString("note"));
         raccolto.setPiantagioneId(rs.getInt("piantagione_id"));
-        // altri campi se necessari
         return raccolto;
     }
 
