@@ -10,7 +10,6 @@ public class Zona {
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
 
-    // Costruttori
     public Zona() {}
 
     public Zona(Integer id, String nome, Double dimensione, String tipoTerreno,
@@ -23,7 +22,6 @@ public class Zona {
         this.dataAggiornamento = dataAggiornamento;
     }
 
-    // Getter e Setter
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

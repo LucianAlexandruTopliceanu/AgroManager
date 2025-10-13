@@ -19,12 +19,6 @@ public class StatoPiantagione {
         this.descrizione = descrizione;
     }
 
-    public StatoPiantagione(String codice, String descrizione) {
-        this.codice = codice;
-        this.descrizione = descrizione;
-    }
-
-
     public static final String ATTIVA = "ATTIVA";
     public static final String RIMOSSA = "RIMOSSA";
     public static final String IN_RACCOLTA = "IN_RACCOLTA";

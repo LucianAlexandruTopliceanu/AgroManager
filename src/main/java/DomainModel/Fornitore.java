@@ -12,7 +12,6 @@ public class Fornitore {
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
 
-    // Costruttori
     public Fornitore() {}
 
     public Fornitore(Integer id, String nome, String indirizzo, String numeroTelefono,
@@ -28,7 +27,6 @@ public class Fornitore {
         this.dataAggiornamento = dataAggiornamento;
     }
 
-    // Getter e Setter
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

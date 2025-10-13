@@ -13,7 +13,6 @@ public class Pianta {
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
 
-    // Costruttori
     public Pianta() {}
 
     public Pianta(Integer id, String tipo, String varieta, BigDecimal costo, String note,
@@ -28,7 +27,6 @@ public class Pianta {
         this.dataAggiornamento = dataAggiornamento;
     }
 
-    // Getter e Setter
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

@@ -13,7 +13,6 @@ public class Raccolto {
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
 
-    // Costruttori
     public Raccolto() {}
 
     public Raccolto(Integer id, LocalDate dataRaccolto, BigDecimal quantitaKg, String note,
@@ -28,7 +27,6 @@ public class Raccolto {
         this.dataAggiornamento = dataAggiornamento;
     }
 
-    // Getter e Setter
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -50,8 +48,4 @@ public class Raccolto {
     public LocalDateTime getDataAggiornamento() { return dataAggiornamento; }
     public void setDataAggiornamento(LocalDateTime dataAggiornamento) { this.dataAggiornamento = dataAggiornamento; }
 
-    // Utility per conversione a int
-    public int getQuantitaKgInt() {
-        return quantitaKg != null ? quantitaKg.intValue() : 0;
-    }
 }
