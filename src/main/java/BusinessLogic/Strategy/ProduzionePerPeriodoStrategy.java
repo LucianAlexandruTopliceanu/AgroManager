@@ -1,5 +1,6 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.BusinessLogicException;
 import BusinessLogic.Exception.ValidationException;
 import DomainModel.Raccolto;
 import java.math.BigDecimal;
@@ -39,7 +40,7 @@ public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigD
     }
 
     @Override
-    public void validateParameters(Object... data) {
+    public void validateParameters(Object... data) throws ValidationException {
         if (data == null) throw new ValidationException("I parametri non possono essere null");
         if (data.length < 3) throw new ValidationException("Necessari: lista raccolti, data inizio e data fine");
         if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");

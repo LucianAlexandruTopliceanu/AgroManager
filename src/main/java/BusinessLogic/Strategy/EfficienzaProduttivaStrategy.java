@@ -53,7 +53,7 @@ public class EfficienzaProduttivaStrategy implements DataProcessingStrategy<BigD
     }
 
     @Override
-    public void validateParameters(Object... data) {
+    public void validateParameters(Object... data) throws ValidationException {
         if (data == null) throw new ValidationException("I parametri non possono essere null");
         if (data.length < 3) throw new ValidationException("Necessari: lista raccolti, lista piantagioni e ID piantagione");
         if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");
