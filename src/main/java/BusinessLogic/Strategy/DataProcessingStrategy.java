@@ -1,5 +1,8 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+
 
 public interface DataProcessingStrategy<T> {
 
@@ -20,12 +23,12 @@ public interface DataProcessingStrategy<T> {
     }
 
 
-    ProcessingResult<T> execute(Object... data);
+    ProcessingResult<T> execute(Object... data) throws ValidationException, BusinessLogicException;
 
 
     ProcessingType getType();
 
-    default void validateParameters(Object... data) {
-        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
+    default void validateParameters(Object... data) throws ValidationException {
+        if (data == null) throw new ValidationException("I parametri non possono essere null");
     }
 }

@@ -1,5 +1,7 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
 import DomainModel.Piantagione;
 import DomainModel.Raccolto;
 import java.math.BigDecimal;
@@ -9,7 +11,7 @@ import java.util.List;
 
 public class EfficienzaProduttivaStrategy implements DataProcessingStrategy<BigDecimal> {
     @Override
-    public ProcessingResult<BigDecimal> execute(Object... data) {
+    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException, BusinessLogicException {
         validateParameters(data);
 
         // Cast type-safe con validazione runtime
@@ -21,10 +23,10 @@ public class EfficienzaProduttivaStrategy implements DataProcessingStrategy<BigD
         Piantagione piantagione = piantagioni.stream()
             .filter(p -> p.getId() == piantagioneId)
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Piantagione non trovata: " + piantagioneId));
+            .orElseThrow(() -> new BusinessLogicException("Piantagione non trovata", "ID piantagione: " + piantagioneId));
 
         if (piantagione.getMessaADimora() == null) {
-            throw new IllegalArgumentException("Data di messa a dimora non disponibile per la piantagione " + piantagioneId);
+            throw new BusinessLogicException("Data di messa a dimora mancante", "Piantagione ID: " + piantagioneId);
         }
 
         // Calcola il totale dei raccolti
@@ -37,7 +39,7 @@ public class EfficienzaProduttivaStrategy implements DataProcessingStrategy<BigD
         // Calcola i giorni dalla messa a dimora
         long giorniTotali = ChronoUnit.DAYS.between(piantagione.getMessaADimora(), java.time.LocalDate.now());
         if (giorniTotali <= 0) {
-            throw new IllegalArgumentException("La piantagione è stata messa a dimora oggi o in futuro");
+            throw new BusinessLogicException("Piantagione troppo recente", "La piantagione è stata messa a dimora oggi o in futuro");
         }
 
         // Calcola l'efficienza (kg per pianta per giorno)
@@ -46,30 +48,17 @@ public class EfficienzaProduttivaStrategy implements DataProcessingStrategy<BigD
         BigDecimal mediaPerPianta = totale.divide(numeroPiante, 4, RoundingMode.HALF_UP);
         BigDecimal efficienzaGiornaliera = mediaPerPianta.divide(new BigDecimal(giorniTotali), 4, RoundingMode.HALF_UP);
 
-        String output = String.format("Efficienza produttiva piantagione %d:\n" +
-            "Periodo: %s (%d giorni)\n" +
-            "Produzione totale: %.2f kg\n" +
-            "Numero piante: %s\n" +
-            "Media per pianta: %.2f kg/pianta\n" +
-            "Efficienza: %.4f kg/pianta/giorno",
-            piantagioneId,
-            piantagione.getMessaADimora(),
-            giorniTotali,
-            totale,
-            numeroPiante,
-            mediaPerPianta,
-            efficienzaGiornaliera);
-
-        return new ProcessingResult<>(efficienzaGiornaliera, output);
+        // Restituisce solo il dato numerico - nessuna formattazione
+        return new ProcessingResult<>(efficienzaGiornaliera);
     }
 
     @Override
     public void validateParameters(Object... data) {
-        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
-        if (data.length < 3) throw new IllegalArgumentException("Necessari: lista raccolti, lista piantagioni e ID piantagione");
-        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
-        if (!(data[1] instanceof List)) throw new IllegalArgumentException("Secondo parametro deve essere List<Piantagione>");
-        if (!(data[2] instanceof Integer)) throw new IllegalArgumentException("Terzo parametro deve essere Integer");
+        if (data == null) throw new ValidationException("I parametri non possono essere null");
+        if (data.length < 3) throw new ValidationException("Necessari: lista raccolti, lista piantagioni e ID piantagione");
+        if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");
+        if (!(data[1] instanceof List)) throw new ValidationException("Secondo parametro deve essere List<Piantagione>");
+        if (!(data[2] instanceof Integer)) throw new ValidationException("Terzo parametro deve essere Integer (ID piantagione)");
     }
 
     @SuppressWarnings("unchecked")

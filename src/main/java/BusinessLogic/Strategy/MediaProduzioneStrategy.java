@@ -1,5 +1,7 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
 import DomainModel.Piantagione;
 import DomainModel.Raccolto;
 import java.math.BigDecimal;
@@ -8,9 +10,8 @@ import java.util.List;
 
 public class MediaProduzioneStrategy implements DataProcessingStrategy<BigDecimal> {
     @Override
-    public ProcessingResult<BigDecimal> execute(Object... data) {
+    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException, BusinessLogicException {
         validateParameters(data);
-
 
         List<Raccolto> raccolti = castToRaccoltiList(data[0]);
         List<Piantagione> piantagioni = castToPiantagioniList(data[1]);
@@ -20,7 +21,7 @@ public class MediaProduzioneStrategy implements DataProcessingStrategy<BigDecima
         Piantagione piantagione = piantagioni.stream()
             .filter(p -> p.getId() == piantagioneId)
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Piantagione non trovata: " + piantagioneId));
+            .orElseThrow(() -> new BusinessLogicException("Piantagione non trovata", "ID piantagione: " + piantagioneId));
 
         // Calcola il totale dei raccolti
         BigDecimal totale = raccolti.stream()
@@ -34,22 +35,17 @@ public class MediaProduzioneStrategy implements DataProcessingStrategy<BigDecima
             new BigDecimal(piantagione.getQuantitaPianta()) : BigDecimal.ONE;
         BigDecimal media = totale.divide(numeroPiante, 2, RoundingMode.HALF_UP);
 
-        String output = String.format("Media produzione per piantagione %d:\n" +
-            "Totale produzione: %.2f kg\n" +
-            "Numero piante: %s\n" +
-            "Media per pianta: %.2f kg/pianta",
-            piantagioneId, totale, numeroPiante, media);
-
-        return new ProcessingResult<>(media, output);
+        // Restituisce solo il dato numerico - nessuna formattazione
+        return new ProcessingResult<>(media);
     }
 
     @Override
     public void validateParameters(Object... data) {
-        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
-        if (data.length < 3) throw new IllegalArgumentException("Necessari: lista raccolti, lista piantagioni e ID piantagione");
-        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
-        if (!(data[1] instanceof List)) throw new IllegalArgumentException("Secondo parametro deve essere List<Piantagione>");
-        if (!(data[2] instanceof Integer)) throw new IllegalArgumentException("Terzo parametro deve essere Integer");
+        if (data == null) throw new ValidationException("I parametri non possono essere null");
+        if (data.length < 3) throw new ValidationException("Necessari: lista raccolti, lista piantagioni e ID piantagione");
+        if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");
+        if (!(data[1] instanceof List)) throw new ValidationException("Secondo parametro deve essere List<Piantagione>");
+        if (!(data[2] instanceof Integer)) throw new ValidationException("Terzo parametro deve essere Integer (ID piantagione)");
     }
 
     @SuppressWarnings("unchecked")

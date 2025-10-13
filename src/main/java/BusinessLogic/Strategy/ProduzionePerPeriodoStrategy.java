@@ -1,5 +1,6 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.Raccolto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,9 +11,8 @@ import java.time.temporal.ChronoUnit;
 public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigDecimal> {
 
     @Override
-    public ProcessingResult<BigDecimal> execute(Object... data) {
+    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException, BusinessLogicException {
         validateParameters(data);
-
 
         List<Raccolto> raccolti = castToRaccoltiList(data[0]);
         LocalDate inizio = (LocalDate) data[1];
@@ -24,25 +24,8 @@ public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigD
             .filter(q -> q != null)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long giorniPeriodo = ChronoUnit.DAYS.between(inizio, fine) + 1;
-        BigDecimal mediaGiornaliera = giorniPeriodo > 0 ?
-            produzione.divide(new BigDecimal(giorniPeriodo), 2, java.math.RoundingMode.HALF_UP) :
-            BigDecimal.ZERO;
-
-        String output = String.format("""
-            📅 Produzione nel periodo:
-            ▸ Dal: %s
-            ▸ Al: %s
-            ▸ Durata: %d giorni
-            ▸ Produzione totale: %.2f kg
-            ▸ Media giornaliera: %.2f kg/giorno""",
-            inizio.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-            fine.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-            giorniPeriodo,
-            produzione,
-            mediaGiornaliera);
-
-        return new ProcessingResult<>(produzione, output);
+        // Restituisce solo il dato numerico - nessuna formattazione
+        return new ProcessingResult<>(produzione);
     }
 
     @SuppressWarnings("unchecked")
@@ -57,15 +40,15 @@ public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigD
 
     @Override
     public void validateParameters(Object... data) {
-        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
-        if (data.length < 3) throw new IllegalArgumentException("Necessari: lista raccolti, data inizio e data fine");
-        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
-        if (!(data[1] instanceof LocalDate)) throw new IllegalArgumentException("Secondo parametro deve essere LocalDate");
-        if (!(data[2] instanceof LocalDate)) throw new IllegalArgumentException("Terzo parametro deve essere LocalDate");
+        if (data == null) throw new ValidationException("I parametri non possono essere null");
+        if (data.length < 3) throw new ValidationException("Necessari: lista raccolti, data inizio e data fine");
+        if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");
+        if (!(data[1] instanceof LocalDate)) throw new ValidationException("Secondo parametro deve essere LocalDate (data inizio)");
+        if (!(data[2] instanceof LocalDate)) throw new ValidationException("Terzo parametro deve essere LocalDate (data fine)");
 
         LocalDate inizio = (LocalDate) data[1];
         LocalDate fine = (LocalDate) data[2];
-        if (fine.isBefore(inizio)) throw new IllegalArgumentException("La data di fine non può essere precedente alla data di inizio");
+        if (fine.isBefore(inizio)) throw new ValidationException("La data di fine non può essere precedente alla data di inizio");
     }
 
     @Override

@@ -1,5 +1,7 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
 import DomainModel.Raccolto;
 import java.math.BigDecimal;
 import java.util.*;
@@ -7,11 +9,11 @@ import java.util.stream.Collectors;
 
 public class TopPiantagioniStrategy implements DataProcessingStrategy<Map<Integer, BigDecimal>> {
     @Override
-    public ProcessingResult<Map<Integer, BigDecimal>> execute(Object... data) {
+    public ProcessingResult<Map<Integer, BigDecimal>> execute(Object... data) throws ValidationException, BusinessLogicException {
         validateParameters(data);
 
         List<Raccolto> raccolti = castToRaccoltiList(data[0]);
-        int topN = data.length > 1 ? (Integer) data[1] : 1; // Se non specificato, prende solo la migliore
+        int topN = data.length > 1 ? (Integer) data[1] : 1;
 
         // Raggruppa per piantagione e somma le quantità
         Map<Integer, BigDecimal> produzioniPerPiantagione = raccolti.stream()
@@ -25,6 +27,12 @@ public class TopPiantagioniStrategy implements DataProcessingStrategy<Map<Intege
                 )
             ));
 
+        // Verifica che ci siano piantagioni da analizzare
+        if (produzioniPerPiantagione.isEmpty()) {
+            throw new BusinessLogicException("Nessuna piantagione trovata",
+                "Non ci sono raccolti validi per calcolare le top piantagioni");
+        }
+
         // Ordina per produzione e prendi i top N
         Map<Integer, BigDecimal> topPiantagioni = produzioniPerPiantagione.entrySet().stream()
             .sorted(Map.Entry.<Integer, BigDecimal>comparingByValue().reversed())
@@ -36,37 +44,21 @@ public class TopPiantagioniStrategy implements DataProcessingStrategy<Map<Intege
                 LinkedHashMap::new
             ));
 
-        // Formatta l'output in base al numero di risultati richiesti
-        String output;
-        if (topN == 1) {
-            Map.Entry<Integer, BigDecimal> best = topPiantagioni.entrySet().iterator().next();
-            output = String.format("🏆 Piantagione più produttiva:\n" +
-                                 "ID: %d\n" +
-                                 "Produzione totale: %.2f kg",
-                                 best.getKey(), best.getValue());
-        } else {
-            StringBuilder sb = new StringBuilder(String.format("Top %d piantagioni per produzione:\n", topN));
-            int pos = 1;
-            for (Map.Entry<Integer, BigDecimal> entry : topPiantagioni.entrySet()) {
-                String medal = pos == 1 ? "🥇" : pos == 2 ? "🥈" : pos == 3 ? "🥉" : "▫️";
-                sb.append(String.format("%s #%d: Piantagione %d - %.2f kg\n",
-                    medal, pos++, entry.getKey(), entry.getValue()));
-            }
-            output = sb.toString();
-        }
-
-        return new ProcessingResult<>(topPiantagioni, output);
+        // Restituisce solo i dati - nessuna formattazione
+        return new ProcessingResult<>(topPiantagioni);
     }
 
     @Override
-    public void validateParameters(Object... data) {
-        if (data == null) throw new IllegalArgumentException("I parametri non possono essere null");
-        if (data.length < 1) throw new IllegalArgumentException("Necessaria almeno la lista raccolti");
-        if (!(data[0] instanceof List)) throw new IllegalArgumentException("Primo parametro deve essere List<Raccolto>");
+    public void validateParameters(Object... data) throws ValidationException {
+        if (data == null) throw new ValidationException("I parametri non possono essere null");
+        if (data.length < 1) throw new ValidationException("Necessaria almeno la lista raccolti");
+        if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");
+
         if (data.length > 1) {
-            if (!(data[1] instanceof Integer)) throw new IllegalArgumentException("Secondo parametro deve essere Integer");
+            if (!(data[1] instanceof Integer)) throw new ValidationException("Secondo parametro deve essere Integer (numero top piantagioni)");
             int topN = (Integer) data[1];
-            if (topN <= 0) throw new IllegalArgumentException("Il numero di piantagioni deve essere positivo");
+            if (topN <= 0) throw new ValidationException("Il numero di piantagioni deve essere positivo");
+            if (topN > 100) throw new ValidationException("Il numero di piantagioni non può essere superiore a 100");
         }
     }
 
