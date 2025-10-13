@@ -7,6 +7,7 @@ import ORM.PiantagioneDAO;
 import ORM.DAOFactory;
 import DomainModel.Piantagione;
 import DomainModel.StatoPiantagione;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -134,6 +135,34 @@ public class PiantagioneService {
             return piantagioneDAO.read(id);
         } catch (Exception e) {
             throw DataAccessException.queryError("lettura piantagione", e);
+        }
+    }
+
+    // Metodo per filtri - richiesto dal controller
+    public List<Piantagione> getPiantagioniConFiltri(View.PiantagioneView.CriteriFiltro criteriFiltro) throws DataAccessException {
+        try {
+            var tuttePiantagioni = piantagioneDAO.findAll();
+
+            return tuttePiantagioni.stream()
+                .filter(p -> {
+                    boolean matchPianta = criteriFiltro.pianta() == null || criteriFiltro.pianta().isEmpty() ||
+                                         (p.getPiantaId() != null && p.getPiantaId().toString().equals(criteriFiltro.pianta()));
+                    boolean matchZona = criteriFiltro.zona() == null || criteriFiltro.zona().isEmpty() ||
+                                       (p.getZonaId() != null && p.getZonaId().toString().equals(criteriFiltro.zona()));
+                    boolean matchStato = criteriFiltro.stato() == null || criteriFiltro.stato().isEmpty() ||
+                                        (p.getStatoPiantagione() != null && p.getStatoPiantagione().getDescrizione().contains(criteriFiltro.stato()));
+                    boolean matchData = true;
+                    if (criteriFiltro.dataDa() != null && p.getMessaADimora() != null) {
+                        matchData = !p.getMessaADimora().isBefore(criteriFiltro.dataDa());
+                    }
+                    if (criteriFiltro.dataA() != null && p.getMessaADimora() != null) {
+                        matchData = matchData && !p.getMessaADimora().isAfter(criteriFiltro.dataA());
+                    }
+                    return matchPianta && matchZona && matchStato && matchData;
+                })
+                .toList();
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("applicazione filtri piantagioni", e);
         }
     }
 }

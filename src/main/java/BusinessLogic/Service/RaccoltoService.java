@@ -183,4 +183,29 @@ public class RaccoltoService {
             throw DataAccessException.queryError("lettura raccolti per periodo", e);
         }
     }
+
+    // Metodo per filtri - richiesto dal controller
+    public List<Raccolto> getRaccoltiConFiltri(View.RaccoltoView.CriteriFiltro criteriFiltro) throws DataAccessException {
+        try {
+            var tuttiRaccolti = raccoltoDAO.findAll();
+
+            return tuttiRaccolti.stream()
+                .filter(r -> {
+                    boolean matchPiantagione = criteriFiltro.piantagione() == null || criteriFiltro.piantagione().isEmpty() ||
+                                              (r.getPiantagioneId() != null && r.getPiantagioneId().toString().equals(criteriFiltro.piantagione()));
+                    boolean matchDataDa = criteriFiltro.dataDa() == null ||
+                                         (r.getDataRaccolto() != null && !r.getDataRaccolto().isBefore(criteriFiltro.dataDa()));
+                    boolean matchDataA = criteriFiltro.dataA() == null ||
+                                        (r.getDataRaccolto() != null && !r.getDataRaccolto().isAfter(criteriFiltro.dataA()));
+                    boolean matchQuantitaMin = criteriFiltro.quantitaMin() == null ||
+                                              (r.getQuantitaKg() != null && r.getQuantitaKg().doubleValue() >= criteriFiltro.quantitaMin());
+                    boolean matchQuantitaMax = criteriFiltro.quantitaMax() == null ||
+                                              (r.getQuantitaKg() != null && r.getQuantitaKg().doubleValue() <= criteriFiltro.quantitaMax());
+                    return matchPiantagione && matchDataDa && matchDataA && matchQuantitaMin && matchQuantitaMax;
+                })
+                .toList();
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("applicazione filtri raccolti", e);
+        }
+    }
 }

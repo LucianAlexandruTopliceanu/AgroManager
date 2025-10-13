@@ -111,4 +111,23 @@ public class ZonaService {
             throw DataAccessException.queryError("lettura lista zone", e);
         }
     }
+
+    // Metodo per filtri - richiesto dal controller
+    public List<Zona> getZoneConFiltri(View.ZonaView.CriteriFiltro criteriFiltro) throws DataAccessException {
+        try {
+            var tutteZone = zonaDAO.findAll();
+
+            return tutteZone.stream()
+                .filter(z -> {
+                    boolean matchNome = criteriFiltro.nome() == null || criteriFiltro.nome().isEmpty() ||
+                                       z.getNome().toLowerCase().contains(criteriFiltro.nome().toLowerCase());
+                    boolean matchTipoTerreno = criteriFiltro.tipoTerreno() == null || criteriFiltro.tipoTerreno().isEmpty() ||
+                                              z.getTipoTerreno().toLowerCase().contains(criteriFiltro.tipoTerreno().toLowerCase());
+                    return matchNome && matchTipoTerreno;
+                })
+                .toList();
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("applicazione filtri zone", e);
+        }
+    }
 }

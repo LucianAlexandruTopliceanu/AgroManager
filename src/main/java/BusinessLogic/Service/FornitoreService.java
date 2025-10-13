@@ -123,4 +123,23 @@ public class FornitoreService {
             throw DataAccessException.queryError("lettura lista fornitori", e);
         }
     }
+
+    // Metodo per filtri - richiesto dal controller
+    public List<Fornitore> getFornitoriConFiltri(View.FornitoreView.CriteriFiltro criteriFiltro) throws DataAccessException {
+        try {
+            var tuttiFornitori = fornitoreDAO.findAll();
+
+            return tuttiFornitori.stream()
+                .filter(f -> {
+                    boolean matchNome = criteriFiltro.nome() == null || criteriFiltro.nome().isEmpty() ||
+                                       f.getNome().toLowerCase().contains(criteriFiltro.nome().toLowerCase());
+                    boolean matchCitta = criteriFiltro.citta() == null || criteriFiltro.citta().isEmpty() ||
+                                        f.getIndirizzo().toLowerCase().contains(criteriFiltro.citta().toLowerCase());
+                    return matchNome && matchCitta;
+                })
+                .toList();
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("applicazione filtri fornitori", e);
+        }
+    }
 }

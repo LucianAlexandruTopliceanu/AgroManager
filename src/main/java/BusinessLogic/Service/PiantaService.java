@@ -132,4 +132,25 @@ public class PiantaService {
             throw DataAccessException.queryError("lettura piante per fornitore", e);
         }
     }
+
+    // Metodo per filtri - richiesto dal controller
+    public List<Pianta> getPianteConFiltri(View.PiantaView.CriteriFiltro criteriFiltro) throws DataAccessException {
+        try {
+            var tuttePiante = piantaDAO.findAll();
+
+            return tuttePiante.stream()
+                .filter(p -> {
+                    boolean matchTipo = criteriFiltro.tipo() == null || criteriFiltro.tipo().isEmpty() ||
+                                       p.getTipo().toLowerCase().contains(criteriFiltro.tipo().toLowerCase());
+                    boolean matchVarieta = criteriFiltro.varieta() == null || criteriFiltro.varieta().isEmpty() ||
+                                          p.getVarieta().toLowerCase().contains(criteriFiltro.varieta().toLowerCase());
+                    boolean matchFornitore = criteriFiltro.fornitore() == null || criteriFiltro.fornitore().isEmpty() ||
+                                           (p.getFornitoreId() != null && p.getFornitoreId().toString().equals(criteriFiltro.fornitore()));
+                    return matchTipo && matchVarieta && matchFornitore;
+                })
+                .toList();
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("applicazione filtri piante", e);
+        }
+    }
 }

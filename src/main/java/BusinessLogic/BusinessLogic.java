@@ -223,4 +223,35 @@ public class BusinessLogic {
             throw new ValidationException("Parametri strategia non validi: " + e.getMessage());
         }
     }
+
+    public Map<String, List<String>> getDatiPerComboBox() throws DataAccessException {
+        try {
+            var piantagioni = DAOFactory.getPiantagioneDAO().findAll();
+            var zone = DAOFactory.getZonaDAO().findAll();
+
+            return Map.of(
+                "piantagioni", piantagioni.stream().map(p -> p.getId().toString()).toList(),
+                "zone", zone.stream().map(z -> z.getNome()).toList()
+            );
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("recupero dati per combo box", e);
+        }
+    }
+
+    public Map<String, Object> aggiornaEOttieniStatistiche() throws DataAccessException {
+        try {
+            var raccolti = DAOFactory.getRaccoltoDAO().findAll();
+            var piantagioni = DAOFactory.getPiantagioneDAO().findAll();
+            var zone = DAOFactory.getZonaDAO().findAll();
+
+            return Map.of(
+                "totaleRaccolti", raccolti.size(),
+                "totalePiantagioni", piantagioni.size(),
+                "totaleZone", zone.size(),
+                "ultimoAggiornamento", java.time.LocalDateTime.now()
+            );
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("aggiornamento statistiche", e);
+        }
+    }
 }
