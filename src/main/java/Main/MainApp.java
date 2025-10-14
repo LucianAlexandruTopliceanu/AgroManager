@@ -23,6 +23,7 @@ public class MainApp extends Application {
     private PiantaService piantaService;
     private PiantagioneService piantagioneService;
     private RaccoltoService raccoltoService;
+    private StatoPiantagioneService statoPiantagioneService;
     private BusinessLogic businessLogic;
 
     // Controllers
@@ -43,8 +44,6 @@ public class MainApp extends Application {
 
     // Status components
     private Label statusLabel;
-    private ProgressIndicator loadingIndicator;
-    private BorderPane mainLayout;
     private boolean systemReady = false;
 
     @Override
@@ -70,7 +69,7 @@ public class MainApp extends Application {
         Label titleLabel = new Label("🌱 AgroManager");
         titleLabel.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
 
-        loadingIndicator = new ProgressIndicator();
+        ProgressIndicator loadingIndicator = new ProgressIndicator();
         loadingIndicator.setMaxSize(60, 60);
 
         statusLabel = new Label("Inizializzazione in corso...");
@@ -84,7 +83,7 @@ public class MainApp extends Application {
     }
 
     private void initializeApplicationAsync(Stage primaryStage) {
-        Task<Void> initTask = new Task<Void>() {
+        Task<Void> initTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
                 Platform.runLater(() -> statusLabel.setText("Inizializzazione servizi..."));
@@ -125,7 +124,7 @@ public class MainApp extends Application {
     }
 
     private void showMainInterface(Stage primaryStage) {
-        mainLayout = new BorderPane();
+        BorderPane mainLayout = new BorderPane();
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabPane.setStyle("-fx-tab-min-height: 35px; -fx-tab-max-height: 35px;");
@@ -151,7 +150,12 @@ public class MainApp extends Application {
 
         // Carica gli stili CSS se disponibili
         try {
-            scene.getStylesheets().add(getClass().getResource("/styles/application.css").toExternalForm());
+            var cssResource = getClass().getResource("/styles/application.css");
+            if (cssResource != null) {
+                scene.getStylesheets().add(cssResource.toExternalForm());
+            } else {
+                applyDefaultStyles(scene);
+            }
         } catch (Exception e) {
             // CSS file non trovato, usa stili di default
             applyDefaultStyles(scene);
@@ -209,6 +213,7 @@ public class MainApp extends Application {
         piantaService = new PiantaService(DAOFactory.getPiantaDAO());
         piantagioneService = new PiantagioneService(DAOFactory.getPiantagioneDAO());
         raccoltoService = new RaccoltoService(DAOFactory.getRaccoltoDAO());
+        statoPiantagioneService = new StatoPiantagioneService(DAOFactory.getStatoPiantagioneDAO()); // Inizializzazione servizio mancante
         businessLogic = new BusinessLogic();
     }
 
@@ -224,10 +229,17 @@ public class MainApp extends Application {
     private void initializeControllers() {
         zonaController = new ZonaController(zonaService, zonaView);
         fornitoreController = new FornitoreController(fornitoreService, fornitoreView);
-        piantaController = new PiantaController(piantaService, piantaView);
-        piantagioneController = new PiantagioneController(piantagioneService, zonaService, piantaService, piantagioneView);
+        piantaController = new PiantaController(piantaService, fornitoreService, piantaView);
+        piantagioneController = new PiantagioneController(piantagioneService, zonaService, piantaService, statoPiantagioneService, piantagioneView);
         raccoltoController = new RaccoltoController(raccoltoService, piantagioneService, raccoltoView);
-        dataProcessingController = new DataProcessingController(dataProcessingView, businessLogic);
+
+        // Inizializza il controller per l'elaborazione dati
+        try {
+            dataProcessingController = new DataProcessingController(dataProcessingView, businessLogic);
+        } catch (Exception e) {
+            // Controller opzionale - continua senza se non disponibile
+            ErrorService.handleException("Inizializzazione DataProcessingController", e);
+        }
     }
 
     // Metodo per verificare se il sistema è operativo - delega ai servizi la verifica
@@ -350,7 +362,10 @@ public class MainApp extends Application {
                 // Card Piantagioni
                 VBox piantagioniCard = createStatsCard("🌱", "Piantagioni", String.valueOf(piantagioneService.getAllPiantagioni().size()), "#9b59b6");
 
-                statsContainer.getChildren().addAll(zoneCard, fornitoriCard, pianteCard, piantagioniCard);
+                // Card Raccolti
+                VBox raccoltiCard = createStatsCard("🥕", "Raccolti", String.valueOf(raccoltoService.getAllRaccolti().size()), "#e74c3c");
+
+                statsContainer.getChildren().addAll(zoneCard, fornitoriCard, pianteCard, piantagioniCard, raccoltiCard);
 
             } catch (DataAccessException e) {
                 // Mostra card di errore
@@ -373,27 +388,37 @@ public class MainApp extends Application {
         if (systemReady) {
             Button nuovaZonaBtn = createActionButton("➕ Nuova Zona", "Aggiungi una nuova zona di coltivazione", e -> {
                 tabPane.getSelectionModel().select(1);
-                zonaController.onNuovaZona();
+                if (zonaController != null) {
+                    zonaController.onNuovaZona();
+                }
             });
 
             Button nuovoFornitoreBtn = createActionButton("➕ Nuovo Fornitore", "Registra un nuovo fornitore", e -> {
                 tabPane.getSelectionModel().select(2);
-                fornitoreController.onNuovoFornitore();
+                if (fornitoreController != null) {
+                    fornitoreController.onNuovoFornitore();
+                }
             });
 
             Button nuovaPiantaBtn = createActionButton("➕ Nuova Pianta", "Aggiungi una nuova varietà di pianta", e -> {
                 tabPane.getSelectionModel().select(3);
-                piantaController.onNuovaPianta();
+                if (piantaController != null) {
+                    piantaController.onNuovaPianta();
+                }
             });
 
             Button nuovaPiantagioneBtn = createActionButton("🌱 Nuova Piantagione", "Crea una nuova piantagione", e -> {
                 tabPane.getSelectionModel().select(4);
-                piantagioneController.onNuovaPiantagione();
+                if (piantagioneController != null) {
+                    piantagioneController.onNuovaPiantagione();
+                }
             });
 
             Button nuovoRaccoltoBtn = createActionButton("🥕 Nuovo Raccolto", "Registra un nuovo raccolto", e -> {
                 tabPane.getSelectionModel().select(5);
-                raccoltoController.onNuovoRaccolto();
+                if (raccoltoController != null) {
+                    raccoltoController.onNuovoRaccolto();
+                }
             });
 
             Button analisiBtn = createActionButton("📈 Analisi Dati", "Visualizza report e statistiche", e -> {
@@ -408,7 +433,10 @@ public class MainApp extends Application {
             actionsPane.getChildren().add(offlineMessage);
         }
 
-        content.getChildren().addAll(headerLabel, statsContainer, actionsHeader, actionsPane);
+        // Sezione informazioni sistema
+        VBox systemInfoBox = createSystemInfoCard();
+
+        content.getChildren().addAll(headerLabel, statsContainer, actionsHeader, actionsPane, systemInfoBox);
 
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
@@ -483,6 +511,47 @@ public class MainApp extends Application {
         return button;
     }
 
+    private VBox createSystemInfoCard() {
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
+                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+
+        Label titleLabel = new Label("ℹ️ Informazioni Sistema");
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+
+        GridPane infoGrid = new GridPane();
+        infoGrid.setHgap(15);
+        infoGrid.setVgap(8);
+
+        infoGrid.addRow(0, createInfoLabel("Status:"), createStatusLabel());
+        infoGrid.addRow(1, createInfoLabel("Pattern:"), createInfoValueLabel("MVC con Strategy Pattern"));
+        infoGrid.addRow(2, createInfoLabel("Gestione Errori:"), createInfoValueLabel("Centralizzata (ErrorService)"));
+        infoGrid.addRow(3, createInfoLabel("Validazione:"), createInfoValueLabel("Standardizzata nei Service"));
+        infoGrid.addRow(4, createInfoLabel("UI Framework:"), createInfoValueLabel("JavaFX"));
+
+        card.getChildren().addAll(titleLabel, infoGrid);
+        return card;
+    }
+
+    private Label createInfoLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: #7f8c8d; -fx-min-width: 120px;");
+        return label;
+    }
+
+    private Label createInfoValueLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-text-fill: #2c3e50;");
+        return label;
+    }
+
+    private Label createStatusLabel() {
+        Label label = new Label(systemReady ? "🟢 Operativo" : "🔴 Limitato");
+        label.setStyle("-fx-text-fill: " + (systemReady ? "#27ae60" : "#e74c3c") + "; -fx-font-weight: bold;");
+        return label;
+    }
+
     private HBox creaBarraStato() {
         HBox barraStato = new HBox();
         barraStato.setPadding(new Insets(8, 15, 8, 15));
@@ -497,6 +566,16 @@ public class MainApp extends Application {
         dbLabel.setStyle("-fx-text-fill: " + (systemReady ? "#27ae60" : "#e74c3c") + "; -fx-font-size: 12px; -fx-font-weight: bold;");
 
         dbStatus.getChildren().addAll(dbIcon, dbLabel);
+
+        // Informazioni architettura
+        HBox archStatus = new HBox(8);
+        archStatus.setAlignment(Pos.CENTER_LEFT);
+
+        Label archIcon = new Label("🏗️");
+        Label archLabel = new Label("Pattern MVC");
+        archLabel.setStyle("-fx-text-fill: #3498db; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        archStatus.getChildren().addAll(archIcon, archLabel);
 
         // Spacer centrale
         Region spacer = new Region();
@@ -515,7 +594,7 @@ public class MainApp extends Application {
 
         systemInfo.getChildren().addAll(userLabel, timeLabel);
 
-        barraStato.getChildren().addAll(dbStatus, spacer, systemInfo);
+        barraStato.getChildren().addAll(dbStatus, archStatus, spacer, systemInfo);
         return barraStato;
     }
 

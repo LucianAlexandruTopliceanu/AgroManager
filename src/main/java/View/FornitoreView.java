@@ -17,15 +17,12 @@ public class FornitoreView extends VBox {
     private final Button nuovoBtn;
     private final Button modificaBtn;
     private final Button eliminaBtn;
-    private final Button aggiornaBtn;
+    private final Button applicaFiltriBtn;
+    private final Button resetFiltriBtn;
 
     // Controlli di ricerca
     private final TextField ricercaNomeField;
     private final TextField ricercaCittaField;
-
-    // Callback per notificare il controller sui cambiamenti dei filtri
-    private java.util.function.Consumer<String> onTestoRicercaNomeChanged;
-    private java.util.function.Consumer<String> onTestoRicercaCittaChanged;
 
     public FornitoreView() {
         tableFornitori = new TableView<>();
@@ -33,7 +30,8 @@ public class FornitoreView extends VBox {
         nuovoBtn = new Button("➕ Nuovo Fornitore");
         modificaBtn = new Button("✏️ Modifica");
         eliminaBtn = new Button("🗑️ Elimina");
-        aggiornaBtn = new Button("🔄 Aggiorna");
+        applicaFiltriBtn = new Button("🔍 Applica Filtri");
+        resetFiltriBtn = new Button("🔄 Reset Filtri");
         ricercaNomeField = new TextField();
         ricercaCittaField = new TextField();
 
@@ -118,23 +116,14 @@ public class FornitoreView extends VBox {
         HBox ricercaControls = new HBox(10);
         ricercaNomeField.setPromptText("Cerca per nome...");
         ricercaNomeField.setPrefWidth(200);
-        ricercaNomeField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (onTestoRicercaNomeChanged != null) {
-                onTestoRicercaNomeChanged.accept(newVal);
-            }
-        });
 
         ricercaCittaField.setPromptText("Cerca per città...");
         ricercaCittaField.setPrefWidth(150);
-        ricercaCittaField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (onTestoRicercaCittaChanged != null) {
-                onTestoRicercaCittaChanged.accept(newVal);
-            }
-        });
 
         ricercaControls.getChildren().addAll(
             new Label("Nome:"), ricercaNomeField,
-            new Label("Città:"), ricercaCittaField
+            new Label("Città:"), ricercaCittaField,
+            applicaFiltriBtn, resetFiltriBtn
         );
 
         ricercaBox.getChildren().addAll(ricercaLabel, ricercaControls);
@@ -162,8 +151,11 @@ public class FornitoreView extends VBox {
                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
         eliminaBtn.setDisable(true);
 
-        aggiornaBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
+        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
+                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
+
+        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
+                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
 
         // Gestione selezione
         tableFornitori.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
@@ -172,7 +164,7 @@ public class FornitoreView extends VBox {
             eliminaBtn.setDisable(!hasSelection);
         });
 
-        pulsantiBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn, aggiornaBtn);
+        pulsantiBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn);
         azioniBox.getChildren().addAll(azioniLabel, pulsantiBox);
 
         getChildren().addAll(ricercaBox, azioniBox, tableFornitori);
@@ -197,22 +189,49 @@ public class FornitoreView extends VBox {
     public void setOnNuovoFornitore(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
+
     public void setOnModificaFornitore(Runnable handler) {
         modificaBtn.setOnAction(e -> handler.run());
     }
+
     public void setOnEliminaFornitore(Runnable handler) {
         eliminaBtn.setOnAction(e -> handler.run());
     }
 
-    public void setOnAggiornaFornitori(Consumer<Void> handler) {
-        aggiornaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnApplicaFiltri(Runnable handler) {
+        applicaFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    // Metodi per il controller per impostare le callback
-    public void setOnTestoRicercaNomeChanged(java.util.function.Consumer<String> handler) {
-        this.onTestoRicercaNomeChanged = handler;
+    public void setOnResetFiltri(Runnable handler) {
+        resetFiltriBtn.setOnAction(e -> handler.run());
     }
-    public void setOnTestoRicercaCittaChanged(java.util.function.Consumer<String> handler) {
-        this.onTestoRicercaCittaChanged = handler;
+
+    // Metodi per gestione filtri
+    public CriteriFiltro getCriteriFiltro() {
+        return new CriteriFiltro(
+            ricercaNomeField.getText().trim(),
+            ricercaCittaField.getText().trim()
+        );
     }
+
+    public void resetFiltri() {
+        ricercaNomeField.clear();
+        ricercaCittaField.clear();
+    }
+
+    // Metodo per conferma eliminazione
+    public boolean confermaEliminazione(Fornitore fornitore) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Conferma Eliminazione");
+        alert.setHeaderText("Stai per eliminare il fornitore:");
+        alert.setContentText(fornitore.getNome() + " - " + fornitore.getEmail() +
+                            "\n\nQuesta operazione non può essere annullata.");
+
+        return alert.showAndWait()
+                .filter(response -> response == ButtonType.OK)
+                .isPresent();
+    }
+
+    // Record per criteri di filtro
+    public record CriteriFiltro(String nome, String citta) {}
 }

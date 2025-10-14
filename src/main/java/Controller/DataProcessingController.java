@@ -46,7 +46,7 @@ public class DataProcessingController {
         try {
             // Delega al BusinessLogic per ottenere i dati necessari
             var datiComboBox = businessLogic.getDatiPerComboBox();
-            view.updateComboBoxes(datiComboBox.getPiantagioni(), datiComboBox.getZone());
+            view.updateComboBoxes(datiComboBox.get("piantagioni"), datiComboBox.get("zone"));
         } catch (Exception e) {
             ErrorService.handleException("inizializzazione view", e);
         }
@@ -134,24 +134,13 @@ public class DataProcessingController {
 
     private void onAggiornaDati() {
         try {
-            view.setStatus("Aggiornamento dati in corso...");
-
-            // Delega al BusinessLogic
-            var statistiche = businessLogic.aggiornaEOttieniStatistiche();
-
-            // Aggiorna la view con i nuovi dati
             var datiComboBox = businessLogic.getDatiPerComboBox();
-            view.updateComboBoxes(datiComboBox.getPiantagioni(), datiComboBox.getZone());
+            view.updateComboBoxes(datiComboBox.get("piantagioni"), datiComboBox.get("zone"));
 
-            // Passa le statistiche alla view per la presentazione
+            var statistiche = businessLogic.aggiornaEOttieniStatistiche();
             view.mostraStatistiche(statistiche);
-            view.setStatus("Dati aggiornati");
-
-            NotificationHelper.showSuccess("Aggiornamento Completato", "Dati aggiornati con successo!");
-
         } catch (Exception e) {
             ErrorService.handleException("aggiornamento dati", e);
-            view.setStatus("Errore aggiornamento");
         }
     }
 

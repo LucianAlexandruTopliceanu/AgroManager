@@ -1,100 +1,88 @@
 package Controller;
 
-import BusinessLogic.Exception.ValidationException;
-import BusinessLogic.Exception.BusinessLogicException;
-import BusinessLogic.Exception.DataAccessException;
 import BusinessLogic.Service.ErrorService;
 import BusinessLogic.Service.PiantaService;
-import DomainModel.Pianta;
-import View.PiantaDialog;
+import BusinessLogic.Service.FornitoreService;
 import View.PiantaView;
+import View.PiantaDialog;
 import View.NotificationHelper;
+import DomainModel.Pianta;
+import DomainModel.Fornitore;
+import java.util.List;
 
 public class PiantaController {
     private final PiantaService piantaService;
+    private final FornitoreService fornitoreService;
     private final PiantaView piantaView;
 
-    // Stato dei filtri
-    private String filtroTipo = "";
-    private String filtroVarieta = "";
-    private String filtroFornitore = "";
-
-    public PiantaController(PiantaService piantaService, PiantaView piantaView) {
+    public PiantaController(PiantaService piantaService, FornitoreService fornitoreService, PiantaView piantaView) {
         this.piantaService = piantaService;
+        this.fornitoreService = fornitoreService;
         this.piantaView = piantaView;
 
         setupEventHandlers();
-        aggiornaView();
+        inizializzaFiltri();
+        aggiornaPiante();
     }
 
     private void setupEventHandlers() {
         piantaView.setOnNuovaPianta(this::onNuovaPianta);
         piantaView.setOnModificaPianta(this::onModificaPianta);
         piantaView.setOnEliminaPianta(this::onEliminaPianta);
-
-        // Callback per i filtri
-        piantaView.setOnTestoRicercaTipoChanged(this::onFiltroTipoChanged);
-        piantaView.setOnTestoRicercaVarietaChanged(this::onFiltroVarietaChanged);
-        piantaView.setOnFiltroFornitoreChanged(this::onFiltroFornitoreChanged);
-
-        // Callback per aggiornamento dati
-        piantaView.setOnAggiornaPiante(v -> aggiornaView());
+        piantaView.setOnApplicaFiltri(this::onApplicaFiltri);
+        piantaView.setOnResetFiltri(this::onResetFiltri);
     }
 
-    private void onFiltroTipoChanged(String nuovoTipo) {
-        filtroTipo = nuovoTipo != null ? nuovoTipo : "";
-        aggiornaView();
-    }
-
-    private void onFiltroVarietaChanged(String nuovaVarieta) {
-        filtroVarieta = nuovaVarieta != null ? nuovaVarieta : "";
-        aggiornaView();
-    }
-
-    private void onFiltroFornitoreChanged(String nuovoFornitore) {
-        filtroFornitore = nuovoFornitore != null ? nuovoFornitore : "";
-        aggiornaView();
-    }
-
-    private void aggiornaView() {
+    private void inizializzaFiltri() {
         try {
-            java.util.List<Pianta> tutte = piantaService.getAllPiante();
-
-            // Applica i filtri
-            java.util.List<Pianta> filtrate = tutte.stream()
-                .filter(p -> filtroTipo.isEmpty() ||
-                            p.getTipo().toLowerCase().contains(filtroTipo.toLowerCase()))
-                .filter(p -> filtroVarieta.isEmpty() ||
-                            p.getVarieta().toLowerCase().contains(filtroVarieta.toLowerCase()))
-                .filter(p -> filtroFornitore.isEmpty() || "Tutti".equals(filtroFornitore) ||
-                            String.valueOf(p.getFornitoreId()).equals(filtroFornitore))
+            List<Fornitore> fornitori = fornitoreService.getAllFornitori();
+            List<String> nomiFornitori = fornitori.stream()
+                .map(f -> f.getId() + " - " + f.getNome())
                 .toList();
+            piantaView.setFornitori(nomiFornitori);
+        } catch (Exception e) {
+            ErrorService.handleException("caricamento fornitori per filtri", e);
+        }
+    }
 
-            piantaView.setPiante(filtrate);
+    private void onApplicaFiltri() {
+        try {
+            var criteriFiltro = piantaView.getCriteriFiltro();
+            var pianteFiltrate = piantaService.getPianteConFiltri(criteriFiltro);
+            piantaView.setPiante(pianteFiltrate);
+        } catch (Exception e) {
+            ErrorService.handleException("applicazione filtri", e);
+        }
+    }
 
-        } catch (DataAccessException e) {
-            ErrorService.handleException(e);
+    private void onResetFiltri() {
+        piantaView.resetFiltri();
+        aggiornaPiante();
+    }
+
+    private void aggiornaPiante() {
+        try {
+            var tutte = piantaService.getAllPiante();
+            piantaView.setPiante(tutte);
         } catch (Exception e) {
             ErrorService.handleException("caricamento piante", e);
         }
     }
 
     public void onNuovaPianta() {
-        PiantaDialog dialog = new PiantaDialog(new Pianta());
-        dialog.showAndWait();
+        try {
+            List<Fornitore> fornitori = fornitoreService.getAllFornitori();
+            PiantaDialog dialog = new PiantaDialog(new Pianta());
+            dialog.showAndWait();
 
-        if (dialog.isConfermato()) {
-            Pianta pianta = dialog.getPianta();
-            try {
+            if (dialog.isConfermato()) {
+                Pianta pianta = dialog.getPianta();
                 piantaService.aggiungiPianta(pianta);
                 NotificationHelper.showSuccess("Operazione completata", "Pianta aggiunta con successo!");
-                aggiornaView();
-
-            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                ErrorService.handleException(e);
-            } catch (Exception e) {
-                ErrorService.handleException("aggiunta pianta", e);
+                aggiornaPiante();
             }
+        } catch (Exception e) {
+            ErrorService.handleException("aggiunta pianta", e);
         }
     }
 
@@ -105,20 +93,18 @@ public class PiantaController {
             return;
         }
 
-        PiantaDialog dialog = new PiantaDialog(selezionata);
-        dialog.showAndWait();
+        try {
+            List<Fornitore> fornitori = fornitoreService.getAllFornitori();
+            PiantaDialog dialog = new PiantaDialog(selezionata);
+            dialog.showAndWait();
 
-        if (dialog.isConfermato()) {
-            try {
+            if (dialog.isConfermato()) {
                 piantaService.aggiornaPianta(dialog.getPianta());
                 NotificationHelper.showSuccess("Operazione completata", "Pianta aggiornata con successo!");
-                aggiornaView();
-
-            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                ErrorService.handleException(e);
-            } catch (Exception e) {
-                ErrorService.handleException("aggiornamento pianta", e);
+                aggiornaPiante();
             }
+        } catch (Exception e) {
+            ErrorService.handleException("aggiornamento pianta", e);
         }
     }
 
@@ -129,18 +115,15 @@ public class PiantaController {
             return;
         }
 
-        if (NotificationHelper.confirmCriticalOperation("Eliminazione Pianta",
-                "Pianta: " + selezionata.getTipo() + " - " + selezionata.getVarieta())) {
-            try {
+        try {
+            boolean confermato = piantaView.confermaEliminazione(selezionata);
+            if (confermato) {
                 piantaService.eliminaPianta(selezionata.getId());
                 NotificationHelper.showSuccess("Operazione completata", "Pianta eliminata con successo!");
-                aggiornaView();
-
-            } catch (ValidationException | BusinessLogicException | DataAccessException e) {
-                ErrorService.handleException(e);
-            } catch (Exception e) {
-                ErrorService.handleException("eliminazione pianta", e);
+                aggiornaPiante();
             }
+        } catch (Exception e) {
+            ErrorService.handleException("eliminazione pianta", e);
         }
     }
 }

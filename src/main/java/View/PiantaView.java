@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import java.util.function.Consumer;
 
 public class PiantaView extends VBox {
 
@@ -17,17 +16,13 @@ public class PiantaView extends VBox {
     private final Button nuovoBtn;
     private final Button modificaBtn;
     private final Button eliminaBtn;
-    private final Button aggiornaBtn;
+    private final Button applicaFiltriBtn;
+    private final Button resetFiltriBtn;
 
     // Controlli di ricerca e filtro
     private final TextField ricercaTipoField;
     private final TextField ricercaVarietaField;
     private final ComboBox<String> filtroFornitoreCombo;
-
-    // Callback per notificare il controller sui cambiamenti dei filtri
-    private java.util.function.Consumer<String> onTestoRicercaTipoChanged;
-    private java.util.function.Consumer<String> onTestoRicercaVarietaChanged;
-    private java.util.function.Consumer<String> onFiltroFornitoreChanged;
 
     public PiantaView() {
         tablePiante = new TableView<>();
@@ -35,7 +30,8 @@ public class PiantaView extends VBox {
         nuovoBtn = new Button("➕ Nuova Pianta");
         modificaBtn = new Button("✏️ Modifica");
         eliminaBtn = new Button("🗑️ Elimina");
-        aggiornaBtn = new Button("🔄 Aggiorna");
+        applicaFiltriBtn = new Button("🔍 Applica Filtri");
+        resetFiltriBtn = new Button("🔄 Reset Filtri");
         ricercaTipoField = new TextField();
         ricercaVarietaField = new TextField();
         filtroFornitoreCombo = new ComboBox<>();
@@ -87,15 +83,8 @@ public class PiantaView extends VBox {
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getNote()));
         noteCol.setPrefWidth(200);
 
-        // Correzione per evitare generic array creation warning
         tablePiante.getColumns().clear();
-        tablePiante.getColumns().add(idCol);
-        tablePiante.getColumns().add(tipoCol);
-        tablePiante.getColumns().add(varietaCol);
-        tablePiante.getColumns().add(costoCol);
-        tablePiante.getColumns().add(fornitoreCol);
-        tablePiante.getColumns().add(noteCol);
-
+        tablePiante.getColumns().addAll(idCol, tipoCol, varietaCol, costoCol, fornitoreCol, noteCol);
         tablePiante.setItems(pianteData);
 
         // Double-click per modifica
@@ -103,7 +92,7 @@ public class PiantaView extends VBox {
             TableRow<Pianta> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    modificaPianta();
+                    // Il controller gestirà l'apertura del dialog
                 }
             });
             return row;
@@ -113,58 +102,32 @@ public class PiantaView extends VBox {
     }
 
     private void setupControls() {
-        // Sezione ricerca
-        VBox ricercaBox = new VBox(10);
-        ricercaBox.setPadding(new Insets(15));
-        ricercaBox.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                           "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+        // Sezione ricerca in card
+        VBox ricercaCard = createCard("🔍 Ricerca Piante");
+        GridPane ricercaGrid = new GridPane();
+        ricercaGrid.setHgap(10);
+        ricercaGrid.setVgap(10);
 
-        Label ricercaLabel = new Label("🔍 Ricerca Piante");
-        ricercaLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-
-        HBox ricercaControls = new HBox(10);
         ricercaTipoField.setPromptText("Cerca per tipo...");
-        ricercaTipoField.setPrefWidth(150);
-        ricercaTipoField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (onTestoRicercaTipoChanged != null) {
-                onTestoRicercaTipoChanged.accept(newVal);
-            }
-        });
-
         ricercaVarietaField.setPromptText("Cerca per varietà...");
-        ricercaVarietaField.setPrefWidth(150);
-        ricercaVarietaField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (onTestoRicercaVarietaChanged != null) {
-                onTestoRicercaVarietaChanged.accept(newVal);
-            }
-        });
+        filtroFornitoreCombo.setPromptText("Tutti i fornitori");
 
-        filtroFornitoreCombo.setPromptText("Filtra per fornitore");
-        filtroFornitoreCombo.setPrefWidth(200);
-        filtroFornitoreCombo.setOnAction(e -> {
-            if (onFiltroFornitoreChanged != null) {
-                onFiltroFornitoreChanged.accept(filtroFornitoreCombo.getValue());
-            }
-        });
+        ricercaGrid.addRow(0, new Label("Tipo:"), ricercaTipoField);
+        ricercaGrid.addRow(1, new Label("Varietà:"), ricercaVarietaField);
+        ricercaGrid.addRow(2, new Label("Fornitore:"), filtroFornitoreCombo);
 
-        ricercaControls.getChildren().addAll(
-            new Label("Tipo:"), ricercaTipoField,
-            new Label("Varietà:"), ricercaVarietaField,
-            new Label("Fornitore:"), filtroFornitoreCombo
-        );
+        HBox filtriActions = new HBox(10);
+        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
+                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
+        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
+                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
+        filtriActions.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
 
-        ricercaBox.getChildren().addAll(ricercaLabel, ricercaControls);
+        ricercaCard.getChildren().addAll(ricercaGrid, filtriActions);
 
-        // Sezione azioni
-        VBox azioniBox = new VBox(10);
-        azioniBox.setPadding(new Insets(15));
-        azioniBox.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                          "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-
-        Label azioniLabel = new Label("⚡ Azioni");
-        azioniLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-
-        HBox pulsantiBox = new HBox(10);
+        // Sezione azioni in card
+        VBox azioniCard = createCard("⚡ Azioni");
+        HBox azioniBox = new HBox(10);
 
         // Stili pulsanti
         nuovoBtn.setStyle("-fx-background-color: #28A745; -fx-text-fill: white; " +
@@ -178,9 +141,6 @@ public class PiantaView extends VBox {
                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
         eliminaBtn.setDisable(true);
 
-        aggiornaBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-
         // Gestione selezione
         tablePiante.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean hasSelection = newSel != null;
@@ -188,16 +148,23 @@ public class PiantaView extends VBox {
             eliminaBtn.setDisable(!hasSelection);
         });
 
-        pulsantiBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn, aggiornaBtn);
-        azioniBox.getChildren().addAll(azioniLabel, pulsantiBox);
+        azioniBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn);
+        azioniCard.getChildren().add(azioniBox);
 
-        getChildren().addAll(ricercaBox, azioniBox, tablePiante);
+        getChildren().addAll(ricercaCard, azioniCard, tablePiante);
     }
 
-    private void modificaPianta() {
-        if (getPiantaSelezionata() != null) {
-            // Il controller gestirà l'apertura del dialog
-        }
+    private VBox createCard(String title) {
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
+                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        card.getChildren().add(titleLabel);
+
+        return card;
     }
 
     // Metodi pubblici per il controller
@@ -209,48 +176,59 @@ public class PiantaView extends VBox {
         return tablePiante.getSelectionModel().getSelectedItem();
     }
 
-    // Handler per i pulsanti principali
+    // Event handlers
     public void setOnNuovaPianta(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
+
     public void setOnModificaPianta(Runnable handler) {
         modificaBtn.setOnAction(e -> handler.run());
     }
+
     public void setOnEliminaPianta(Runnable handler) {
         eliminaBtn.setOnAction(e -> handler.run());
     }
 
-    public void setOnAggiornaPiante(Consumer<Void> handler) {
-        aggiornaBtn.setOnAction(e -> handler.accept(null));
+    public void setOnApplicaFiltri(Runnable handler) {
+        applicaFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    public String getTestoRicercaTipo() {
-        return ricercaTipoField.getText();
+    public void setOnResetFiltri(Runnable handler) {
+        resetFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    public String getTestoRicercaVarieta() {
-        return ricercaVarietaField.getText();
-    }
-
-    public String getFiltroFornitore() {
-        return filtroFornitoreCombo.getValue();
-    }
-
+    // Gestione filtri
     public void setFornitori(java.util.List<String> fornitori) {
-        filtroFornitoreCombo.getItems().clear();
-        filtroFornitoreCombo.getItems().add("Tutti");
-        filtroFornitoreCombo.getItems().addAll(fornitori);
-        filtroFornitoreCombo.setValue("Tutti");
+        filtroFornitoreCombo.getItems().setAll(fornitori);
     }
 
-    // Metodi per il controller per impostare le callback
-    public void setOnTestoRicercaTipoChanged(java.util.function.Consumer<String> handler) {
-        this.onTestoRicercaTipoChanged = handler;
+    public CriteriFiltro getCriteriFiltro() {
+        return new CriteriFiltro(
+            ricercaTipoField.getText().trim(),
+            ricercaVarietaField.getText().trim(),
+            filtroFornitoreCombo.getValue()
+        );
     }
-    public void setOnTestoRicercaVarietaChanged(java.util.function.Consumer<String> handler) {
-        this.onTestoRicercaVarietaChanged = handler;
+
+    public void resetFiltri() {
+        ricercaTipoField.clear();
+        ricercaVarietaField.clear();
+        filtroFornitoreCombo.setValue(null);
     }
-    public void setOnFiltroFornitoreChanged(java.util.function.Consumer<String> handler) {
-        this.onFiltroFornitoreChanged = handler;
+
+    // Metodo per conferma eliminazione
+    public boolean confermaEliminazione(Pianta pianta) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Conferma Eliminazione");
+        alert.setHeaderText("Stai per eliminare la pianta:");
+        alert.setContentText(pianta.getTipo() + " - " + pianta.getVarieta() +
+                            "\n\nQuesta operazione non può essere annullata.");
+
+        return alert.showAndWait()
+                .filter(response -> response == ButtonType.OK)
+                .isPresent();
     }
+
+    // Record per criteri di filtro
+    public record CriteriFiltro(String tipo, String varieta, String fornitore) {}
 }
