@@ -1,8 +1,9 @@
 package BusinessLogic.Strategy;
 
 import BusinessLogic.Service.TestLogger;
-import BusinessLogic.Strategy.*;
-import DomainModel.Pianta;
+import BusinessLogic.Exception.ValidationException;
+import BusinessLogic.Exception.BusinessLogicException;
+import BusinessLogic.Strategy.DataProcessingStrategy.ProcessingType;
 import DomainModel.Piantagione;
 import DomainModel.Raccolto;
 import DomainModel.Zona;
@@ -13,11 +14,6 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per DataProcessingStrategy - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- * CORRETTO per conformità architetturale
- */
 @DisplayName("DataProcessingStrategy Test Suite")
 public class DataProcessingStrategyTest {
 
@@ -25,7 +21,6 @@ public class DataProcessingStrategyTest {
     private List<Raccolto> raccolti;
     private List<Piantagione> piantagioni;
     private List<Zona> zone;
-    private DataProcessingContext context;
 
     @BeforeAll
     static void setupSuite() {
@@ -34,12 +29,11 @@ public class DataProcessingStrategyTest {
 
     @AfterAll
     static void tearDownSuite() {
-        testLogger.endTestSuite("DataProcessingStrategy", 6, 6, 0);
+        testLogger.endTestSuite("DataProcessingStrategy", 8, 8, 0);
     }
 
     @BeforeEach
     void setUp() {
-        context = new DataProcessingContext();
         setupData();
     }
 
@@ -55,9 +49,15 @@ public class DataProcessingStrategyTest {
         raccolto2.setId(2);
         raccolto2.setDataRaccolto(LocalDate.now().minusDays(3));
         raccolto2.setQuantitaKg(new BigDecimal("18.25"));
-        raccolto2.setPiantagioneId(2);
+        raccolto2.setPiantagioneId(1);
 
-        raccolti = Arrays.asList(raccolto1, raccolto2);
+        Raccolto raccolto3 = new Raccolto();
+        raccolto3.setId(3);
+        raccolto3.setDataRaccolto(LocalDate.now().minusDays(1));
+        raccolto3.setQuantitaKg(new BigDecimal("32.75"));
+        raccolto3.setPiantagioneId(2);
+
+        raccolti = Arrays.asList(raccolto1, raccolto2, raccolto3);
 
         // Piantagioni mock
         Piantagione piantagione1 = new Piantagione();
@@ -91,177 +91,172 @@ public class DataProcessingStrategyTest {
     }
 
     @Test
-    @DisplayName("Test context execution strategia")
-    void testContextExecution() {
-        testLogger.startTest("context execution");
+    @DisplayName("Test ProduzioneTotaleStrategy - Calcolo corretto")
+    void testProduzioneTotaleStrategy() throws Exception {
+        testLogger.startTest("ProduzioneTotaleStrategy calcolo");
 
-        // Usa l'architettura reale documentata
-        DataProcessingStrategy<String> mockStrategy = new DataProcessingStrategy<String>() {
-            @Override
-            public ProcessingResult<String> execute(Object... data) {
-                return new ProcessingResult<>("Test Result", "Strategy eseguita con successo");
-            }
+        ProduzioneTotaleStrategy strategy = new ProduzioneTotaleStrategy();
 
-            @Override
-            public ProcessingType getType() {
-                return ProcessingType.CALCULATION;
-            }
-        };
-
-        ProcessingResult<?> result = context.executeStrategy(mockStrategy, raccolti, piantagioni, zone);
+        // Test con piantagione ID 1
+        ProcessingResult<BigDecimal> result = strategy.execute(raccolti, 1);
 
         assertNotNull(result);
-        assertNotNull(result.getValue());
+        assertNotNull(result.getData());
+        assertEquals(DataProcessingStrategy.ProcessingType.CALCULATION, strategy.getType());
 
-        testLogger.operation("Strategy eseguita", result.getFormattedOutput());
-        testLogger.testPassed("context execution");
+        // Verifica il calcolo: raccolto1 (25.50) + raccolto2 (18.25) = 43.75
+        BigDecimal expected = new BigDecimal("43.75");
+        assertEquals(0, expected.compareTo(result.getData()));
+
+        testLogger.operation("Produzione totale calcolata", result.getData().toString() + " kg");
+        testLogger.testPassed("ProduzioneTotaleStrategy calcolo");
     }
 
     @Test
-    @DisplayName("Test validazione parametri null")
-    void testParametriNull() {
-        testLogger.startTest("validazione parametri null");
+    @DisplayName("Test MediaProduzioneStrategy - Calcolo per pianta")
+    void testMediaProduzioneStrategy() throws Exception {
+        testLogger.startTest("MediaProduzioneStrategy calcolo");
 
-        DataProcessingStrategy<String> mockStrategy = new DataProcessingStrategy<String>() {
-            @Override
-            public ProcessingResult<String> execute(Object... data) {
-                return new ProcessingResult<>("Test", "Test completato");
-            }
+        MediaProduzioneStrategy strategy = new MediaProduzioneStrategy();
 
-            @Override
-            public ProcessingType getType() {
-                return ProcessingType.CALCULATION;
-            }
-        };
+        ProcessingResult<BigDecimal> result = strategy.execute(raccolti, piantagioni, 1);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            context.executeStrategy(mockStrategy, (Object[]) null);
+        assertNotNull(result);
+        assertNotNull(result.getData());
+        assertEquals(DataProcessingStrategy.ProcessingType.CALCULATION, strategy.getType());
+
+        // Verifica il calcolo: totale 43.75 kg / 100 piante = 0.44 kg per pianta
+        BigDecimal expected = new BigDecimal("0.44");
+        assertEquals(0, expected.compareTo(result.getData()));
+
+        testLogger.operation("Media produzione calcolata", result.getData().toString() + " kg/pianta");
+        testLogger.testPassed("MediaProduzioneStrategy calcolo");
+    }
+
+    @Test
+    @DisplayName("Test validazione parametri - ProduzioneTotaleStrategy")
+    void testValidazioneParametriProduzioneTotale() {
+        testLogger.startTest("validazione parametri ProduzioneTotaleStrategy");
+
+        ProduzioneTotaleStrategy strategy = new ProduzioneTotaleStrategy();
+
+        // Test parametri null
+        assertThrows(ValidationException.class, () -> {
+            strategy.execute((Object[]) null);
         });
 
-        testLogger.expectedError("parametri null", "IllegalArgumentException");
-        testLogger.testPassed("validazione parametri null");
-    }
-
-    @Test
-    @DisplayName("Test validazione tipo strategia")
-    void testValidazioneTipoStrategia() {
-        testLogger.startTest("validazione tipo strategia");
-
-        DataProcessingStrategy<String> calculationStrategy = new DataProcessingStrategy<String>() {
-            @Override
-            public ProcessingResult<String> execute(Object... data) {
-                return new ProcessingResult<>("Calculation", "Calcolo eseguito");
-            }
-
-            @Override
-            public ProcessingType getType() {
-                return ProcessingType.CALCULATION;
-            }
-        };
-
-        // Prova ad eseguire come STATISTICS ma la strategia è CALCULATION
-        assertThrows(IllegalArgumentException.class, () -> {
-            context.executeStrategyOfType(
-                DataProcessingStrategy.ProcessingType.STATISTICS,
-                calculationStrategy,
-                raccolti
-            );
+        // Test parametri insufficienti
+        assertThrows(ValidationException.class, () -> {
+            strategy.execute(raccolti);
         });
 
-        testLogger.expectedError("tipo strategia errato", "IllegalArgumentException");
-        testLogger.testPassed("validazione tipo strategia");
+        // Test tipo parametro errato
+        assertThrows(ValidationException.class, () -> {
+            strategy.execute("wrong type", 1);
+        });
+
+        testLogger.expectedError("parametri non validi", "ValidationException");
+        testLogger.testPassed("validazione parametri ProduzioneTotaleStrategy");
     }
 
     @Test
-    @DisplayName("Test execution con tipo corretto")
-    void testExecutionTipoCorretto() {
-        testLogger.startTest("execution con tipo corretto");
+    @DisplayName("Test validazione parametri - MediaProduzioneStrategy")
+    void testValidazioneParametriMediaProduzione() {
+        testLogger.startTest("validazione parametri MediaProduzioneStrategy");
 
-        DataProcessingStrategy<String> reportStrategy = new DataProcessingStrategy<String>() {
-            @Override
-            public ProcessingResult<String> execute(Object... data) {
-                return new ProcessingResult<>("Report Generated", "Report creato con successo");
-            }
+        MediaProduzioneStrategy strategy = new MediaProduzioneStrategy();
 
-            @Override
-            public ProcessingType getType() {
-                return ProcessingType.REPORT;
-            }
-        };
+        // Test parametri insufficienti
+        assertThrows(ValidationException.class, () -> {
+            strategy.execute(raccolti, piantagioni);
+        });
 
-        ProcessingResult<?> result = context.executeStrategyOfType(
-            DataProcessingStrategy.ProcessingType.REPORT,
-            reportStrategy,
-            raccolti, piantagioni
-        );
+        // Test tipo parametro errato per piantagione ID
+        assertThrows(ValidationException.class, () -> {
+            strategy.execute(raccolti, piantagioni, "wrong type");
+        });
 
-        assertNotNull(result);
-        assertNotNull(result.getValue());
-        assertEquals("Report Generated", result.getValue());
-
-        testLogger.operation("Report generato", result.getFormattedOutput());
-        testLogger.testPassed("execution con tipo corretto");
+        testLogger.expectedError("parametri non validi", "ValidationException");
+        testLogger.testPassed("validazione parametri MediaProduzioneStrategy");
     }
 
     @Test
-    @DisplayName("Test mock strategia calculation")
-    void testMockCalculationStrategy() {
-        testLogger.startTest("mock calculation strategy");
+    @DisplayName("Test BusinessLogicException - Piantagione non trovata")
+    void testPiantagioneNonTrovata() {
+        testLogger.startTest("piantagione non trovata");
 
-        DataProcessingStrategy<BigDecimal> calculationStrategy = new DataProcessingStrategy<BigDecimal>() {
-            @Override
-            public ProcessingResult<BigDecimal> execute(Object... data) {
-                // Simula calcolo produzione totale
-                BigDecimal totale = new BigDecimal("43.75"); // 25.50 + 18.25
-                return new ProcessingResult<>(totale, "Produzione totale: " + totale + " kg");
-            }
+        MediaProduzioneStrategy strategy = new MediaProduzioneStrategy();
 
-            @Override
-            public ProcessingType getType() {
-                return ProcessingType.CALCULATION;
-            }
-        };
+        // Test con ID piantagione inesistente
+        assertThrows(BusinessLogicException.class, () -> {
+            strategy.execute(raccolti, piantagioni, 999);
+        });
 
-        ProcessingResult<?> result = context.executeStrategy(calculationStrategy, raccolti);
-
-        assertNotNull(result);
-        assertNotNull(result.getValue());
-        assertEquals(new BigDecimal("43.75"), result.getValue());
-
-        testLogger.operation("Produzione calcolata", result.getFormattedOutput());
-        testLogger.testPassed("mock calculation strategy");
+        testLogger.expectedError("piantagione non trovata", "BusinessLogicException");
+        testLogger.testPassed("piantagione non trovata");
     }
 
     @Test
-    @DisplayName("Test mock strategia statistics")
-    void testMockStatisticsStrategy() {
-        testLogger.startTest("mock statistics strategy");
+    @DisplayName("Test ProcessingResult - Struttura dati")
+    void testProcessingResultStruttura() throws Exception {
+        testLogger.startTest("ProcessingResult struttura");
 
-        DataProcessingStrategy<Map<String, Object>> statisticsStrategy = new DataProcessingStrategy<Map<String, Object>>() {
-            @Override
-            public ProcessingResult<Map<String, Object>> execute(Object... data) {
-                Map<String, Object> stats = new HashMap<>();
-                stats.put("totalePiantagioni", 2);
-                stats.put("totaleZone", 2);
-                stats.put("mediaProduzione", 21.875);
-                return new ProcessingResult<>(stats, "Statistiche generate: " + stats.size() + " metriche");
-            }
+        ProduzioneTotaleStrategy strategy = new ProduzioneTotaleStrategy();
+        ProcessingResult<BigDecimal> result = strategy.execute(raccolti, 1);
 
-            @Override
-            public ProcessingType getType() {
-                return ProcessingType.STATISTICS;
-            }
-        };
+        // Test metodi della classe ProcessingResult
+        assertNotNull(result.getData());
+        assertNotNull(result.getMetadata());
+        assertTrue(result.getMetadata().isEmpty()); // Metadata vuoto per default
 
-        ProcessingResult<?> result = context.executeStrategy(statisticsStrategy, piantagioni, zone);
+        // Test compatibilità metodo legacy
+        assertEquals(result.getData(), result.getValue());
 
-        assertNotNull(result);
-        assertNotNull(result.getValue());
-        @SuppressWarnings("unchecked")
-        Map<String, Object> stats = (Map<String, Object>) result.getValue();
-        assertEquals(2, stats.get("totalePiantagioni"));
+        testLogger.operation("ProcessingResult validato", "getData() e metadata verificati");
+        testLogger.testPassed("ProcessingResult struttura");
+    }
 
-        testLogger.operation("Statistiche generate", result.getFormattedOutput());
-        testLogger.testPassed("mock statistics strategy");
+    @Test
+    @DisplayName("Test separazione responsabilità - Solo dati numerici")
+    void testSeparazioneResponsabilita() throws Exception {
+        testLogger.startTest("separazione responsabilità");
+
+        ProduzioneTotaleStrategy strategy = new ProduzioneTotaleStrategy();
+        ProcessingResult<BigDecimal> result = strategy.execute(raccolti, 1);
+
+        // Verifica che la strategy restituisca solo dati numerici puri
+        assertTrue(result.getData() instanceof BigDecimal);
+        assertFalse(result.getData().toString().contains("kg")); // Nessuna unità di misura
+        assertFalse(result.getData().toString().contains("€")); // Nessun simbolo di valuta
+
+        // Il dato deve essere numerico puro per permettere alla view di formattarlo
+        BigDecimal data = result.getData();
+        assertTrue(data.compareTo(BigDecimal.ZERO) >= 0);
+
+        testLogger.operation("Dati puri verificati", "Nessuna formattazione nella strategy");
+        testLogger.testPassed("separazione responsabilità");
+    }
+
+    @Test
+    @DisplayName("Test tipi di processing - Enum ProcessingType")
+    void testTipiProcessing() {
+        testLogger.startTest("tipi processing");
+
+        ProduzioneTotaleStrategy calculationStrategy = new ProduzioneTotaleStrategy();
+        MediaProduzioneStrategy mediaStrategy = new MediaProduzioneStrategy();
+
+        // Verifica tipi delle strategy
+        assertEquals(DataProcessingStrategy.ProcessingType.CALCULATION, calculationStrategy.getType());
+        assertEquals(DataProcessingStrategy.ProcessingType.CALCULATION, mediaStrategy.getType());
+
+        // Verifica enum ProcessingType
+        assertNotNull(DataProcessingStrategy.ProcessingType.CALCULATION.getDescription());
+        assertNotNull(DataProcessingStrategy.ProcessingType.STATISTICS.getDescription());
+        assertNotNull(DataProcessingStrategy.ProcessingType.REPORT.getDescription());
+
+        assertEquals("Calcoli numerici", DataProcessingStrategy.ProcessingType.CALCULATION.getDescription());
+
+        testLogger.operation("Tipi processing verificati", "Enum e strategy types corretti");
+        testLogger.testPassed("tipi processing");
     }
 }

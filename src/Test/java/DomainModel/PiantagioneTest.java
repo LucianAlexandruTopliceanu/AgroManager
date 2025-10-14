@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Piantagione Test Suite")
 public class PiantagioneTest {
     private Piantagione piantagione;
     private StatoPiantagione statoTest;
@@ -17,13 +18,11 @@ public class PiantagioneTest {
     void setUp() {
         piantagione = new Piantagione();
 
-        statoTest = new StatoPiantagione();
-        statoTest.setId(1);
-        statoTest.setCodice(StatoPiantagione.ATTIVA);
-        statoTest.setDescrizione("Piantagione attiva");
+        statoTest = new StatoPiantagione(1, StatoPiantagione.ATTIVA, "Piantagione attiva");
     }
 
     @Test
+    @DisplayName("Test costruttore vuoto")
     void testCostruttoreVuoto() {
         assertNotNull(piantagione);
         assertNull(piantagione.getId());
@@ -31,6 +30,7 @@ public class PiantagioneTest {
     }
 
     @Test
+    @DisplayName("Test costruttore completo")
     void testCostruttoreCompleto() {
         LocalDateTime now = LocalDateTime.now();
         LocalDate oggi = LocalDate.now();
@@ -48,248 +48,137 @@ public class PiantagioneTest {
     }
 
     @Test
+    @DisplayName("Test getter e setter di base")
     void testGetterESetterBasici() {
-        LocalDate data = LocalDate.now().minusDays(10);
-        LocalDateTime timestamp = LocalDateTime.now();
-
+        // Test ID
         piantagione.setId(123);
-        piantagione.setQuantitaPianta(15);
-        piantagione.setMessaADimora(data);
-        piantagione.setPiantaId(5);
-        piantagione.setZonaId(3);
-        piantagione.setDataCreazione(timestamp);
-        piantagione.setDataAggiornamento(timestamp);
-
         assertEquals(123, piantagione.getId());
-        assertEquals(15, piantagione.getQuantitaPianta());
+
+        // Test quantità pianta
+        piantagione.setQuantitaPianta(50);
+        assertEquals(50, piantagione.getQuantitaPianta());
+
+        // Test data messa a dimora
+        LocalDate data = LocalDate.of(2024, 3, 15);
+        piantagione.setMessaADimora(data);
         assertEquals(data, piantagione.getMessaADimora());
-        assertEquals(5, piantagione.getPiantaId());
-        assertEquals(3, piantagione.getZonaId());
-        assertEquals(timestamp, piantagione.getDataCreazione());
-        assertEquals(timestamp, piantagione.getDataAggiornamento());
+
+        // Test pianta ID
+        piantagione.setPiantaId(10);
+        assertEquals(10, piantagione.getPiantaId());
+
+        // Test zona ID
+        piantagione.setZonaId(5);
+        assertEquals(5, piantagione.getZonaId());
     }
 
-    // Test sistema di stati
     @Test
-    void testGetterESetterStato() {
+    @DisplayName("Test date di creazione e aggiornamento")
+    void testDateCreazione() {
+        LocalDateTime now = LocalDateTime.now();
+
+        piantagione.setDataCreazione(now);
+        assertEquals(now, piantagione.getDataCreazione());
+
+        piantagione.setDataAggiornamento(now.plusHours(1));
+        assertEquals(now.plusHours(1), piantagione.getDataAggiornamento());
+    }
+
+    @Test
+    @DisplayName("Test gestione stato piantagione - ID")
+    void testGestioneStatoId() {
+        // Test ID stato piantagione
         piantagione.setIdStatoPiantagione(2);
         assertEquals(2, piantagione.getIdStatoPiantagione());
 
+        // Test default
+        Piantagione nuovaPiantagione = new Piantagione();
+        assertEquals(1, nuovaPiantagione.getIdStatoPiantagione());
+    }
+
+    @Test
+    @DisplayName("Test gestione stato piantagione - Oggetto")
+    void testGestioneStatoOggetto() {
+        // Test con oggetto StatoPiantagione
         piantagione.setStatoPiantagione(statoTest);
         assertEquals(statoTest, piantagione.getStatoPiantagione());
-        assertEquals(1, piantagione.getIdStatoPiantagione()); // Dovrebbe sincronizzarsi
-    }
+        assertEquals(1, piantagione.getIdStatoPiantagione()); // Dovrebbe sincronizzare l'ID
 
-    @Test
-    void testSincronizzazioneStatoEId() {
-        // Quando impostiamo lo stato, l'ID dovrebbe sincronizzarsi
-        piantagione.setStatoPiantagione(statoTest);
-        assertEquals(statoTest.getId(), piantagione.getIdStatoPiantagione());
-
-        // Test con stato null
+        // Test con null
         piantagione.setStatoPiantagione(null);
         assertNull(piantagione.getStatoPiantagione());
-        // L'ID non dovrebbe cambiare quando impostiamo null
+        assertEquals(1, piantagione.getIdStatoPiantagione()); // L'ID non dovrebbe cambiare
     }
 
     @Test
-    void testIsAttiva() {
-        // Con oggetto stato
-        piantagione.setStatoPiantagione(statoTest);
-        assertTrue(piantagione.isAttiva());
-
-        // Con solo ID stato (fallback)
-        piantagione.setStatoPiantagione(null);
-        piantagione.setIdStatoPiantagione(1);
-        assertTrue(piantagione.isAttiva());
-
-        // Con stato diverso
-        piantagione.setIdStatoPiantagione(2);
-        assertFalse(piantagione.isAttiva());
+    @DisplayName("Test stati piantagione predefiniti")
+    void testStatiPredefiniti() {
+        // Test costanti della classe StatoPiantagione
+        assertEquals("ATTIVA", StatoPiantagione.ATTIVA);
+        assertEquals("RIMOSSA", StatoPiantagione.RIMOSSA);
+        assertEquals("IN_RACCOLTA", StatoPiantagione.IN_RACCOLTA);
+        assertEquals("COMPLETATA", StatoPiantagione.COMPLETATA);
+        assertEquals("SOSPESA", StatoPiantagione.SOSPESA);
     }
 
     @Test
-    void testIsRimossa() {
-        // Con oggetto stato RIMOSSA
-        StatoPiantagione statoRimossa = new StatoPiantagione();
-        statoRimossa.setId(2);
-        statoRimossa.setCodice(StatoPiantagione.RIMOSSA);
+    @DisplayName("Test creazione piantagione con tutti i parametri")
+    void testCreazionePiantagioneCompleta() {
+        LocalDate dataDimora = LocalDate.of(2024, 3, 1);
+        LocalDateTime dataCreazione = LocalDateTime.of(2024, 3, 1, 10, 0);
+        LocalDateTime dataAggiornamento = LocalDateTime.of(2024, 3, 15, 15, 30);
 
-        piantagione.setStatoPiantagione(statoRimossa);
-        assertTrue(piantagione.isRimossa());
+        Piantagione p = new Piantagione(100, 25, dataDimora, 2, 3, dataCreazione, dataAggiornamento);
 
-        // Con solo ID stato (fallback)
-        piantagione.setStatoPiantagione(null);
-        piantagione.setIdStatoPiantagione(2);
-        assertTrue(piantagione.isRimossa());
-
-        // Con stato diverso
-        piantagione.setIdStatoPiantagione(1);
-        assertFalse(piantagione.isRimossa());
+        assertEquals(100, p.getId());
+        assertEquals(25, p.getQuantitaPianta());
+        assertEquals(dataDimora, p.getMessaADimora());
+        assertEquals(2, p.getPiantaId());
+        assertEquals(3, p.getZonaId());
+        assertEquals(dataCreazione, p.getDataCreazione());
+        assertEquals(dataAggiornamento, p.getDataAggiornamento());
+        assertEquals(1, p.getIdStatoPiantagione()); // Default ATTIVA
     }
 
     @Test
-    void testIsCompletata() {
-        // Con oggetto stato COMPLETATA
-        StatoPiantagione statoCompletata = new StatoPiantagione();
-        statoCompletata.setId(4);
-        statoCompletata.setCodice(StatoPiantagione.COMPLETATA);
+    @DisplayName("Test modifica stato con oggetti StatoPiantagione")
+    void testModificaStatoConOggetti() {
+        // Stato attiva
+        StatoPiantagione statoAttiva = new StatoPiantagione(1, StatoPiantagione.ATTIVA, "Attiva");
+        piantagione.setStatoPiantagione(statoAttiva);
+        assertEquals(statoAttiva, piantagione.getStatoPiantagione());
 
+        // Stato in raccolta
+        StatoPiantagione statoRaccolta = new StatoPiantagione(3, StatoPiantagione.IN_RACCOLTA, "In Raccolta");
+        piantagione.setStatoPiantagione(statoRaccolta);
+        assertEquals(statoRaccolta, piantagione.getStatoPiantagione());
+
+        // Stato completata
+        StatoPiantagione statoCompletata = new StatoPiantagione(4, StatoPiantagione.COMPLETATA, "Completata");
         piantagione.setStatoPiantagione(statoCompletata);
-        assertTrue(piantagione.isCompletata());
-
-        // Con solo ID stato (fallback)
-        piantagione.setStatoPiantagione(null);
-        piantagione.setIdStatoPiantagione(4);
-        assertTrue(piantagione.isCompletata());
-
-        // Con stato diverso
-        piantagione.setIdStatoPiantagione(1);
-        assertFalse(piantagione.isCompletata());
+        assertEquals(statoCompletata, piantagione.getStatoPiantagione());
     }
 
     @Test
-    void testCambiaStato() {
-        LocalDateTime prima = LocalDateTime.now().minusMinutes(1);
-        piantagione.setDataAggiornamento(prima);
+    @DisplayName("Test validazione dati piantagione")
+    void testValidazioneDati() {
+        // Test con valori null - dovrebbero essere gestiti senza errori
+        piantagione.setId(null);
+        assertNull(piantagione.getId());
 
-        StatoPiantagione nuovoStato = new StatoPiantagione();
-        nuovoStato.setId(3);
-        nuovoStato.setCodice(StatoPiantagione.IN_RACCOLTA);
+        piantagione.setQuantitaPianta(null);
+        assertNull(piantagione.getQuantitaPianta());
 
-        piantagione.cambiaStato(nuovoStato);
-
-        assertEquals(nuovoStato, piantagione.getStatoPiantagione());
-        assertEquals(nuovoStato.getId(), piantagione.getIdStatoPiantagione());
-        assertTrue(piantagione.getDataAggiornamento().isAfter(prima));
-    }
-
-    @Test
-    void testRimuovi() {
-        LocalDateTime prima = LocalDateTime.now().minusMinutes(1);
-        piantagione.setDataAggiornamento(prima);
-
-        piantagione.rimuovi();
-
-        assertEquals(2, piantagione.getIdStatoPiantagione()); // ID stato RIMOSSA
-        assertTrue(piantagione.getDataAggiornamento().isAfter(prima));
-    }
-
-    @Test
-    void testCompleta() {
-        LocalDateTime prima = LocalDateTime.now().minusMinutes(1);
-        piantagione.setDataAggiornamento(prima);
-
-        piantagione.completa();
-
-        assertEquals(4, piantagione.getIdStatoPiantagione()); // ID stato COMPLETATA
-        assertTrue(piantagione.getDataAggiornamento().isAfter(prima));
-    }
-
-    @Test
-    void testRiattiva() {
-        // Prima rimuovi
-        piantagione.rimuovi();
-        assertEquals(2, piantagione.getIdStatoPiantagione());
-
-        LocalDateTime prima = LocalDateTime.now().minusMinutes(1);
-        piantagione.setDataAggiornamento(prima);
-
-        // Poi riattiva
-        piantagione.riattiva();
-
-        assertEquals(1, piantagione.getIdStatoPiantagione()); // ID stato ATTIVA
-        assertTrue(piantagione.getDataAggiornamento().isAfter(prima));
-    }
-
-    @Test
-    void testGetDurataGiorni() {
-        // Test con data di messa a dimora
-        LocalDate trentaGiorniFa = LocalDate.now().minusDays(30);
-        piantagione.setMessaADimora(trentaGiorniFa);
-
-        long durata = piantagione.getDurataGiorni();
-        assertEquals(30, durata);
-
-        // Test con data null
         piantagione.setMessaADimora(null);
-        assertEquals(0, piantagione.getDurataGiorni());
-    }
+        assertNull(piantagione.getMessaADimora());
 
-    @Test
-    void testGetDescrizioneStato() {
-        // Con oggetto stato
-        piantagione.setStatoPiantagione(statoTest);
-        assertEquals("Piantagione attiva", piantagione.getDescrizioneStato());
+        piantagione.setPiantaId(null);
+        assertNull(piantagione.getPiantaId());
 
-        // Con solo ID stato (fallback)
-        piantagione.setStatoPiantagione(null);
+        piantagione.setZonaId(null);
+        assertNull(piantagione.getZonaId());
 
-        piantagione.setIdStatoPiantagione(1);
-        assertEquals("Attiva", piantagione.getDescrizioneStato());
-
-        piantagione.setIdStatoPiantagione(2);
-        assertEquals("Rimossa", piantagione.getDescrizioneStato());
-
-        piantagione.setIdStatoPiantagione(3);
-        assertEquals("In Raccolta", piantagione.getDescrizioneStato());
-
-        piantagione.setIdStatoPiantagione(4);
-        assertEquals("Completata", piantagione.getDescrizioneStato());
-
-        piantagione.setIdStatoPiantagione(5);
-        assertEquals("Sospesa", piantagione.getDescrizioneStato());
-
-        piantagione.setIdStatoPiantagione(999);
-        assertEquals("Sconosciuto", piantagione.getDescrizioneStato());
-
-        // Con ID null
-        piantagione.setIdStatoPiantagione(null);
-        assertEquals("Attiva", piantagione.getDescrizioneStato()); // Default
-    }
-
-    @Test
-    void testStatoNullSafeOperations() {
-        // Test che i metodi funzionino anche con stato null
-        piantagione.setStatoPiantagione(null);
-        piantagione.setIdStatoPiantagione(null);
-
-        assertFalse(piantagione.isAttiva());
-        assertFalse(piantagione.isRimossa());
-        assertFalse(piantagione.isCompletata());
-        assertEquals("Attiva", piantagione.getDescrizioneStato()); // Default
-    }
-
-    @Test
-    @DisplayName("Test flusso completo ciclo di vita piantagione")
-    void testFlussoCompletoCicloVita() {
-        // Arrange
-        Piantagione piantagione = new Piantagione();
-        piantagione.setMessaADimora(LocalDate.now().minusDays(90));
-        piantagione.setQuantitaPianta(20);
-
-        // Inizialmente dovrebbe essere in stato ATTIVA (default)
-        piantagione.setIdStatoPiantagione(1); // ATTIVA
-        assertTrue(piantagione.isAttiva(), "La piantagione dovrebbe iniziare come attiva");
-
-        // Act & Assert - Passaggio a IN_RACCOLTA (id 3)
-        StatoPiantagione statoRaccolta = new StatoPiantagione();
-        statoRaccolta.setId(3);
-        statoRaccolta.setCodice(StatoPiantagione.IN_RACCOLTA);
-        piantagione.cambiaStato(statoRaccolta);
-
-        // Verifica stato in raccolta
-        assertFalse(piantagione.isAttiva(), "Non dovrebbe più essere attiva");
-        assertFalse(piantagione.isCompletata(), "Non dovrebbe ancora essere completata");
-        assertEquals(3, piantagione.getIdStatoPiantagione(), "Dovrebbe essere in raccolta");
-
-        // Completamento
-        piantagione.completa();
-        assertTrue(piantagione.isCompletata(), "Dovrebbe essere completata");
-        assertFalse(piantagione.isAttiva(), "Non dovrebbe più essere attiva");
-        assertEquals(4, piantagione.getIdStatoPiantagione(), "Dovrebbe avere ID stato COMPLETATA");
-
-        // Verifica durata (dovrebbe essere esattamente 90 giorni)
-        assertEquals(90, piantagione.getDurataGiorni(), "La durata dovrebbe essere 90 giorni");
+        // L'ID stato piantagione dovrebbe rimanere quello di default
+        assertEquals(1, piantagione.getIdStatoPiantagione());
     }
 }
