@@ -34,6 +34,26 @@ public class RaccoltoServiceTest {
         public void update(Raccolto raccolto) {
             // Simula aggiornamento riuscito
         }
+
+        @Override
+        public java.util.List<Raccolto> findByPiantagione(Integer piantagioneId) throws java.sql.SQLException {
+            // Restituisce una lista vuota per evitare conflitti con il database reale
+            return new java.util.ArrayList<>();
+        }
+
+        @Override
+        public Raccolto read(int id) throws java.sql.SQLException {
+            // Simula che il raccolto esista
+            if (id > 0) {
+                Raccolto raccolto = new Raccolto();
+                raccolto.setId(id);
+                raccolto.setDataRaccolto(LocalDate.now().minusDays(1));
+                raccolto.setQuantitaKg(new BigDecimal("25.50"));
+                raccolto.setPiantagioneId(1);
+                return raccolto;
+            }
+            return null;
+        }
     }
 
     @BeforeAll
