@@ -32,6 +32,9 @@ public class DataProcessingController {
         // Configura i callback della view
         setupEventHandlers();
 
+        // Imposta il riferimento al controller nella view per i report
+        view.setController(this);
+
         // Inizializza la view con i dati
         initializeView();
     }
@@ -185,6 +188,72 @@ public class DataProcessingController {
             view.setStatus("Errore nel salvataggio");
             NotificationHelper.showError("Errore Salvataggio",
                 "Errore imprevisto durante il salvataggio");
+        }
+    }
+
+    /**
+     * Gestisce l'elaborazione dei report raccolti come parte del data processing
+     */
+    public void elaboraReportRaccolti(String tipoReport) {
+        try {
+            // Verifica prima se ci sono dati disponibili
+            if (!businessLogic.getReportService().hasRaccoltiDisponibili()) {
+                view.mostraErrore("Nessun raccolto disponibile nel database per generare report");
+                return;
+            }
+
+            ProcessingResult<Map<String, Object>> result;
+
+            switch (tipoReport.toLowerCase()) {
+                case "completo" -> {
+                    result = businessLogic.getReportService().generaReportCompleto();
+                    view.mostraReportCompleto(result.getData());
+                }
+                case "statistiche_generali" -> {
+                    result = businessLogic.getReportService().generaStatisticheGenerali();
+                    view.mostraStatisticheGenerali(result.getData());
+                }
+                case "statistiche_mensili" -> {
+                    result = businessLogic.getReportService().generaStatisticheMensili();
+                    view.mostraStatisticheMensili(result.getData());
+                }
+                case "periodo_coperto" -> {
+                    result = businessLogic.getReportService().calcolaPeriodoCoperto();
+                    view.mostraPeriodoCoperto(result.getData());
+                }
+                default -> {
+                    view.mostraErrore("Tipo di report non riconosciuto: " + tipoReport);
+                    return;
+                }
+            }
+
+            // Salva il risultato per eventuale esportazione
+            ultimoRisultato = result;
+
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+            view.mostraErrore("Errore di accesso ai dati durante la generazione del report");
+        } catch (BusinessLogicException e) {
+            ErrorService.handleException(e);
+            view.mostraErrore("Errore di business logic: " + e.getUserMessage());
+        } catch (ValidationException e) {
+            ErrorService.handleException(e);
+            view.mostraErrore("Errore di validazione: " + e.getUserMessage());
+        } catch (Exception e) {
+            ErrorService.handleException("elaborazione report " + tipoReport, e);
+            view.mostraErrore("Errore imprevisto durante l'elaborazione del report");
+        }
+    }
+
+    /**
+     * Verifica se ci sono dati disponibili per i report
+     */
+    public boolean hasRaccoltiDisponibili() {
+        try {
+            return businessLogic.getReportService().hasRaccoltiDisponibili();
+        } catch (DataAccessException e) {
+            ErrorService.handleException(e);
+            return false;
         }
     }
 

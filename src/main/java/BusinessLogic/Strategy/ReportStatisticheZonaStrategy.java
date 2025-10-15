@@ -1,65 +1,70 @@
 package BusinessLogic.Strategy;
 
+import BusinessLogic.Exception.ValidationException;
 import DomainModel.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReportStatisticheZonaStrategy implements DataProcessingStrategy<Map<String, Map<String, BigDecimal>>> {
+public class ReportStatisticheZonaStrategy implements DataProcessingStrategy<Map<String, Object>> {
     @Override
     @SuppressWarnings("unchecked")
-    public ProcessingResult<Map<String, Map<String, BigDecimal>>> execute(Object... data) {
-        validateParameters(data);
+    public ProcessingResult<Map<String, Object>> execute(Object... data) throws ValidationException {
+        try {
+            validateParameters(data);
 
-        List<Raccolto> raccolti = (List<Raccolto>) data[0];
-        List<Piantagione> piantagioni = (List<Piantagione>) data[1];
-        List<Zona> zone = (List<Zona>) data[2];
+            List<Raccolto> raccolti = (List<Raccolto>) data[0];
+            List<Piantagione> piantagioni = (List<Piantagione>) data[1];
+            List<Zona> zone = (List<Zona>) data[2];
 
-        // Mappa per tenere traccia delle statistiche per zona
-        Map<String, Map<String, BigDecimal>> statistichePerZona = new LinkedHashMap<>();
+            // Mappa per tenere traccia delle statistiche per zona
+            Map<String, Object> statistichePerZona = new HashMap<>();
 
-        // Calcola le statistiche per ogni zona
-        for (Zona zona : zone) {
-            // Trova tutte le piantagioni in questa zona
-            Set<Integer> piantagioniInZona = piantagioni.stream()
-                .filter(p -> p.getZonaId() != null && p.getZonaId().equals(zona.getId()))
-                .map(Piantagione::getId)
-                .collect(Collectors.toSet());
+            // Calcola le statistiche per ogni zona
+            for (Zona zona : zone) {
+                // Trova tutte le piantagioni in questa zona
+                Set<Integer> piantagioniInZona = piantagioni.stream()
+                    .filter(p -> p.getZonaId() != null && p.getZonaId().equals(zona.getId()))
+                    .map(Piantagione::getId)
+                    .collect(Collectors.toSet());
 
-            // Calcola le statistiche per questa zona
-            BigDecimal produzioneTotale = raccolti.stream()
-                .filter(r -> r.getPiantagioneId() != null &&
-                           piantagioniInZona.contains(r.getPiantagioneId()))
-                .map(Raccolto::getQuantitaKg)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                // Calcola le statistiche per questa zona
+                BigDecimal produzioneTotale = raccolti.stream()
+                    .filter(r -> r.getPiantagioneId() != null &&
+                               piantagioniInZona.contains(r.getPiantagioneId()))
+                    .map(Raccolto::getQuantitaKg)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            BigDecimal produzioneMQ = zona.getDimensione() != null && zona.getDimensione() > 0 ?
-                produzioneTotale.divide(new BigDecimal(zona.getDimensione() * 10000), 4, java.math.RoundingMode.HALF_UP) :
-                BigDecimal.ZERO;
+                BigDecimal produzioneMQ = zona.getDimensione() != null && zona.getDimensione() > 0 ?
+                    produzioneTotale.divide(new BigDecimal(zona.getDimensione() * 10000), 4, java.math.RoundingMode.HALF_UP) :
+                    BigDecimal.ZERO;
 
-            // Salva le statistiche
-            Map<String, BigDecimal> stats = new LinkedHashMap<>();
-            stats.put("produzioneTotale", produzioneTotale);
-            stats.put("produzioneMQ", produzioneMQ);
-            stats.put("numeroPiantagioni", new BigDecimal(piantagioniInZona.size()));
+                // Salva le statistiche
+                Map<String, BigDecimal> stats = new LinkedHashMap<>();
+                stats.put("produzioneTotale", produzioneTotale);
+                stats.put("produzioneMQ", produzioneMQ);
+                stats.put("numeroPiantagioni", new BigDecimal(piantagioniInZona.size()));
 
-            statistichePerZona.put(zona.getNome(), stats);
+                statistichePerZona.put(zona.getNome(), stats);
+            }
+
+            // Genera il report formattato
+            StringBuilder report = new StringBuilder();
+            report.append("🗺️ REPORT STATISTICHE PER ZONA\n");
+            report.append("════════════════════════════\n\n");
+
+            statistichePerZona.forEach((nomeZona, stats) -> {
+                report.append(String.format("📍 ZONA: %s\n", nomeZona));
+                report.append(String.format("▸ Produzione totale: %.2f kg\n", ((Map<String, BigDecimal>)stats).get("produzioneTotale")));
+                report.append(String.format("▸ Produzione per m²: %.4f kg/m²\n", ((Map<String, BigDecimal>)stats).get("produzioneMQ")));
+                report.append(String.format("▸ Numero piantagioni: %d\n\n", ((Map<String, BigDecimal>)stats).get("numeroPiantagioni").intValue()));
+            });
+
+            return new ProcessingResult<>(statistichePerZona);
+        } catch (Exception e) {
+            throw new ValidationException("Errore durante il calcolo delle statistiche delle zone: " + e.getMessage());
         }
-
-        // Genera il report formattato
-        StringBuilder report = new StringBuilder();
-        report.append("🗺️ REPORT STATISTICHE PER ZONA\n");
-        report.append("════════════════════════════\n\n");
-
-        statistichePerZona.forEach((nomeZona, stats) -> {
-            report.append(String.format("📍 ZONA: %s\n", nomeZona));
-            report.append(String.format("▸ Produzione totale: %.2f kg\n", stats.get("produzioneTotale")));
-            report.append(String.format("▸ Produzione per m²: %.4f kg/m²\n", stats.get("produzioneMQ")));
-            report.append(String.format("▸ Numero piantagioni: %d\n\n", stats.get("numeroPiantagioni").intValue()));
-        });
-
-        return new ProcessingResult<>(statistichePerZona, report.toString());
     }
 
     @Override
