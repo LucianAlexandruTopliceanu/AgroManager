@@ -7,7 +7,303 @@
     -fx-background-color: #f8f9fa;
 }
 
-/* Colori principali */
+/* =================================================================
+   LAYOUT E CONTAINER PRINCIPALI
+   ================================================================= */
+
+/* Container principale delle view */
+.main-container {
+    -fx-padding: 20;
+    -fx-spacing: 20;
+    -fx-background-color: #f8f9fa;
+}
+
+/* Card styling per sezioni */
+.styled-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+    -fx-border-color: #e9ecef;
+    -fx-border-radius: 12;
+    -fx-padding: 20;
+    -fx-spacing: 15;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #343a40;
+}
+
+/* Header sezioni */
+.header-section {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.main-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6c757d;
+    -fx-font-style: italic;
+}
+
+/* =================================================================
+   CONTROLLI INPUT E SELEZIONE
+   ================================================================= */
+
+/* ComboBox standardizzate */
+.combo-box-standard {
+    -fx-font-size: 12px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
+}
+
+.combo-box-standard:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
+}
+
+/* TextField standardizzati */
+.text-field-standard {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
+}
+
+.text-field-standard:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
+}
+
+/* DatePicker standardizzati */
+.date-picker-standard {
+    -fx-pref-width: 150;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 4px;
+}
+
+/* Spinner standardizzati */
+.spinner-standard {
+    -fx-pref-width: 80;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 4px;
+}
+
+/* Container parametri */
+.parameters-container {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+    -fx-spacing: 10;
+}
+
+/* =================================================================
+   BOTTONI E AZIONI
+   ================================================================= */
+
+/* Bottone azione primaria */
+.btn-primary {
+    -fx-background-color: #28a745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12 24;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 3, 0, 0, 1);
+}
+
+.btn-primary:hover {
+    -fx-background-color: #218838;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #1e7e34;
+}
+
+/* Bottone azione secondaria */
+.btn-secondary {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 10 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 3, 0, 0, 1);
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #0056b3;
+}
+
+/* Bottone azione distruttiva */
+.btn-danger {
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+    -fx-padding: 10 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #c82333;
+}
+
+/* Bottone azione supporto */
+.btn-support {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-padding: 10 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-support:hover {
+    -fx-background-color: #545b62;
+}
+
+/* Bottoni per report */
+.btn-report-complete {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-report-stats {
+    -fx-background-color: #28a745;
+    -fx-text-fill: white;
+    -fx-padding: 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-report-monthly {
+    -fx-background-color: #ffc107;
+    -fx-text-fill: black;
+    -fx-padding: 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-report-period {
+    -fx-background-color: #6f42c1;
+    -fx-text-fill: white;
+    -fx-padding: 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+/* =================================================================
+   FEEDBACK E STATUS
+   ================================================================= */
+
+/* Progress indicator standardizzato */
+.progress-standard {
+    -fx-pref-width: 28;
+    -fx-pref-height: 28;
+    -fx-progress-color: #3498db;
+}
+
+/* Status label */
+.status-label {
+    -fx-text-fill: #495057;
+    -fx-font-style: italic;
+    -fx-font-size: 11px;
+}
+
+/* Label di validazione errore */
+.validation-error {
+    -fx-text-fill: #dc3545;
+    -fx-font-weight: bold;
+    -fx-background-color: #f8d7da;
+    -fx-padding: 8 12;
+    -fx-background-radius: 4;
+    -fx-border-color: #f5c6cb;
+    -fx-border-radius: 4;
+}
+
+/* Label informative */
+.info-label {
+    -fx-text-fill: #28a745;
+    -fx-font-style: italic;
+    -fx-padding: 10;
+}
+
+.help-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-style: italic;
+    -fx-font-size: 11px;
+}
+
+/* =================================================================
+   OUTPUT E RISULTATI
+   ================================================================= */
+
+/* Area risultati standardizzata */
+.results-area {
+    -fx-font-family: 'Courier New', 'Monaco', monospace;
+    -fx-font-size: 11px;
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+/* Scroll pane per risultati */
+.results-scroll {
+    -fx-background-color: transparent;
+    -fx-fit-to-width: true;
+}
+
+/* =================================================================
+   SEPARATORI E LAYOUT UTILITIES
+   ================================================================= */
+
+/* Separatori verticali */
+.v-separator {
+    -fx-orientation: vertical;
+    -fx-pref-height: 30;
+    -fx-background-color: #dee2e6;
+}
+
+/* Label con stile standardizzato */
+.field-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: #495057;
+    -fx-font-size: 12px;
+}
+
+/* Grid pane con spacing standardizzato */
+.input-grid {
+    -fx-hgap: 10;
+    -fx-vgap: 8;
+}
+
+.config-grid {
+    -fx-hgap: 20;
+    -fx-vgap: 15;
+    -fx-alignment: center-left;
+}
+
+/* =================================================================
+   COLORI PRINCIPALI AGGIORNATI
+   ================================================================= */
 .primary-color { -fx-background-color: #2c3e50; }
 .secondary-color { -fx-background-color: #34495e; }
 .accent-color { -fx-background-color: #3498db; }
@@ -15,7 +311,9 @@
 .warning-color { -fx-background-color: #f39c12; }
 .danger-color { -fx-background-color: #e74c3c; }
 
-/* Miglioramenti per le TabPane */
+/* =================================================================
+   TAB PANE - Stili Migliorati
+   ================================================================= */
 .tab-pane {
     -fx-background-color: #ffffff;
     -fx-border-color: #dee2e6;
@@ -39,12 +337,13 @@
 .tab-pane .tab:selected {
     -fx-background-color: #ffffff;
     -fx-border-color: #3498db;
-    -fx-border-width: 0 0 2px 0;
+    -fx-border-width: 0 0 3px 0;
 }
 
 .tab-pane .tab .tab-label {
     -fx-text-fill: #6c757d;
     -fx-font-weight: 500;
+    -fx-font-size: 13px;
 }
 
 .tab-pane .tab:selected .tab-label {
@@ -52,23 +351,30 @@
     -fx-font-weight: bold;
 }
 
-/* Stili per le TableView */
+.tab-pane .tab:hover {
+    -fx-background-color: #e9ecef;
+}
+
+/* =================================================================
+   TABLE VIEW - Stili Migliorati
+   ================================================================= */
 .table-view {
     -fx-background-color: #ffffff;
     -fx-border-color: #dee2e6;
     -fx-border-width: 1px;
-    -fx-border-radius: 4px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
 }
 
 .table-view .column-header-background {
     -fx-background-color: #f8f9fa;
     -fx-border-color: #dee2e6;
-    -fx-border-width: 0 0 1px 0;
+    -fx-border-width: 0 0 2px 0;
 }
 
 .table-view .column-header {
     -fx-background-color: transparent;
-    -fx-border-color: #dee2e6;
+    -fx-border-color: #e9ecef;
     -fx-border-width: 0 1px 0 0;
     -fx-padding: 12px 8px;
 }
@@ -83,7 +389,7 @@
     -fx-background-color: #ffffff;
     -fx-border-color: #f8f9fa;
     -fx-border-width: 0 0 1px 0;
-    -fx-padding: 8px 0;
+    -fx-padding: 6px 0;
 }
 
 .table-view .table-row-cell:odd {
@@ -95,113 +401,84 @@
     -fx-text-fill: #1976d2;
 }
 
+.table-view .table-row-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
 .table-view .table-cell {
-    -fx-padding: 8px;
+    -fx-padding: 10px 8px;
     -fx-alignment: CENTER_LEFT;
+    -fx-text-fill: #495057;
 }
 
-/* Stili per i Button */
-.button {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-    -fx-border-radius: 4px;
-    -fx-background-radius: 4px;
-    -fx-padding: 8px 16px;
-    -fx-font-weight: 500;
+/* Placeholder quando la tabella è vuota */
+.table-view .placeholder .label {
+    -fx-text-fill: #6c757d;
+    -fx-font-style: italic;
+}
+
+/* =================================================================
+   SCROLL BAR - Stili Moderni
+   ================================================================= */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #cbd5e0;
+    -fx-background-radius: 8px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #a0aec0;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #718096;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #f7fafc;
+    -fx-background-radius: 8px;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* =================================================================
+   MENU LATERALE
+   ================================================================= */
+.menu-button-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ecf0f1;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 6px;
     -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-size: 13px;
 }
 
-.button:hover {
-    -fx-background-color: #2980b9;
+.menu-button-item:hover {
+    -fx-background-color: #34495e;
 }
 
-.button:pressed {
-    -fx-background-color: #21618c;
+.menu-button-item:pressed {
+    -fx-background-color: #1a252f;
 }
 
-.button.success {
-    -fx-background-color: #27ae60;
-}
-
-.button.success:hover {
-    -fx-background-color: #229954;
-}
-
-.button.warning {
-    -fx-background-color: #f39c12;
-}
-
-.button.warning:hover {
-    -fx-background-color: #e67e22;
-}
-
-.button.danger {
-    -fx-background-color: #e74c3c;
-}
-
-.button.danger:hover {
-    -fx-background-color: #c0392b;
-}
-
-.button.secondary {
-    -fx-background-color: #6c757d;
-    -fx-text-fill: white;
-}
-
-.button.secondary:hover {
-    -fx-background-color: #5a6268;
-}
-
-/* Stili per i TextField e ComboBox */
-.text-field, .combo-box {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #ced4da;
-    -fx-border-width: 1px;
-    -fx-border-radius: 4px;
-    -fx-background-radius: 4px;
-    -fx-padding: 8px 12px;
-}
-
-.text-field:focused, .combo-box:focused {
-    -fx-border-color: #3498db;
-    -fx-border-width: 2px;
-}
-
-/* Stili per i Label */
-.label {
-    -fx-text-fill: #495057;
-}
-
-.label.heading {
-    -fx-font-size: 18px;
+.menu-button-item.active {
+    -fx-background-color: #3498db;
     -fx-font-weight: bold;
-    -fx-text-fill: #2c3e50;
 }
 
-.label.subheading {
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #495057;
-}
-
-.label.error {
-    -fx-text-fill: #e74c3c;
-    -fx-font-weight: 500;
-}
-
-.label.success {
-    -fx-text-fill: #27ae60;
-    -fx-font-weight: 500;
-}
-
-.label.warning {
-    -fx-text-fill: #f39c12;
-    -fx-font-weight: 500;
-}
-
-/* Stili per gli Alert e Dialog */
+/* =================================================================
+   DIALOG E MODAL
+   ================================================================= */
 .dialog-pane {
-    -fx-background-color: #ffffff;
+    -fx-background-color: white;
     -fx-border-color: #dee2e6;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
@@ -212,95 +489,181 @@
     -fx-background-color: #f8f9fa;
     -fx-border-color: #dee2e6;
     -fx-border-width: 0 0 1px 0;
-    -fx-padding: 16px;
+    -fx-padding: 15px;
 }
 
 .dialog-pane .content {
-    -fx-padding: 16px;
+    -fx-padding: 20px;
 }
 
-/* Stili per le progress bar e indicatori */
-.progress-indicator {
-    -fx-progress-color: #3498db;
-}
-
-.progress-bar {
-    -fx-accent: #3498db;
-}
-
-/* Stili per i Separator */
-.separator .line {
+.dialog-pane .button-bar {
+    -fx-padding: 15px;
+    -fx-background-color: #f8f9fa;
     -fx-border-color: #dee2e6;
     -fx-border-width: 1px 0 0 0;
 }
 
-/* Stili per i ScrollPane */
-.scroll-pane {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
+/* =================================================================
+   TOOLTIP
+   ================================================================= */
+.tooltip {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 10px;
+    -fx-font-size: 11px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
 }
 
-.scroll-pane .viewport {
-    -fx-background-color: transparent;
-}
-
-/* Animazioni e transizioni */
-.button, .text-field, .combo-box {
-    -fx-transition: all 0.2s ease;
-}
-
-/* Stili specifici per card e dashboard */
-.stats-card {
-    -fx-background-color: #ffffff;
+/* =================================================================
+   CONTEXT MENU
+   ================================================================= */
+.context-menu {
+    -fx-background-color: white;
     -fx-border-color: #dee2e6;
     -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
-.action-button {
+.context-menu .menu-item {
+    -fx-padding: 8px 15px;
+}
+
+.context-menu .menu-item:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+.context-menu .menu-item .label {
+    -fx-text-fill: #495057;
+}
+
+/* =================================================================
+   BADGE E INDICATORS
+   ================================================================= */
+.badge {
     -fx-background-color: #3498db;
     -fx-text-fill: white;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 12px;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
 }
 
-.action-button:hover {
-    -fx-background-color: #2980b9;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 4);
+.badge.success {
+    -fx-background-color: #27ae60;
 }
 
-/* Stili per il menu laterale */
-.sidebar {
-    -fx-background-color: #2c3e50;
+.badge.warning {
+    -fx-background-color: #f39c12;
 }
 
-.sidebar .button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #ecf0f1;
-    -fx-border-color: transparent;
-    -fx-background-radius: 4px;
-    -fx-alignment: CENTER_LEFT;
+.badge.danger {
+    -fx-background-color: #e74c3c;
 }
 
-.sidebar .button:hover {
-    -fx-background-color: #34495e;
+/* =================================================================
+   DASHBOARD CARDS
+   ================================================================= */
+.dashboard-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);
+    -fx-border-color: #e9ecef;
+    -fx-border-radius: 12px;
+    -fx-padding: 20px;
 }
 
-.sidebar .button:selected {
-    -fx-background-color: #3498db;
+.dashboard-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 3);
 }
 
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-    .root {
-        -fx-font-size: 12px;
-    }
+.dashboard-card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c757d;
+}
 
-    .stats-card {
-        -fx-pref-width: 150px;
-        -fx-pref-height: 100px;
-    }
+.dashboard-card-value {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.dashboard-card-icon {
+    -fx-font-size: 48px;
+}
+
+/* =================================================================
+   ANIMAZIONI E TRANSIZIONI
+   ================================================================= */
+.fade-in {
+    -fx-opacity: 0;
+}
+
+/* =================================================================
+   UTILITY CLASSES
+   ================================================================= */
+.text-center {
+    -fx-alignment: center;
+}
+
+.text-bold {
+    -fx-font-weight: bold;
+}
+
+.text-muted {
+    -fx-text-fill: #6c757d;
+}
+
+.text-primary {
+    -fx-text-fill: #3498db;
+}
+
+.text-success {
+    -fx-text-fill: #27ae60;
+}
+
+.text-warning {
+    -fx-text-fill: #f39c12;
+}
+
+.text-danger {
+    -fx-text-fill: #e74c3c;
+}
+
+.mb-10 {
+    -fx-margin-bottom: 10;
+}
+
+.mt-10 {
+    -fx-margin-top: 10;
+}
+
+.p-10 {
+    -fx-padding: 10;
+}
+
+.p-20 {
+    -fx-padding: 20;
+}
+
+/* =================================================================
+   RESPONSIVE SIZING
+   ================================================================= */
+.small-text {
+    -fx-font-size: 11px;
+}
+
+.medium-text {
+    -fx-font-size: 13px;
+}
+
+.large-text {
+    -fx-font-size: 16px;
+}
+
+.xlarge-text {
+    -fx-font-size: 20px;
 }

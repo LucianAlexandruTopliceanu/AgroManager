@@ -4,6 +4,8 @@ import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Exception.BusinessLogicException;
 import BusinessLogic.Exception.DataAccessException;
 import BusinessLogic.Service.ErrorService;
+import BusinessLogic.Service.RaccoltoService;
+import BusinessLogic.Service.ReportService;
 import BusinessLogic.Strategy.*;
 import DomainModel.*;
 import ORM.DAOFactory;
@@ -15,9 +17,22 @@ import java.util.Map;
 
 public class BusinessLogic {
     private final DataProcessingContext processingContext;
+    private final RaccoltoService raccoltoService;
+    private final ReportService reportService;
 
     public BusinessLogic() {
         this.processingContext = new DataProcessingContext();
+        this.raccoltoService = new RaccoltoService(DAOFactory.getRaccoltoDAO());
+        this.reportService = new ReportService(raccoltoService);
+    }
+
+    public ReportService getReportService() {
+        return reportService;
+    }
+
+
+    public RaccoltoService getRaccoltoService() {
+        return raccoltoService;
     }
 
     // Nuovo metodo che restituisce i dati puri per permettere formattazione custom
@@ -252,6 +267,68 @@ public class BusinessLogic {
             );
         } catch (SQLException e) {
             throw DataAccessException.queryError("aggiornamento statistiche", e);
+        }
+    }
+
+    /**
+     * Genera un report completo dei raccolti usando le strategy integrate
+     */
+    public ProcessingResult<Map<String, Object>> generaReportCompletoRaccolti()
+            throws DataAccessException, BusinessLogicException, ValidationException {
+
+        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
+
+        if (raccolti.isEmpty()) {
+            throw new BusinessLogicException("Nessun raccolto disponibile per generare il report",
+                "Database vuoto o nessun raccolto inserito");
+        }
+
+        ReportRaccoltiStrategy strategy = new ReportRaccoltiStrategy();
+        return strategy.execute(raccolti);
+    }
+
+    /**
+     * Genera statistiche generali dei raccolti
+     */
+    public ProcessingResult<Map<String, Object>> generaStatisticheGeneraliRaccolti()
+            throws DataAccessException, BusinessLogicException, ValidationException {
+
+        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
+        StatisticheGeneraliRaccoltiStrategy strategy = new StatisticheGeneraliRaccoltiStrategy();
+        return strategy.execute(raccolti);
+    }
+
+    /**
+     * Genera statistiche mensili dei raccolti
+     */
+    public ProcessingResult<Map<String, Object>> generaStatisticheMensiliRaccolti()
+            throws DataAccessException, BusinessLogicException, ValidationException {
+
+        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
+        StatisticheMensiliRaccoltiStrategy strategy = new StatisticheMensiliRaccoltiStrategy();
+        return strategy.execute(raccolti);
+    }
+
+    /**
+     * Calcola il periodo coperto dai raccolti
+     */
+    public ProcessingResult<Map<String, Object>> calcolaPeriodoCopertoRaccolti()
+            throws DataAccessException, BusinessLogicException, ValidationException {
+
+        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
+        PeriodoCopertoRaccoltiStrategy strategy = new PeriodoCopertoRaccoltiStrategy();
+        return strategy.execute(raccolti);
+    }
+
+    /**
+     * Verifica se ci sono raccolti disponibili
+     */
+    public boolean hasRaccoltiDisponibili() throws DataAccessException {
+        try {
+            List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
+            return !raccolti.isEmpty();
+        } catch (Exception e) {
+            throw DataAccessException.queryError("verifica raccolti disponibili", e);
         }
     }
 }

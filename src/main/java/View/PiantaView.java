@@ -4,47 +4,170 @@ import DomainModel.Pianta;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+/**
+ * View moderna per la gestione delle piante.
+ * Stile coerente con l'applicazione.
+ */
 public class PiantaView extends VBox {
 
-    private final TableView<Pianta> tablePiante;
-    private final ObservableList<Pianta> pianteData;
+    // Componenti UI
+    private final TableView<Pianta> tablePiante = new TableView<>();
+    private final ObservableList<Pianta> pianteData = FXCollections.observableArrayList();
 
-    // Pulsanti essenziali
-    private final Button nuovoBtn;
-    private final Button modificaBtn;
-    private final Button eliminaBtn;
-    private final Button applicaFiltriBtn;
-    private final Button resetFiltriBtn;
+    // Pulsanti azione
+    private final Button nuovoBtn = new Button("➕ Nuova Pianta");
+    private final Button modificaBtn = new Button("✏️ Modifica");
+    private final Button eliminaBtn = new Button("🗑️ Elimina");
+    private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
+    private final Button resetFiltriBtn = new Button("🔄 Reset");
 
-    // Controlli di ricerca e filtro
-    private final TextField ricercaTipoField;
-    private final TextField ricercaVarietaField;
-    private final ComboBox<String> filtroFornitoreCombo;
+    // Controlli ricerca
+    private final TextField ricercaTipoField = new TextField();
+    private final TextField ricercaVarietaField = new TextField();
+    private final ComboBox<String> filtroFornitoreCombo = new ComboBox<>();
 
     public PiantaView() {
-        tablePiante = new TableView<>();
-        pianteData = FXCollections.observableArrayList();
-        nuovoBtn = new Button("➕ Nuova Pianta");
-        modificaBtn = new Button("✏️ Modifica");
-        eliminaBtn = new Button("🗑️ Elimina");
-        applicaFiltriBtn = new Button("🔍 Applica Filtri");
-        resetFiltriBtn = new Button("🔄 Reset Filtri");
-        ricercaTipoField = new TextField();
-        ricercaVarietaField = new TextField();
-        filtroFornitoreCombo = new ComboBox<>();
-
+        setupStyles();
         setupLayout();
         setupTable();
-        setupControls();
+    }
+
+    private void setupStyles() {
+        getStyleClass().add("main-container");
+
+        // Configurazione campi ricerca
+        ricercaTipoField.setPromptText("Cerca per tipo...");
+        ricercaTipoField.setPrefWidth(180);
+        ricercaTipoField.getStyleClass().add("text-field-standard");
+
+        ricercaVarietaField.setPromptText("Cerca per varietà...");
+        ricercaVarietaField.setPrefWidth(180);
+        ricercaVarietaField.getStyleClass().add("text-field-standard");
+
+        filtroFornitoreCombo.setPromptText("Tutti i fornitori");
+        filtroFornitoreCombo.setPrefWidth(200);
+        filtroFornitoreCombo.getStyleClass().add("combo-box-standard");
+
+        // Configurazione bottoni
+        nuovoBtn.getStyleClass().add("btn-primary");
+        modificaBtn.getStyleClass().add("btn-secondary");
+        modificaBtn.setDisable(true);
+        eliminaBtn.getStyleClass().add("btn-danger");
+        eliminaBtn.setDisable(true);
+        applicaFiltriBtn.getStyleClass().add("btn-secondary");
+        resetFiltriBtn.getStyleClass().add("btn-support");
     }
 
     private void setupLayout() {
-        setPadding(new Insets(20));
-        setSpacing(20);
-        setStyle("-fx-background-color: #F8F9FA;");
+        // Header
+        VBox header = createHeader();
+
+        // Card ricerca
+        VBox ricercaCard = createRicercaSection();
+
+        // Barra azioni
+        HBox actionBar = createActionBar();
+
+        // Card tabella
+        VBox tableCard = createTableSection();
+
+        getChildren().addAll(header, ricercaCard, actionBar, tableCard);
+        VBox.setVgrow(tableCard, Priority.ALWAYS);
+    }
+
+    private VBox createHeader() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        header.getStyleClass().add("header-section");
+
+        Label title = new Label("🌱 Gestione Piante");
+        title.getStyleClass().add("main-title");
+
+        Label subtitle = new Label("Catalogo delle varietà di piante disponibili");
+        subtitle.getStyleClass().add("subtitle");
+
+        header.getChildren().addAll(title, subtitle);
+        return header;
+    }
+
+    private VBox createRicercaSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
+
+        Label cardTitle = new Label("🔍 Ricerca");
+        cardTitle.getStyleClass().add("card-title");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label tipoLabel = new Label("Tipo:");
+        tipoLabel.getStyleClass().add("field-label");
+
+        Label varietaLabel = new Label("Varietà:");
+        varietaLabel.getStyleClass().add("field-label");
+
+        Label fornitoreLabel = new Label("Fornitore:");
+        fornitoreLabel.getStyleClass().add("field-label");
+
+        grid.add(tipoLabel, 0, 0);
+        grid.add(ricercaTipoField, 1, 0);
+        grid.add(varietaLabel, 2, 0);
+        grid.add(ricercaVarietaField, 3, 0);
+        grid.add(fornitoreLabel, 0, 1);
+        grid.add(filtroFornitoreCombo, 1, 1);
+
+        card.getChildren().addAll(cardTitle, grid);
+        return card;
+    }
+
+    private HBox createActionBar() {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(0, 0, 10, 0));
+
+        // Gruppo principale
+        HBox mainGroup = new HBox(10);
+        mainGroup.setAlignment(Pos.CENTER_LEFT);
+        mainGroup.getChildren().add(nuovoBtn);
+
+        // Gruppo secondario
+        HBox secondaryGroup = new HBox(8);
+        secondaryGroup.setAlignment(Pos.CENTER_LEFT);
+        secondaryGroup.getChildren().addAll(modificaBtn, eliminaBtn);
+
+        // Gruppo filtri
+        HBox filterGroup = new HBox(8);
+        filterGroup.setAlignment(Pos.CENTER_LEFT);
+        filterGroup.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
+
+        // Separatori
+        Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep1.getStyleClass().add("v-separator");
+        Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep2.getStyleClass().add("v-separator");
+
+        bar.getChildren().addAll(mainGroup, sep1, secondaryGroup, sep2, filterGroup);
+        return bar;
+    }
+
+    private VBox createTableSection() {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("styled-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
+
+        Label cardTitle = new Label("📋 Catalogo Piante");
+        cardTitle.getStyleClass().add("card-title");
+
+        VBox.setVgrow(tablePiante, Priority.ALWAYS);
+
+        card.getChildren().addAll(cardTitle, tablePiante);
+        return card;
     }
 
     @SuppressWarnings("unchecked")
@@ -71,11 +194,11 @@ public class PiantaView extends VBox {
                 String.format("%.2f", cell.getValue().getCosto()) : "N/A"));
         costoCol.setPrefWidth(100);
 
-        TableColumn<Pianta, String> fornitoreCol = new TableColumn<>("Fornitore ID");
+        TableColumn<Pianta, String> fornitoreCol = new TableColumn<>("Fornitore");
         fornitoreCol.setCellValueFactory(cell ->
             new javafx.beans.property.SimpleStringProperty(
                 cell.getValue().getFornitoreId() != null ?
-                cell.getValue().getFornitoreId().toString() : "N/A"));
+                "ID " + cell.getValue().getFornitoreId().toString() : "N/A"));
         fornitoreCol.setPrefWidth(100);
 
         TableColumn<Pianta, String> noteCol = new TableColumn<>("Note");
@@ -92,54 +215,11 @@ public class PiantaView extends VBox {
             TableRow<Pianta> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    // Il controller gestirà l'apertura del dialog
+                    modificaPianta();
                 }
             });
             return row;
         });
-
-        VBox.setVgrow(tablePiante, Priority.ALWAYS);
-    }
-
-    private void setupControls() {
-        // Sezione ricerca in card
-        VBox ricercaCard = createCard("🔍 Ricerca Piante");
-        GridPane ricercaGrid = new GridPane();
-        ricercaGrid.setHgap(10);
-        ricercaGrid.setVgap(10);
-
-        ricercaTipoField.setPromptText("Cerca per tipo...");
-        ricercaVarietaField.setPromptText("Cerca per varietà...");
-        filtroFornitoreCombo.setPromptText("Tutti i fornitori");
-
-        ricercaGrid.addRow(0, new Label("Tipo:"), ricercaTipoField);
-        ricercaGrid.addRow(1, new Label("Varietà:"), ricercaVarietaField);
-        ricercaGrid.addRow(2, new Label("Fornitore:"), filtroFornitoreCombo);
-
-        HBox filtriActions = new HBox(10);
-        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
-                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        filtriActions.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
-
-        ricercaCard.getChildren().addAll(ricercaGrid, filtriActions);
-
-        // Sezione azioni in card
-        VBox azioniCard = createCard("⚡ Azioni");
-        HBox azioniBox = new HBox(10);
-
-        // Stili pulsanti
-        nuovoBtn.setStyle("-fx-background-color: #28A745; -fx-text-fill: white; " +
-                         "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-
-        modificaBtn.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        modificaBtn.setDisable(true);
-
-        eliminaBtn.setStyle("-fx-background-color: #DC3545; -fx-text-fill: white; " +
-                           "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        eliminaBtn.setDisable(true);
 
         // Gestione selezione
         tablePiante.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
@@ -147,24 +227,12 @@ public class PiantaView extends VBox {
             modificaBtn.setDisable(!hasSelection);
             eliminaBtn.setDisable(!hasSelection);
         });
-
-        azioniBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn);
-        azioniCard.getChildren().add(azioniBox);
-
-        getChildren().addAll(ricercaCard, azioniCard, tablePiante);
     }
 
-    private VBox createCard(String title) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(15));
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        card.getChildren().add(titleLabel);
-
-        return card;
+    private void modificaPianta() {
+        if (getPiantaSelezionata() != null) {
+            // Il controller gestirà l'apertura del dialog
+        }
     }
 
     // Metodi pubblici per il controller
@@ -176,7 +244,14 @@ public class PiantaView extends VBox {
         return tablePiante.getSelectionModel().getSelectedItem();
     }
 
-    // Event handlers
+    public void setFornitori(java.util.List<String> fornitori) {
+        filtroFornitoreCombo.getItems().clear();
+        filtroFornitoreCombo.getItems().add("Tutti i fornitori");
+        filtroFornitoreCombo.getItems().addAll(fornitori);
+        filtroFornitoreCombo.getSelectionModel().selectFirst();
+    }
+
+    // Handler per i pulsanti
     public void setOnNuovaPianta(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
@@ -198,25 +273,24 @@ public class PiantaView extends VBox {
     }
 
     // Gestione filtri
-    public void setFornitori(java.util.List<String> fornitori) {
-        filtroFornitoreCombo.getItems().setAll(fornitori);
-    }
-
     public CriteriFiltro getCriteriFiltro() {
+        String fornitore = filtroFornitoreCombo.getValue();
+        if (fornitore != null && fornitore.equals("Tutti i fornitori")) {
+            fornitore = null;
+        }
         return new CriteriFiltro(
             ricercaTipoField.getText().trim(),
             ricercaVarietaField.getText().trim(),
-            filtroFornitoreCombo.getValue()
+            fornitore
         );
     }
 
     public void resetFiltri() {
         ricercaTipoField.clear();
         ricercaVarietaField.clear();
-        filtroFornitoreCombo.setValue(null);
+        filtroFornitoreCombo.getSelectionModel().selectFirst();
     }
 
-    // Metodo per conferma eliminazione
     public boolean confermaEliminazione(Pianta pianta) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Conferma Eliminazione");
@@ -229,6 +303,5 @@ public class PiantaView extends VBox {
                 .isPresent();
     }
 
-    // Record per criteri di filtro
     public record CriteriFiltro(String tipo, String varieta, String fornitore) {}
 }

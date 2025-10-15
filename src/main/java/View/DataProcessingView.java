@@ -11,234 +11,268 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.math.BigDecimal;
 
+/**
+ * View moderna e completa per l'elaborazione dati agricoli.
+ * Stile coerente con l'applicazione, semplice ma funzionale.
+ */
 public class DataProcessingView extends VBox {
-    private final ComboBox<DataProcessingStrategy.ProcessingType> tipoElaborazioneCombo;
-    private final ComboBox<String> strategiaCombo;
-    private final TextArea risultatoArea;
-    private final Button eseguiBtn;
-    private final Button salvaRisultatiBtn;
-    private final Button clearBtn;
-    private final Button aggiornaDatiBtn;
-    private final ProgressIndicator progressIndicator;
-    private final Label statusLabel;
 
-    // Controlli per parametri
-    private final VBox parametriContainer;
-    private final TextField piantagioneIdField;
-    private final DatePicker dataInizioField;
-    private final DatePicker dataFineField;
-    private final Spinner<Integer> topNSpinner;
-    private final ComboBox<String> zonaCombo;
-    private final ComboBox<String> piantagioneCombo;
+    // =================================================================
+    // COMPONENTI UI - ORGANIZZATI PER FUNZIONALITÀ
+    // =================================================================
 
-    // Validazione input
-    private final Label validationLabel;
+    // Selezione strategia
+    private final ComboBox<DataProcessingStrategy.ProcessingType> tipoElaborazioneCombo = new ComboBox<>();
+    private final ComboBox<String> strategiaCombo = new ComboBox<>();
 
-    // Callbacks per il controller
-    private Runnable onEseguiElaborazioneListener;
-    private Runnable onAggiornaDati;
-    private Runnable onSalvaRisultati;
+    // Parametri input
+    private final VBox parametriContainer = new VBox(10);
+    private final TextField piantagioneIdField = new TextField();
+    private final ComboBox<String> piantagioneCombo = new ComboBox<>();
+    private final DatePicker dataInizioField = new DatePicker(LocalDate.now().minusMonths(1));
+    private final DatePicker dataFineField = new DatePicker(LocalDate.now());
+    private final Spinner<Integer> topNSpinner = new Spinner<>(1, 20, 5);
+    private final ComboBox<String> zonaCombo = new ComboBox<>();
+
+    // Controlli azione
+    private final Button eseguiBtn = new Button("🚀 Esegui Analisi");
+    private final Button salvaRisultatiBtn = new Button("💾 Salva");
+    private final Button clearBtn = new Button("🗑️ Pulisci");
+    private final Button aggiornaDatiBtn = new Button("🔄 Aggiorna");
+
+    // Feedback
+    private final ProgressIndicator progressIndicator = new ProgressIndicator();
+    private final Label statusLabel = new Label("Pronto per l'elaborazione");
+    private final Label validationLabel = new Label();
+
+    // Output
+    private final TextArea risultatoArea = new TextArea();
+
+    // Controller
+    private DataProcessingController controller;
 
     public DataProcessingView() {
-        setPadding(new Insets(15));
-        setSpacing(15);
-        setStyle("-fx-background-color: #f8f9fa;");
-
-        // Inizializzazione componenti
-        tipoElaborazioneCombo = new ComboBox<>();
-        strategiaCombo = new ComboBox<>();
-        risultatoArea = new TextArea();
-        eseguiBtn = new Button("🚀 Esegui Analisi");
-        salvaRisultatiBtn = new Button("💾 Salva Risultati");
-        clearBtn = new Button("🗑️ Pulisci");
-        aggiornaDatiBtn = new Button("🔄 Aggiorna Dati");
-        progressIndicator = new ProgressIndicator();
-        statusLabel = new Label("Pronto per l'elaborazione");
-        parametriContainer = new VBox(10);
-        piantagioneIdField = new TextField();
-        dataInizioField = new DatePicker(LocalDate.now().minusMonths(1));
-        dataFineField = new DatePicker(LocalDate.now());
-        topNSpinner = new Spinner<>(1, 20, 5);
-        zonaCombo = new ComboBox<>();
-        piantagioneCombo = new ComboBox<>();
-        validationLabel = new Label();
-
-        setupComponents();
+        setupStyles();
         setupLayout();
+        setupEventHandlers();
         setupValidation();
     }
 
-    private void setupComponents() {
-        // Configurazione ComboBox principale
+    // =================================================================
+    // SETUP INIZIALE
+    // =================================================================
+
+    private void setupStyles() {
+        getStyleClass().add("main-container");
+
+        // Configurazione combo tipo elaborazione
         tipoElaborazioneCombo.getItems().addAll(DataProcessingStrategy.ProcessingType.values());
         tipoElaborazioneCombo.setValue(DataProcessingStrategy.ProcessingType.CALCULATION);
-        tipoElaborazioneCombo.setPromptText("Seleziona tipo di elaborazione");
+        tipoElaborazioneCombo.setPromptText("Tipo elaborazione");
         tipoElaborazioneCombo.setPrefWidth(200);
-        tipoElaborazioneCombo.setOnAction(e -> aggiornaStrategieDisponibili());
+        tipoElaborazioneCombo.getStyleClass().add("combo-box-standard");
 
+        // Configurazione combo strategia
         strategiaCombo.setPrefWidth(250);
-        strategiaCombo.setPromptText("Seleziona strategia specifica");
-        strategiaCombo.setOnAction(e -> aggiornaParametriVisibili());
+        strategiaCombo.setPromptText("Seleziona strategia");
+        strategiaCombo.getStyleClass().add("combo-box-standard");
+
+        // Configurazione campi input
+        piantagioneIdField.setPromptText("ID piantagione");
+        piantagioneIdField.setPrefWidth(150);
+        piantagioneIdField.getStyleClass().add("text-field-standard");
+
+        piantagioneCombo.setPromptText("Seleziona dalla lista");
+        piantagioneCombo.setPrefWidth(200);
+        piantagioneCombo.getStyleClass().add("combo-box-standard");
+
+        dataInizioField.setPromptText("Data inizio");
+        dataInizioField.getStyleClass().add("date-picker-standard");
+
+        dataFineField.setPromptText("Data fine");
+        dataFineField.getStyleClass().add("date-picker-standard");
+
+        topNSpinner.setEditable(true);
+        topNSpinner.setPrefWidth(100);
+        topNSpinner.getStyleClass().add("spinner-standard");
+
+        zonaCombo.setPromptText("Zona (opzionale)");
+        zonaCombo.setPrefWidth(180);
+        zonaCombo.getStyleClass().add("combo-box-standard");
+
+        // Configurazione bottoni
+        eseguiBtn.getStyleClass().add("btn-primary");
+        salvaRisultatiBtn.getStyleClass().add("btn-secondary");
+        salvaRisultatiBtn.setDisable(true);
+        clearBtn.getStyleClass().add("btn-danger");
+        aggiornaDatiBtn.getStyleClass().add("btn-support");
+
+        // Configurazione feedback
+        progressIndicator.setVisible(false);
+        progressIndicator.getStyleClass().add("progress-standard");
+        progressIndicator.setMaxSize(24, 24);
+
+        statusLabel.getStyleClass().add("status-label");
+
+        validationLabel.getStyleClass().add("validation-error");
+        validationLabel.setVisible(false);
+        validationLabel.setWrapText(true);
 
         // Configurazione area risultati
         risultatoArea.setEditable(false);
-        risultatoArea.setPrefRowCount(20);
-        risultatoArea.setStyle("-fx-font-family: 'Courier New'; -fx-font-size: 12px;");
+        risultatoArea.setPrefRowCount(18);
         risultatoArea.setWrapText(true);
+        risultatoArea.getStyleClass().add("results-area");
+        risultatoArea.setPromptText("I risultati dell'elaborazione appariranno qui...");
 
-        // Configurazione bottoni
-        eseguiBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
-        salvaRisultatiBtn.setStyle("-fx-background-color: #007bff; -fx-text-fill: white; -fx-padding: 8 16;");
-        clearBtn.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white; -fx-padding: 8 16;");
-
-        salvaRisultatiBtn.setDisable(true);
-        clearBtn.setOnAction(e -> clearResults());
-
-        // Configurazione progress indicator
-        progressIndicator.setVisible(false);
-        progressIndicator.setPrefSize(24, 24);
-
-        // Configurazione status label
-        statusLabel.setStyle("-fx-text-fill: #6c757d; -fx-font-style: italic;");
-
-        // Configurazione validation label
-        validationLabel.setStyle("-fx-text-fill: #dc3545; -fx-font-weight: bold;");
-        validationLabel.setVisible(false);
-
-        // Configurazione campi parametri
-        setupParameterFields();
+        parametriContainer.getStyleClass().add("parameters-container");
 
         aggiornaStrategieDisponibili();
     }
 
-    private void setupParameterFields() {
-        piantagioneIdField.setPromptText("Inserisci ID piantagione (es. 1, 2, 3...)");
-        piantagioneIdField.setPrefWidth(200);
-
-        dataInizioField.setPromptText("Data inizio periodo");
-        dataFineField.setPromptText("Data fine periodo");
-
-        topNSpinner.setEditable(true);
-        topNSpinner.setPrefWidth(100);
-
-        zonaCombo.setPromptText("Seleziona zona");
-        zonaCombo.setPrefWidth(200);
-
-        piantagioneCombo.setPromptText("Seleziona piantagione");
-        piantagioneCombo.setPrefWidth(200);
-    }
-
     private void setupLayout() {
-        // Header con titolo
-        Label titleLabel = new Label("📊 Centro di Elaborazione Dati Agricoli");
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        // Header con titolo e descrizione
+        VBox header = createHeader();
 
-        // Selezione tipo e strategia in card
-        VBox selectionCard = createCard("Configurazione Analisi");
-        GridPane selectionGrid = new GridPane();
-        selectionGrid.setHgap(15);
-        selectionGrid.setVgap(10);
-        selectionGrid.addRow(0, new Label("Tipo elaborazione:"), tipoElaborazioneCombo);
-        selectionGrid.addRow(1, new Label("Strategia:"), strategiaCombo);
-        selectionCard.getChildren().add(selectionGrid);
+        // Sezione configurazione in card compatta
+        VBox configCard = createConfigSection();
 
-        // Parametri in card
-        VBox parametriCard = createCard("Parametri di Input");
-        parametriCard.getChildren().addAll(parametriContainer, validationLabel);
+        // Sezione parametri dinamica
+        VBox paramCard = createParametersSection();
 
-        // Controlli in card
-        VBox controlCard = createCard("Azioni");
-        HBox controlBox = new HBox(15);
-        controlBox.setAlignment(Pos.CENTER_LEFT);
-        controlBox.getChildren().addAll(
-            eseguiBtn, salvaRisultatiBtn, clearBtn,
-            new Separator(javafx.geometry.Orientation.VERTICAL),
-            aggiornaDatiBtn, progressIndicator
-        );
-        controlCard.getChildren().add(controlBox);
+        // Barra azioni compatta
+        HBox actionBar = createActionBar();
 
-        // Risultati in card
-        VBox risultatiCard = createCard("Risultati Elaborazione");
-        risultatiCard.getChildren().addAll(risultatoArea, statusLabel);
-        VBox.setVgrow(risultatiCard, Priority.ALWAYS);
-        VBox.setVgrow(risultatoArea, Priority.ALWAYS);
+        // Sezione risultati espandibile
+        VBox resultCard = createResultSection();
 
-        getChildren().addAll(titleLabel, selectionCard, parametriCard, controlCard, risultatiCard);
+        getChildren().addAll(header, configCard, paramCard, actionBar, resultCard);
+
+        // L'area risultati cresce per occupare lo spazio disponibile
+        VBox.setVgrow(resultCard, Priority.ALWAYS);
     }
 
-    private VBox createCard(String title) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(15));
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+    // =================================================================
+    // CREAZIONE SEZIONI UI
+    // =================================================================
 
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #495057;");
-        card.getChildren().add(titleLabel);
+    private VBox createHeader() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        header.getStyleClass().add("header-section");
 
+        Label title = new Label("📊 Centro Elaborazione Dati Agricoli");
+        title.getStyleClass().add("main-title");
+
+        Label subtitle = new Label("Analisi, calcoli e report sui dati delle piantagioni");
+        subtitle.getStyleClass().add("subtitle");
+
+        header.getChildren().addAll(title, subtitle);
+        return header;
+    }
+
+    private VBox createConfigSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
+
+        Label cardTitle = new Label("⚙️ Configurazione");
+        cardTitle.getStyleClass().add("card-title");
+
+        // Griglia compatta per la configurazione
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(12);
+        grid.setAlignment(Pos.CENTER_LEFT);
+
+        Label tipoLabel = new Label("Tipo:");
+        tipoLabel.getStyleClass().add("field-label");
+
+        Label strategiaLabel = new Label("Strategia:");
+        strategiaLabel.getStyleClass().add("field-label");
+
+        grid.add(tipoLabel, 0, 0);
+        grid.add(tipoElaborazioneCombo, 1, 0);
+        grid.add(strategiaLabel, 0, 1);
+        grid.add(strategiaCombo, 1, 1);
+
+        card.getChildren().addAll(cardTitle, grid);
         return card;
     }
 
-    private void setupValidation() {
-        // Validazione in tempo reale per ID piantagione
-        piantagioneIdField.textProperty().addListener((obs, oldVal, newVal) -> {
-            validatePiantagioneId(newVal);
-        });
+    private VBox createParametersSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
 
-        // Validazione date
-        dataInizioField.valueProperty().addListener((obs, oldVal, newVal) -> validateDateRange());
-        dataFineField.valueProperty().addListener((obs, oldVal, newVal) -> validateDateRange());
+        Label cardTitle = new Label("📋 Parametri");
+        cardTitle.getStyleClass().add("card-title");
+
+        card.getChildren().addAll(cardTitle, parametriContainer, validationLabel);
+        return card;
     }
 
-    private void validatePiantagioneId(String value) {
-        if (value != null && !value.trim().isEmpty()) {
-            try {
-                int id = Integer.parseInt(value.trim());
-                if (id <= 0) {
-                    showValidationError("L'ID piantagione deve essere un numero positivo");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showValidationError("L'ID piantagione deve essere un numero valido");
-                return;
-            }
-        }
-        hideValidationError();
+    private HBox createActionBar() {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(0, 0, 10, 0));
+
+        // Gruppo principale
+        HBox mainGroup = new HBox(10);
+        mainGroup.setAlignment(Pos.CENTER_LEFT);
+        mainGroup.getChildren().add(eseguiBtn);
+
+        // Gruppo secondario
+        HBox secondaryGroup = new HBox(8);
+        secondaryGroup.setAlignment(Pos.CENTER_LEFT);
+        secondaryGroup.getChildren().addAll(salvaRisultatiBtn, clearBtn);
+
+        // Gruppo utility
+        HBox utilityGroup = new HBox(8);
+        utilityGroup.setAlignment(Pos.CENTER_LEFT);
+        utilityGroup.getChildren().addAll(aggiornaDatiBtn, progressIndicator);
+
+        // Separatori
+        Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep1.getStyleClass().add("v-separator");
+        Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep2.getStyleClass().add("v-separator");
+
+        bar.getChildren().addAll(mainGroup, sep1, secondaryGroup, sep2, utilityGroup);
+
+        // Spacer per allineare a sinistra
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        bar.getChildren().add(spacer);
+
+        return bar;
     }
 
-    private void validateDateRange() {
-        LocalDate inizio = dataInizioField.getValue();
-        LocalDate fine = dataFineField.getValue();
+    private VBox createResultSection() {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("styled-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
 
-        if (inizio != null && fine != null) {
-            if (inizio.isAfter(fine)) {
-                showValidationError("La data di inizio deve essere precedente alla data di fine");
-                return;
-            }
-            if (fine.isAfter(LocalDate.now())) {
-                showValidationError("La data di fine non può essere nel futuro");
-                return;
-            }
-        }
-        hideValidationError();
+        Label cardTitle = new Label("📈 Risultati");
+        cardTitle.getStyleClass().add("card-title");
+
+        ScrollPane scrollPane = new ScrollPane(risultatoArea);
+        scrollPane.getStyleClass().add("results-scroll");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+        card.getChildren().addAll(cardTitle, scrollPane, statusLabel);
+        return card;
     }
 
-    private void showValidationError(String message) {
-        validationLabel.setText("⚠️ " + message);
-        validationLabel.setVisible(true);
-        eseguiBtn.setDisable(true);
-    }
-
-    private void hideValidationError() {
-        validationLabel.setVisible(false);
-        eseguiBtn.setDisable(false);
-    }
+    // =================================================================
+    // GESTIONE DINAMICA PARAMETRI
+    // =================================================================
 
     private void aggiornaStrategieDisponibili() {
-        DataProcessingStrategy.ProcessingType tipoSelezionato = tipoElaborazioneCombo.getValue();
+        DataProcessingStrategy.ProcessingType tipo = tipoElaborazioneCombo.getValue();
         strategiaCombo.getItems().clear();
 
-        switch (tipoSelezionato) {
+        switch (tipo) {
             case CALCULATION -> strategiaCombo.getItems().addAll(
                 "Produzione Totale",
                 "Media per Pianta",
@@ -264,43 +298,228 @@ public class DataProcessingView extends VBox {
 
     private void aggiornaParametriVisibili() {
         parametriContainer.getChildren().clear();
+        eseguiBtn.setDisable(false);
+
         String strategia = strategiaCombo.getValue();
         if (strategia == null) return;
 
         switch (strategia) {
             case "Produzione Totale", "Media per Pianta", "Efficienza Produttiva" -> {
-                GridPane grid = new GridPane();
-                grid.setHgap(10);
-                grid.setVgap(8);
-                grid.addRow(0, new Label("ID Piantagione:"), piantagioneIdField);
-                grid.addRow(1, new Label("Oppure seleziona:"), piantagioneCombo);
-                parametriContainer.getChildren().add(grid);
+                mostraParametriPiantagione();
             }
             case "Produzione per Periodo" -> {
-                GridPane grid = new GridPane();
-                grid.setHgap(10);
-                grid.setVgap(8);
-                grid.addRow(0, new Label("Data inizio:"), dataInizioField);
-                grid.addRow(1, new Label("Data fine:"), dataFineField);
-                grid.addRow(2, new Label("Zona (opzionale):"), zonaCombo);
-                parametriContainer.getChildren().add(grid);
+                mostraParametriPeriodo();
             }
             case "Top Piantagioni" -> {
-                GridPane grid = new GridPane();
-                grid.setHgap(10);
-                grid.setVgap(8);
-                grid.addRow(0, new Label("Numero top:"), topNSpinner);
-                Label infoLabel = new Label("Mostra le migliori N piantagioni per produttività");
-                infoLabel.setStyle("-fx-text-fill: #6c757d; -fx-font-style: italic; -fx-font-size: 11px;");
-                grid.addRow(1, new Label(), infoLabel);
-                parametriContainer.getChildren().add(grid);
+                mostraParametriTopN();
             }
-            case "Piantagione Migliore", "Statistiche Zone", "Report Raccolti" -> {
-                Label infoLabel = new Label("ℹ️ Nessun parametro aggiuntivo richiesto");
-                infoLabel.setStyle("-fx-text-fill: #28a745; -fx-font-style: italic; -fx-padding: 10;");
-                parametriContainer.getChildren().add(infoLabel);
+            case "Report Raccolti" -> {
+                mostraSelettoreReport();
+            }
+            case "Piantagione Migliore", "Statistiche Zone" -> {
+                mostraInfoNessunParametro();
             }
         }
+    }
+
+    private void mostraParametriPiantagione() {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label idLabel = new Label("ID Piantagione:");
+        idLabel.getStyleClass().add("field-label");
+
+        Label comboLabel = new Label("Oppure seleziona:");
+        comboLabel.getStyleClass().add("field-label");
+
+        grid.add(idLabel, 0, 0);
+        grid.add(piantagioneIdField, 1, 0);
+        grid.add(comboLabel, 0, 1);
+        grid.add(piantagioneCombo, 1, 1);
+
+        parametriContainer.getChildren().add(grid);
+    }
+
+    private void mostraParametriPeriodo() {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label inizioLabel = new Label("Data inizio:");
+        inizioLabel.getStyleClass().add("field-label");
+
+        Label fineLabel = new Label("Data fine:");
+        fineLabel.getStyleClass().add("field-label");
+
+        Label zonaLabel = new Label("Zona:");
+        zonaLabel.getStyleClass().add("field-label");
+
+        grid.add(inizioLabel, 0, 0);
+        grid.add(dataInizioField, 1, 0);
+        grid.add(fineLabel, 0, 1);
+        grid.add(dataFineField, 1, 1);
+        grid.add(zonaLabel, 0, 2);
+        grid.add(zonaCombo, 1, 2);
+
+        parametriContainer.getChildren().add(grid);
+    }
+
+    private void mostraParametriTopN() {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label topLabel = new Label("Top N:");
+        topLabel.getStyleClass().add("field-label");
+
+        Label helpLabel = new Label("Mostra le migliori N piantagioni per produttività");
+        helpLabel.getStyleClass().add("help-label");
+
+        grid.add(topLabel, 0, 0);
+        grid.add(topNSpinner, 1, 0);
+        grid.add(helpLabel, 1, 1);
+
+        parametriContainer.getChildren().add(grid);
+    }
+
+    private void mostraInfoNessunParametro() {
+        Label infoLabel = new Label("ℹ️ Nessun parametro richiesto per questa analisi");
+        infoLabel.getStyleClass().add("info-label");
+        parametriContainer.getChildren().add(infoLabel);
+    }
+
+    private void mostraSelettoreReport() {
+        eseguiBtn.setDisable(true);
+
+        VBox reportContainer = new VBox(15);
+        reportContainer.getStyleClass().add("report-selection-container");
+
+        // Titolo sezione
+        Label sectionTitle = new Label("📊 Scegli il Report da Generare");
+        sectionTitle.getStyleClass().add("section-title");
+
+        // Report principale
+        VBox mainReportGroup = createMainReportGroup();
+
+        // Separatore
+        Separator separator = new Separator();
+        separator.getStyleClass().add("section-separator");
+
+        // Report dettagliati
+        VBox detailedReportsGroup = createDetailedReportsGroup();
+
+        // Info box
+        HBox infoBox = createInfoBox();
+
+        reportContainer.getChildren().addAll(
+            sectionTitle,
+            mainReportGroup,
+            separator,
+            detailedReportsGroup,
+            infoBox
+        );
+
+        parametriContainer.getChildren().add(reportContainer);
+        statusLabel.setText("Seleziona un report usando i pulsanti sopra");
+    }
+
+    private VBox createMainReportGroup() {
+        VBox group = new VBox(10);
+        group.getStyleClass().add("report-group");
+
+        Label groupTitle = new Label("🎯 Report Completo");
+        groupTitle.getStyleClass().add("group-title");
+
+        Button reportBtn = new Button("📋 Genera Report Completo");
+        reportBtn.getStyleClass().addAll("btn-report", "btn-report-complete");
+        reportBtn.setPrefWidth(220);
+        reportBtn.setOnAction(e -> eseguiReportSpecifico("completo"));
+
+        Label desc = new Label("Include tutte le statistiche e analisi");
+        desc.getStyleClass().add("help-label");
+
+        group.getChildren().addAll(groupTitle, reportBtn, desc);
+        return group;
+    }
+
+    private VBox createDetailedReportsGroup() {
+        VBox group = new VBox(10);
+        group.getStyleClass().add("report-group");
+
+        Label groupTitle = new Label("📈 Report Dettagliati");
+        groupTitle.getStyleClass().add("group-title");
+
+        // Griglia 2x2 per i report
+        GridPane reportGrid = new GridPane();
+        reportGrid.setHgap(10);
+        reportGrid.setVgap(10);
+
+        // Report statistiche generali
+        Button statsBtn = new Button("📊 Statistiche Generali");
+        statsBtn.getStyleClass().addAll("btn-report", "btn-report-stats");
+        statsBtn.setPrefWidth(180);
+        statsBtn.setOnAction(e -> eseguiReportSpecifico("statistiche_generali"));
+
+        Label statsDesc = new Label("Totali e produzione");
+        statsDesc.getStyleClass().add("help-label-small");
+
+        // Report mensili
+        Button monthBtn = new Button("📅 Analisi Mensile");
+        monthBtn.getStyleClass().addAll("btn-report", "btn-report-monthly");
+        monthBtn.setPrefWidth(180);
+        monthBtn.setOnAction(e -> eseguiReportSpecifico("statistiche_mensili"));
+
+        Label monthDesc = new Label("Per mese");
+        monthDesc.getStyleClass().add("help-label-small");
+
+        // Report periodo
+        Button periodBtn = new Button("⏰ Periodo Coperto");
+        periodBtn.getStyleClass().addAll("btn-report", "btn-report-period");
+        periodBtn.setPrefWidth(180);
+        periodBtn.setOnAction(e -> eseguiReportSpecifico("periodo_coperto"));
+
+        Label periodDesc = new Label("Date raccolta");
+        periodDesc.getStyleClass().add("help-label-small");
+
+        reportGrid.add(statsBtn, 0, 0);
+        reportGrid.add(monthBtn, 1, 0);
+        reportGrid.add(statsDesc, 0, 1);
+        reportGrid.add(monthDesc, 1, 1);
+        reportGrid.add(periodBtn, 0, 2);
+        reportGrid.add(periodDesc, 0, 3);
+
+        group.getChildren().addAll(groupTitle, reportGrid);
+        return group;
+    }
+
+    private HBox createInfoBox() {
+        HBox box = new HBox(10);
+        box.getStyleClass().add("info-box");
+        box.setAlignment(Pos.CENTER_LEFT);
+
+        Label icon = new Label("💡");
+        icon.getStyleClass().add("info-icon");
+
+        Label text = new Label("Seleziona il tipo di report. Il report completo include tutte le informazioni.");
+        text.getStyleClass().add("info-text");
+        text.setWrapText(true);
+
+        box.getChildren().addAll(icon, text);
+        return box;
+    }
+
+    // =================================================================
+    // EVENT HANDLERS E LOGICA DI BUSINESS SEPARATA
+    // =================================================================
+
+    private void setupEventHandlers() {
+        tipoElaborazioneCombo.setOnAction(e -> aggiornaStrategieDisponibili());
+        strategiaCombo.setOnAction(e -> aggiornaParametriVisibili());
+        clearBtn.setOnAction(e -> clearResults());
     }
 
     private void clearResults() {
@@ -309,20 +528,60 @@ public class DataProcessingView extends VBox {
         statusLabel.setText("Risultati cancellati");
     }
 
-    // Event handlers per il controller
-    public void setOnEseguiElaborazioneListener(Runnable handler) {
-        this.onEseguiElaborazioneListener = handler;
-        eseguiBtn.setOnAction(e -> handler.run());
+    private void eseguiReportSpecifico(String tipoReport) {
+        if (controller != null) {
+            // Mostra indicatore di caricamento
+            progressIndicator.setVisible(true);
+            statusLabel.setText("Generazione " + getTipoReportLabel(tipoReport) + " in corso...");
+
+            // Disabilita tutti i controlli durante l'elaborazione
+            setControlsEnabled(false);
+
+            // Esegue il report tramite il controller
+            controller.elaboraReportRaccolti(tipoReport);
+
+            // Riabilita i controlli
+            setControlsEnabled(true);
+            progressIndicator.setVisible(false);
+
+            // Abilita il salvataggio se il report è stato generato con successo
+            salvaRisultatiBtn.setDisable(false);
+        } else {
+            mostraErrore("Errore: controller non inizializzato");
+        }
     }
 
-    public void setOnAggiornaDati(Runnable handler) {
-        this.onAggiornaDati = handler;
-        aggiornaDatiBtn.setOnAction(e -> handler.run());
+    /**
+     * Restituisce l'etichetta leggibile per il tipo di report
+     */
+    private String getTipoReportLabel(String tipoReport) {
+        return switch (tipoReport) {
+            case "completo" -> "Report Completo";
+            case "statistiche_generali" -> "Statistiche Generali";
+            case "statistiche_mensili" -> "Statistiche Mensili";
+            case "periodo_coperto" -> "Periodo Coperto";
+            default -> "Report";
+        };
     }
 
-    public void setOnSalvaRisultati(Runnable handler) {
-        this.onSalvaRisultati = handler;
-        salvaRisultatiBtn.setOnAction(e -> handler.run());
+    /**
+     * Abilita/disabilita i controlli dell'interfaccia
+     */
+    private void setControlsEnabled(boolean enabled) {
+        tipoElaborazioneCombo.setDisable(!enabled);
+        strategiaCombo.setDisable(!enabled);
+        eseguiBtn.setDisable(!enabled);
+        aggiornaDatiBtn.setDisable(!enabled);
+        clearBtn.setDisable(!enabled);
+
+        // Disabilita anche i controlli nei parametri
+        parametriContainer.getChildren().forEach(node -> {
+            if (node instanceof GridPane grid) {
+                grid.getChildren().forEach(child -> child.setDisable(!enabled));
+            } else if (node instanceof VBox vbox) {
+                vbox.getChildren().forEach(child -> child.setDisable(!enabled));
+            }
+        });
     }
 
     // Metodi per ottenere dati dalla view (usati dal controller)
@@ -428,5 +687,220 @@ public class DataProcessingView extends VBox {
     // Metodo per formattazione per salvataggio
     public String formatPerSalvataggio(ProcessingResult<?> result) {
         return risultatoArea.getText();
+    }
+
+    /**
+     * Mostra il report completo dei raccolti
+     */
+    @SuppressWarnings("unchecked")
+    public void mostraReportCompleto(Map<String, Object> reportData) {
+        StringBuilder contenuto = new StringBuilder();
+        contenuto.append("📋 REPORT COMPLETO RACCOLTI\n");
+        contenuto.append("═".repeat(50)).append("\n\n");
+
+        // Statistiche generali
+        Map<String, Object> statisticheGenerali = (Map<String, Object>) reportData.get("statisticheGenerali");
+        if (statisticheGenerali != null) {
+            contenuto.append("📊 STATISTICHE GENERALI\n");
+            contenuto.append("─".repeat(25)).append("\n");
+            contenuto.append(String.format("▸ Numero totale raccolti: %d\n", statisticheGenerali.get("numeroTotaleRaccolti")));
+            contenuto.append(String.format("▸ Produzione totale: %.2f kg\n\n", statisticheGenerali.get("produzioneTotale")));
+        }
+
+        // Periodo coperto
+        Map<String, Object> periodoCoperto = (Map<String, Object>) reportData.get("periodoCoperto");
+        if (periodoCoperto != null && (Boolean) periodoCoperto.get("hasData")) {
+            contenuto.append("⏰ PERIODO ANALIZZATO\n");
+            contenuto.append("─".repeat(20)).append("\n");
+            contenuto.append(String.format("▸ Dal: %s\n", periodoCoperto.get("primaData")));
+            contenuto.append(String.format("▸ Al:  %s\n\n", periodoCoperto.get("ultimaData")));
+        }
+
+        // Statistiche mensili
+        Map<String, Map<String, Object>> raccoltiPerMese =
+            (Map<String, Map<String, Object>>) reportData.get("raccoltiPerMese");
+        if (raccoltiPerMese != null && !raccoltiPerMese.isEmpty()) {
+            contenuto.append("📅 DETTAGLIO MENSILE\n");
+            contenuto.append("─".repeat(20)).append("\n");
+
+            raccoltiPerMese.forEach((mese, stats) -> {
+                contenuto.append(String.format("\n🗓️  %s\n", formatMese(mese)));
+                contenuto.append(String.format("   • Raccolti: %d\n", stats.get("numeroRaccolti")));
+                contenuto.append(String.format("   • Produzione: %.2f kg\n", stats.get("totaleProduzione")));
+                contenuto.append(String.format("   • Piantagioni coinvolte: %d\n", stats.get("numeroPiantagioniCoinvolte")));
+            });
+        }
+
+        risultatoArea.setText(contenuto.toString());
+        setStatus("Report completo raccolti generato con successo");
+    }
+
+    /**
+     * Mostra solo le statistiche generali
+     */
+    public void mostraStatisticheGenerali(Map<String, Object> statistiche) {
+        StringBuilder contenuto = new StringBuilder();
+        contenuto.append("📈 STATISTICHE GENERALI RACCOLTI\n");
+        contenuto.append("═".repeat(40)).append("\n\n");
+
+        contenuto.append(String.format("▸ Numero totale raccolti: %d\n", statistiche.get("numeroTotaleRaccolti")));
+        contenuto.append(String.format("▸ Produzione totale: %.2f kg\n", statistiche.get("produzioneTotale")));
+
+        risultatoArea.setText(contenuto.toString());
+        setStatus("Statistiche generali raccolti generate con successo");
+    }
+
+    /**
+     * Mostra solo le statistiche mensili
+     */
+    @SuppressWarnings("unchecked")
+    public void mostraStatisticheMensili(Map<String, Object> statisticheMensili) {
+        StringBuilder contenuto = new StringBuilder();
+        contenuto.append("📅 STATISTICHE MENSILI RACCOLTI\n");
+        contenuto.append("═".repeat(50)).append("\n\n");
+
+        if (statisticheMensili.isEmpty()) {
+            contenuto.append("Nessun dato mensile disponibile.");
+        } else {
+            statisticheMensili.forEach((mese, statsObj) -> {
+                Map<String, Object> stats = (Map<String, Object>) statsObj;
+                contenuto.append(String.format("🗓️  %s\n", formatMese(mese)));
+                contenuto.append(String.format("   • Raccolti effettuati: %d\n", stats.get("numeroRaccolti")));
+                contenuto.append(String.format("   • Produzione totale: %.2f kg\n", stats.get("totaleProduzione")));
+                contenuto.append(String.format("   • Piantagioni coinvolte: %d\n\n", stats.get("numeroPiantagioniCoinvolte")));
+            });
+        }
+
+        risultatoArea.setText(contenuto.toString());
+        setStatus("Statistiche mensili raccolti generate con successo");
+    }
+
+    /**
+     * Mostra il periodo coperto dai raccolti
+     */
+    public void mostraPeriodoCoperto(Map<String, Object> periodo) {
+        StringBuilder contenuto = new StringBuilder();
+        contenuto.append("⏰ PERIODO COPERTO DAI RACCOLTI\n");
+        contenuto.append("═".repeat(40)).append("\n\n");
+
+        Boolean hasData = (Boolean) periodo.get("hasData");
+        if (hasData != null && hasData) {
+            contenuto.append(String.format("▸ Data primo raccolto: %s\n", periodo.get("primaData")));
+            contenuto.append(String.format("▸ Data ultimo raccolto: %s\n", periodo.get("ultimaData")));
+
+            // Calcola giorni se possibile
+            LocalDate primaData = (LocalDate) periodo.get("primaData");
+            LocalDate ultimaData = (LocalDate) periodo.get("ultimaData");
+            if (primaData != null && ultimaData != null) {
+                long giorni = java.time.temporal.ChronoUnit.DAYS.between(primaData, ultimaData);
+                contenuto.append(String.format("▸ Periodo totale: %d giorni\n", giorni));
+            }
+        } else {
+            contenuto.append("Nessun dato disponibile sui periodi.");
+        }
+
+        risultatoArea.setText(contenuto.toString());
+        setStatus("Periodo coperto raccolti calcolato con successo");
+    }
+
+    /**
+     * Formatta il mese per la visualizzazione
+     */
+    private String formatMese(String meseAnno) {
+        String[] parti = meseAnno.split("-");
+        if (parti.length != 2) return meseAnno;
+
+        String anno = parti[0];
+        String mese = parti[1];
+
+        String[] nomiMesi = {
+            "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+            "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+        };
+
+        try {
+            int numeroMese = Integer.parseInt(mese);
+            if (numeroMese >= 1 && numeroMese <= 12) {
+                return nomiMesi[numeroMese - 1] + " " + anno;
+            }
+        } catch (NumberFormatException ignored) {}
+
+        return meseAnno;
+    }
+
+    // =================================================================
+    // VALIDAZIONE E EVENT HANDLERS
+    // =================================================================
+
+    private void setupValidation() {
+        // Validazione in tempo reale per ID piantagione
+        piantagioneIdField.textProperty().addListener((obs, oldVal, newVal) -> {
+            validatePiantagioneId(newVal);
+        });
+
+        // Validazione date
+        dataInizioField.valueProperty().addListener((obs, oldVal, newVal) -> validateDateRange());
+        dataFineField.valueProperty().addListener((obs, oldVal, newVal) -> validateDateRange());
+    }
+
+    private void validatePiantagioneId(String value) {
+        if (value != null && !value.trim().isEmpty()) {
+            try {
+                int id = Integer.parseInt(value.trim());
+                if (id <= 0) {
+                    showValidationError("L'ID piantagione deve essere un numero positivo");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                showValidationError("L'ID piantagione deve essere un numero valido");
+                return;
+            }
+        }
+        hideValidationError();
+    }
+
+    private void validateDateRange() {
+        LocalDate inizio = dataInizioField.getValue();
+        LocalDate fine = dataFineField.getValue();
+
+        if (inizio != null && fine != null) {
+            if (inizio.isAfter(fine)) {
+                showValidationError("La data di inizio deve essere precedente alla data di fine");
+                return;
+            }
+            if (fine.isAfter(LocalDate.now())) {
+                showValidationError("La data di fine non può essere nel futuro");
+                return;
+            }
+        }
+        hideValidationError();
+    }
+
+    private void showValidationError(String message) {
+        validationLabel.setText("⚠️ " + message);
+        validationLabel.setVisible(true);
+        eseguiBtn.setDisable(true);
+    }
+
+    private void hideValidationError() {
+        validationLabel.setVisible(false);
+        eseguiBtn.setDisable(false);
+    }
+
+    // Event handlers per il controller
+    public void setController(DataProcessingController controller) {
+        this.controller = controller;
+    }
+
+    public void setOnEseguiElaborazioneListener(Runnable handler) {
+        eseguiBtn.setOnAction(e -> handler.run());
+    }
+
+    public void setOnAggiornaDati(Runnable handler) {
+        aggiornaDatiBtn.setOnAction(e -> handler.run());
+    }
+
+    public void setOnSalvaRisultati(Runnable handler) {
+        salvaRisultatiBtn.setOnAction(e -> handler.run());
     }
 }

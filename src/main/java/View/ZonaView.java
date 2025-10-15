@@ -4,45 +4,156 @@ import DomainModel.Zona;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+/**
+ * View moderna per la gestione delle zone.
+ * Stile coerente con l'applicazione.
+ */
 public class ZonaView extends VBox {
 
-    private final TableView<Zona> tableZone;
-    private final ObservableList<Zona> zoneData;
+    // Componenti UI
+    private final TableView<Zona> tableZone = new TableView<>();
+    private final ObservableList<Zona> zoneData = FXCollections.observableArrayList();
 
-    // Pulsanti essenziali
-    private final Button nuovoBtn;
-    private final Button modificaBtn;
-    private final Button eliminaBtn;
-    private final Button applicaFiltriBtn;
-    private final Button resetFiltriBtn;
+    // Pulsanti azione
+    private final Button nuovoBtn = new Button("➕ Nuova Zona");
+    private final Button modificaBtn = new Button("✏️ Modifica");
+    private final Button eliminaBtn = new Button("🗑️ Elimina");
+    private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
+    private final Button resetFiltriBtn = new Button("🔄 Reset");
 
-    // Controlli di ricerca e filtro
-    private final TextField ricercaField;
-    private final ComboBox<String> filtroTipoTerreno;
+    // Controlli ricerca
+    private final TextField ricercaField = new TextField();
+    private final ComboBox<String> filtroTipoTerreno = new ComboBox<>();
 
     public ZonaView() {
-        tableZone = new TableView<>();
-        zoneData = FXCollections.observableArrayList();
-        nuovoBtn = new Button("➕ Nuova Zona");
-        modificaBtn = new Button("✏️ Modifica");
-        eliminaBtn = new Button("🗑️ Elimina");
-        applicaFiltriBtn = new Button("🔍 Applica Filtri");
-        resetFiltriBtn = new Button("🔄 Reset Filtri");
-        ricercaField = new TextField();
-        filtroTipoTerreno = new ComboBox<>();
-
+        setupStyles();
         setupLayout();
         setupTable();
-        setupControls();
+    }
+
+    private void setupStyles() {
+        getStyleClass().add("main-container");
+
+        // Configurazione campi ricerca
+        ricercaField.setPromptText("Cerca zona per nome...");
+        ricercaField.setPrefWidth(250);
+        ricercaField.getStyleClass().add("text-field-standard");
+
+        filtroTipoTerreno.setPromptText("Tutti i tipi");
+        filtroTipoTerreno.setPrefWidth(180);
+        filtroTipoTerreno.getStyleClass().add("combo-box-standard");
+
+        // Configurazione bottoni
+        nuovoBtn.getStyleClass().add("btn-primary");
+        modificaBtn.getStyleClass().add("btn-secondary");
+        modificaBtn.setDisable(true);
+        eliminaBtn.getStyleClass().add("btn-danger");
+        eliminaBtn.setDisable(true);
+        applicaFiltriBtn.getStyleClass().add("btn-secondary");
+        resetFiltriBtn.getStyleClass().add("btn-support");
     }
 
     private void setupLayout() {
-        setPadding(new Insets(20));
-        setSpacing(20);
-        setStyle("-fx-background-color: #F8F9FA;");
+        // Header
+        VBox header = createHeader();
+
+        // Card ricerca
+        VBox ricercaCard = createRicercaSection();
+
+        // Barra azioni
+        HBox actionBar = createActionBar();
+
+        // Card tabella
+        VBox tableCard = createTableSection();
+
+        getChildren().addAll(header, ricercaCard, actionBar, tableCard);
+        VBox.setVgrow(tableCard, Priority.ALWAYS);
+    }
+
+    private VBox createHeader() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        header.getStyleClass().add("header-section");
+
+        Label title = new Label("🗺️ Gestione Zone");
+        title.getStyleClass().add("main-title");
+
+        Label subtitle = new Label("Organizza e gestisci le aree di coltivazione");
+        subtitle.getStyleClass().add("subtitle");
+
+        header.getChildren().addAll(title, subtitle);
+        return header;
+    }
+
+    private VBox createRicercaSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
+
+        Label cardTitle = new Label("🔍 Ricerca");
+        cardTitle.getStyleClass().add("card-title");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label nomeLabel = new Label("Nome:");
+        nomeLabel.getStyleClass().add("field-label");
+
+        Label tipoLabel = new Label("Tipo terreno:");
+        tipoLabel.getStyleClass().add("field-label");
+
+        grid.add(nomeLabel, 0, 0);
+        grid.add(ricercaField, 1, 0);
+        grid.add(tipoLabel, 2, 0);
+        grid.add(filtroTipoTerreno, 3, 0);
+
+        card.getChildren().addAll(cardTitle, grid);
+        return card;
+    }
+
+    private HBox createActionBar() {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(0, 0, 10, 0));
+
+        HBox mainGroup = new HBox(10);
+        mainGroup.setAlignment(Pos.CENTER_LEFT);
+        mainGroup.getChildren().add(nuovoBtn);
+
+        HBox secondaryGroup = new HBox(8);
+        secondaryGroup.setAlignment(Pos.CENTER_LEFT);
+        secondaryGroup.getChildren().addAll(modificaBtn, eliminaBtn);
+
+        HBox filterGroup = new HBox(8);
+        filterGroup.setAlignment(Pos.CENTER_LEFT);
+        filterGroup.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
+
+        Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep1.getStyleClass().add("v-separator");
+        Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep2.getStyleClass().add("v-separator");
+
+        bar.getChildren().addAll(mainGroup, sep1, secondaryGroup, sep2, filterGroup);
+        return bar;
+    }
+
+    private VBox createTableSection() {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("styled-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
+
+        Label cardTitle = new Label("📋 Elenco Zone");
+        cardTitle.getStyleClass().add("card-title");
+
+        VBox.setVgrow(tableZone, Priority.ALWAYS);
+
+        card.getChildren().addAll(cardTitle, tableZone);
+        return card;
     }
 
     @SuppressWarnings("unchecked")
@@ -81,90 +192,30 @@ public class ZonaView extends VBox {
         tableZone.getColumns().addAll(idCol, nomeCol, dimCol, tipoCol, dataCol);
         tableZone.setItems(zoneData);
 
-        // Double-click per modifica
         tableZone.setRowFactory(tv -> {
             TableRow<Zona> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    // Il controller gestirà l'apertura del dialog
+                    modificaZona();
                 }
             });
             return row;
         });
 
-        VBox.setVgrow(tableZone, Priority.ALWAYS);
-    }
-
-    private void setupControls() {
-        // Sezione ricerca in card
-        VBox ricercaCard = createCard("🔍 Ricerca Zone");
-        GridPane ricercaGrid = new GridPane();
-        ricercaGrid.setHgap(10);
-        ricercaGrid.setVgap(10);
-
-        ricercaField.setPromptText("Cerca per nome zona...");
-        filtroTipoTerreno.setPromptText("Tutti i tipi di terreno");
-
-        // Aggiunta opzioni comuni per tipo terreno
-        filtroTipoTerreno.getItems().addAll(
-            "Argilloso", "Sabbioso", "Limoso", "Calcareo", "Vulcanico", "Misto"
-        );
-
-        ricercaGrid.addRow(0, new Label("Nome:"), ricercaField);
-        ricercaGrid.addRow(1, new Label("Tipo Terreno:"), filtroTipoTerreno);
-
-        HBox filtriActions = new HBox(10);
-        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
-                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        filtriActions.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
-
-        ricercaCard.getChildren().addAll(ricercaGrid, filtriActions);
-
-        // Sezione azioni in card
-        VBox azioniCard = createCard("⚡ Azioni");
-        HBox azioniBox = new HBox(10);
-
-        // Stili pulsanti
-        nuovoBtn.setStyle("-fx-background-color: #28A745; -fx-text-fill: white; " +
-                         "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-
-        modificaBtn.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        modificaBtn.setDisable(true);
-
-        eliminaBtn.setStyle("-fx-background-color: #DC3545; -fx-text-fill: white; " +
-                           "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        eliminaBtn.setDisable(true);
-
-        // Gestione selezione
         tableZone.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean hasSelection = newSel != null;
             modificaBtn.setDisable(!hasSelection);
             eliminaBtn.setDisable(!hasSelection);
         });
-
-        azioniBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn);
-        azioniCard.getChildren().add(azioniBox);
-
-        getChildren().addAll(ricercaCard, azioniCard, tableZone);
     }
 
-    private VBox createCard(String title) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(15));
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        card.getChildren().add(titleLabel);
-
-        return card;
+    private void modificaZona() {
+        if (getZonaSelezionata() != null) {
+            // Il controller gestirà l'apertura del dialog
+        }
     }
 
-    // Metodi pubblici per il controller
+    // Metodi pubblici
     public void setZone(java.util.List<Zona> zone) {
         zoneData.setAll(zone);
     }
@@ -173,7 +224,13 @@ public class ZonaView extends VBox {
         return tableZone.getSelectionModel().getSelectedItem();
     }
 
-    // Event handlers
+    public void setTipiTerreno(java.util.List<String> tipi) {
+        filtroTipoTerreno.getItems().clear();
+        filtroTipoTerreno.getItems().add("Tutti i tipi");
+        filtroTipoTerreno.getItems().addAll(tipi);
+        filtroTipoTerreno.getSelectionModel().selectFirst();
+    }
+
     public void setOnNuovaZona(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
@@ -194,33 +251,29 @@ public class ZonaView extends VBox {
         resetFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    // Gestione filtri
     public CriteriFiltro getCriteriFiltro() {
-        return new CriteriFiltro(
-            ricercaField.getText().trim(),
-            filtroTipoTerreno.getValue()
-        );
+        String tipo = filtroTipoTerreno.getValue();
+        if (tipo != null && tipo.equals("Tutti i tipi")) {
+            tipo = null;
+        }
+        return new CriteriFiltro(ricercaField.getText().trim(), tipo);
     }
 
     public void resetFiltri() {
         ricercaField.clear();
-        filtroTipoTerreno.setValue(null);
+        filtroTipoTerreno.getSelectionModel().selectFirst();
     }
 
-    // Metodo per conferma eliminazione
     public boolean confermaEliminazione(Zona zona) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Conferma Eliminazione");
         alert.setHeaderText("Stai per eliminare la zona:");
-        alert.setContentText(zona.getNome() + " (" + zona.getTipoTerreno() + ")" +
-                            "\nDimensione: " + zona.getDimensione() + " ha" +
+        alert.setContentText(zona.getNome() + " (" + zona.getDimensione() + " ha)" +
                             "\n\nQuesta operazione non può essere annullata.");
-
         return alert.showAndWait()
                 .filter(response -> response == ButtonType.OK)
                 .isPresent();
     }
 
-    // Record per criteri di filtro
     public record CriteriFiltro(String nome, String tipoTerreno) {}
 }

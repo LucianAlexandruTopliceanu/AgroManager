@@ -4,52 +4,183 @@ import DomainModel.Raccolto;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import java.time.LocalDate;
 
+/**
+ * View moderna per la gestione dei raccolti.
+ * Stile coerente con l'applicazione.
+ */
 public class RaccoltoView extends VBox {
 
-    private final TableView<Raccolto> tableRaccolti;
-    private final ObservableList<Raccolto> raccoltiData;
+    // Componenti UI
+    private final TableView<Raccolto> tableRaccolti = new TableView<>();
+    private final ObservableList<Raccolto> raccoltiData = FXCollections.observableArrayList();
 
-    // Pulsanti essenziali
-    private final Button nuovoBtn;
-    private final Button modificaBtn;
-    private final Button eliminaBtn;
-    private final Button applicaFiltriBtn;
-    private final Button resetFiltriBtn;
+    // Pulsanti azione
+    private final Button nuovoBtn = new Button("➕ Nuovo Raccolto");
+    private final Button modificaBtn = new Button("✏️ Modifica");
+    private final Button eliminaBtn = new Button("🗑️ Elimina");
+    private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
+    private final Button resetFiltriBtn = new Button("🔄 Reset");
 
-    // Controlli di ricerca e filtro
-    private final ComboBox<String> filtroPiantagioneCombo;
-    private final DatePicker filtroDataDa;
-    private final DatePicker filtroDataA;
-    private final Spinner<Double> filtroQuantitaMin;
-    private final Spinner<Double> filtroQuantitaMax;
+    // Controlli ricerca
+    private final ComboBox<String> filtroPiantagioneCombo = new ComboBox<>();
+    private final DatePicker filtroDataDa = new DatePicker();
+    private final DatePicker filtroDataA = new DatePicker();
+    private final Spinner<Double> filtroQuantitaMin = new Spinner<>(0.0, 1000.0, 0.0, 0.1);
+    private final Spinner<Double> filtroQuantitaMax = new Spinner<>(0.0, 1000.0, 1000.0, 0.1);
 
     public RaccoltoView() {
-        tableRaccolti = new TableView<>();
-        raccoltiData = FXCollections.observableArrayList();
-        nuovoBtn = new Button("➕ Nuovo Raccolto");
-        modificaBtn = new Button("✏️ Modifica");
-        eliminaBtn = new Button("🗑️ Elimina");
-        applicaFiltriBtn = new Button("🔍 Applica Filtri");
-        resetFiltriBtn = new Button("🔄 Reset Filtri");
-        filtroPiantagioneCombo = new ComboBox<>();
-        filtroDataDa = new DatePicker();
-        filtroDataA = new DatePicker();
-        filtroQuantitaMin = new Spinner<>(0.0, 1000.0, 0.0, 0.1);
-        filtroQuantitaMax = new Spinner<>(0.0, 1000.0, 1000.0, 0.1);
-
+        setupStyles();
         setupLayout();
         setupTable();
-        setupControls();
+    }
+
+    private void setupStyles() {
+        getStyleClass().add("main-container");
+
+        // Configurazione controlli ricerca
+        filtroPiantagioneCombo.setPromptText("Tutte le piantagioni");
+        filtroPiantagioneCombo.setPrefWidth(200);
+        filtroPiantagioneCombo.getStyleClass().add("combo-box-standard");
+
+        filtroDataDa.setPromptText("Data da");
+        filtroDataDa.setPrefWidth(150);
+        filtroDataDa.getStyleClass().add("date-picker-standard");
+
+        filtroDataA.setPromptText("Data a");
+        filtroDataA.setPrefWidth(150);
+        filtroDataA.getStyleClass().add("date-picker-standard");
+
+        filtroQuantitaMin.setEditable(true);
+        filtroQuantitaMin.setPrefWidth(100);
+        filtroQuantitaMin.getStyleClass().add("spinner-standard");
+
+        filtroQuantitaMax.setEditable(true);
+        filtroQuantitaMax.setPrefWidth(100);
+        filtroQuantitaMax.getStyleClass().add("spinner-standard");
+
+        // Configurazione bottoni
+        nuovoBtn.getStyleClass().add("btn-primary");
+        modificaBtn.getStyleClass().add("btn-secondary");
+        modificaBtn.setDisable(true);
+        eliminaBtn.getStyleClass().add("btn-danger");
+        eliminaBtn.setDisable(true);
+        applicaFiltriBtn.getStyleClass().add("btn-secondary");
+        resetFiltriBtn.getStyleClass().add("btn-support");
+
+        // Configurazione tabella
+        tableRaccolti.setPlaceholder(new Label("Nessun raccolto registrato. Aggiungi il primo raccolto!"));
     }
 
     private void setupLayout() {
-        setPadding(new Insets(20));
-        setSpacing(20);
-        setStyle("-fx-background-color: #F8F9FA;");
+        VBox header = createHeader();
+        VBox ricercaCard = createRicercaSection();
+        HBox actionBar = createActionBar();
+        VBox tableCard = createTableSection();
+
+        getChildren().addAll(header, ricercaCard, actionBar, tableCard);
+        VBox.setVgrow(tableCard, Priority.ALWAYS);
+    }
+
+    private VBox createHeader() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        header.getStyleClass().add("header-section");
+
+        Label title = new Label("🧺 Gestione Raccolti");
+        title.getStyleClass().add("main-title");
+
+        Label subtitle = new Label("Registra e monitora i raccolti delle piantagioni");
+        subtitle.getStyleClass().add("subtitle");
+
+        header.getChildren().addAll(title, subtitle);
+        return header;
+    }
+
+    private VBox createRicercaSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
+
+        Label cardTitle = new Label("🔍 Filtri Ricerca");
+        cardTitle.getStyleClass().add("card-title");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label piantagioneLabel = new Label("Piantagione:");
+        piantagioneLabel.getStyleClass().add("field-label");
+
+        Label dataDaLabel = new Label("Data da:");
+        dataDaLabel.getStyleClass().add("field-label");
+
+        Label dataALabel = new Label("Data a:");
+        dataALabel.getStyleClass().add("field-label");
+
+        Label quantitaMinLabel = new Label("Quantità min (kg):");
+        quantitaMinLabel.getStyleClass().add("field-label");
+
+        Label quantitaMaxLabel = new Label("Quantità max (kg):");
+        quantitaMaxLabel.getStyleClass().add("field-label");
+
+        grid.add(piantagioneLabel, 0, 0);
+        grid.add(filtroPiantagioneCombo, 1, 0);
+        grid.add(dataDaLabel, 2, 0);
+        grid.add(filtroDataDa, 3, 0);
+        grid.add(dataALabel, 0, 1);
+        grid.add(filtroDataA, 1, 1);
+        grid.add(quantitaMinLabel, 2, 1);
+        grid.add(filtroQuantitaMin, 3, 1);
+        grid.add(quantitaMaxLabel, 0, 2);
+        grid.add(filtroQuantitaMax, 1, 2);
+
+        card.getChildren().addAll(cardTitle, grid);
+        return card;
+    }
+
+    private HBox createActionBar() {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(0, 0, 10, 0));
+
+        HBox mainGroup = new HBox(10);
+        mainGroup.setAlignment(Pos.CENTER_LEFT);
+        mainGroup.getChildren().add(nuovoBtn);
+
+        HBox secondaryGroup = new HBox(8);
+        secondaryGroup.setAlignment(Pos.CENTER_LEFT);
+        secondaryGroup.getChildren().addAll(modificaBtn, eliminaBtn);
+
+        HBox filterGroup = new HBox(8);
+        filterGroup.setAlignment(Pos.CENTER_LEFT);
+        filterGroup.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
+
+        Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep1.getStyleClass().add("v-separator");
+        Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep2.getStyleClass().add("v-separator");
+
+        bar.getChildren().addAll(mainGroup, sep1, secondaryGroup, sep2, filterGroup);
+        return bar;
+    }
+
+    private VBox createTableSection() {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("styled-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
+
+        Label cardTitle = new Label("📋 Elenco Raccolti");
+        cardTitle.getStyleClass().add("card-title");
+
+        VBox.setVgrow(tableRaccolti, Priority.ALWAYS);
+
+        card.getChildren().addAll(cardTitle, tableRaccolti);
+        return card;
     }
 
     @SuppressWarnings("unchecked")
@@ -86,7 +217,6 @@ public class RaccoltoView extends VBox {
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getNote()));
         noteCol.setPrefWidth(250);
 
-        // Colonna stato qualitativo
         TableColumn<Raccolto, String> statoCol = new TableColumn<>("Stato");
         statoCol.setCellValueFactory(cell -> {
             double quantita = cell.getValue().getQuantitaKg() != null ?
@@ -102,91 +232,30 @@ public class RaccoltoView extends VBox {
         tableRaccolti.getColumns().addAll(idCol, piantagioneCol, dataCol, quantitaCol, statoCol, noteCol);
         tableRaccolti.setItems(raccoltiData);
 
-        // Double-click per modifica
         tableRaccolti.setRowFactory(tv -> {
             TableRow<Raccolto> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    // Il controller gestirà l'apertura del dialog
+                    modificaRaccolto();
                 }
             });
             return row;
         });
 
-        VBox.setVgrow(tableRaccolti, Priority.ALWAYS);
-    }
-
-    private void setupControls() {
-        // Sezione filtri in card
-        VBox filtriCard = createCard("🔍 Filtri di Ricerca");
-        GridPane filtriGrid = new GridPane();
-        filtriGrid.setHgap(10);
-        filtriGrid.setVgap(10);
-
-        filtroPiantagioneCombo.setPromptText("Tutte le piantagioni");
-        filtroDataDa.setPromptText("Data da...");
-        filtroDataA.setPromptText("Data a...");
-        filtroQuantitaMin.setEditable(true);
-        filtroQuantitaMax.setEditable(true);
-
-        filtriGrid.addRow(0, new Label("Piantagione:"), filtroPiantagioneCombo);
-        filtriGrid.addRow(1, new Label("Data da:"), filtroDataDa);
-        filtriGrid.addRow(2, new Label("Data a:"), filtroDataA);
-        filtriGrid.addRow(0, new Label("Quantità min (kg):"), filtroQuantitaMin);
-        filtriGrid.addRow(1, new Label("Quantità max (kg):"), filtroQuantitaMax);
-
-        HBox filtriActions = new HBox(10);
-        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
-                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        filtriActions.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
-
-        filtriCard.getChildren().addAll(filtriGrid, filtriActions);
-
-        // Sezione azioni in card
-        VBox azioniCard = createCard("⚡ Azioni");
-        HBox azioniBox = new HBox(10);
-
-        // Stili pulsanti
-        nuovoBtn.setStyle("-fx-background-color: #28A745; -fx-text-fill: white; " +
-                         "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-
-        modificaBtn.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        modificaBtn.setDisable(true);
-
-        eliminaBtn.setStyle("-fx-background-color: #DC3545; -fx-text-fill: white; " +
-                           "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        eliminaBtn.setDisable(true);
-
-        // Gestione selezione
         tableRaccolti.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean hasSelection = newSel != null;
             modificaBtn.setDisable(!hasSelection);
             eliminaBtn.setDisable(!hasSelection);
         });
-
-        azioniBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn);
-        azioniCard.getChildren().add(azioniBox);
-
-        getChildren().addAll(filtriCard, azioniCard, tableRaccolti);
     }
 
-    private VBox createCard(String title) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(15));
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        card.getChildren().add(titleLabel);
-
-        return card;
+    private void modificaRaccolto() {
+        if (getRaccoltoSelezionato() != null) {
+            // Il controller gestirà l'apertura del dialog
+        }
     }
 
-    // Metodi pubblici per il controller
+    // Metodi pubblici
     public void setRaccolti(java.util.List<Raccolto> raccolti) {
         raccoltiData.setAll(raccolti);
     }
@@ -195,7 +264,13 @@ public class RaccoltoView extends VBox {
         return tableRaccolti.getSelectionModel().getSelectedItem();
     }
 
-    // Event handlers
+    public void setPiantagioni(java.util.List<String> piantagioni) {
+        filtroPiantagioneCombo.getItems().clear();
+        filtroPiantagioneCombo.getItems().add("Tutte le piantagioni");
+        filtroPiantagioneCombo.getItems().addAll(piantagioni);
+        filtroPiantagioneCombo.getSelectionModel().selectFirst();
+    }
+
     public void setOnNuovoRaccolto(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
@@ -216,14 +291,13 @@ public class RaccoltoView extends VBox {
         resetFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    // Gestione filtri
-    public void setPiantagioni(java.util.List<String> piantagioni) {
-        filtroPiantagioneCombo.getItems().setAll(piantagioni);
-    }
-
     public CriteriFiltro getCriteriFiltro() {
+        String piantagione = filtroPiantagioneCombo.getValue();
+        if (piantagione != null && piantagione.equals("Tutte le piantagioni")) {
+            piantagione = null;
+        }
         return new CriteriFiltro(
-            filtroPiantagioneCombo.getValue(),
+            piantagione,
             filtroDataDa.getValue(),
             filtroDataA.getValue(),
             filtroQuantitaMin.getValue(),
@@ -232,34 +306,25 @@ public class RaccoltoView extends VBox {
     }
 
     public void resetFiltri() {
-        filtroPiantagioneCombo.setValue(null);
+        filtroPiantagioneCombo.getSelectionModel().selectFirst();
         filtroDataDa.setValue(null);
         filtroDataA.setValue(null);
         filtroQuantitaMin.getValueFactory().setValue(0.0);
         filtroQuantitaMax.getValueFactory().setValue(1000.0);
     }
 
-    // Metodo per conferma eliminazione
     public boolean confermaEliminazione(Raccolto raccolto) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Conferma Eliminazione");
         alert.setHeaderText("Stai per eliminare il raccolto:");
-        alert.setContentText("ID: " + raccolto.getId() +
-                            "\nPiantagione: " + raccolto.getPiantagioneId() +
+        alert.setContentText("Data: " + raccolto.getDataRaccolto() +
                             "\nQuantità: " + raccolto.getQuantitaKg() + " kg" +
                             "\n\nQuesta operazione non può essere annullata.");
-
         return alert.showAndWait()
                 .filter(response -> response == ButtonType.OK)
                 .isPresent();
     }
 
-    // Record per criteri di filtro
-    public record CriteriFiltro(
-        String piantagione,
-        LocalDate dataDa,
-        LocalDate dataA,
-        Double quantitaMin,
-        Double quantitaMax
-    ) {}
+    public record CriteriFiltro(String piantagione, LocalDate dataDa, LocalDate dataA,
+                                Double quantitaMin, Double quantitaMax) {}
 }

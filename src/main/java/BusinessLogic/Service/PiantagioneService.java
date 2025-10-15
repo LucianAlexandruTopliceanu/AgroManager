@@ -149,8 +149,6 @@ public class PiantagioneService {
                                          (p.getPiantaId() != null && p.getPiantaId().toString().equals(criteriFiltro.pianta()));
                     boolean matchZona = criteriFiltro.zona() == null || criteriFiltro.zona().isEmpty() ||
                                        (p.getZonaId() != null && p.getZonaId().toString().equals(criteriFiltro.zona()));
-                    boolean matchStato = criteriFiltro.stato() == null || criteriFiltro.stato().isEmpty() ||
-                                        (p.getStatoPiantagione() != null && p.getStatoPiantagione().getDescrizione().contains(criteriFiltro.stato()));
                     boolean matchData = true;
                     if (criteriFiltro.dataDa() != null && p.getMessaADimora() != null) {
                         matchData = !p.getMessaADimora().isBefore(criteriFiltro.dataDa());
@@ -158,7 +156,7 @@ public class PiantagioneService {
                     if (criteriFiltro.dataA() != null && p.getMessaADimora() != null) {
                         matchData = matchData && !p.getMessaADimora().isAfter(criteriFiltro.dataA());
                     }
-                    return matchPianta && matchZona && matchStato && matchData;
+                    return matchPianta && matchZona && matchData;
                 })
                 .toList();
         } catch (SQLException e) {

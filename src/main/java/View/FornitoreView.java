@@ -4,46 +4,164 @@ import DomainModel.Fornitore;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import java.util.function.Consumer;
 
+/**
+ * View moderna per la gestione dei fornitori.
+ * Stile coerente con l'applicazione.
+ */
 public class FornitoreView extends VBox {
 
-    private final TableView<Fornitore> tableFornitori;
-    private final ObservableList<Fornitore> fornitoriData;
+    // Componenti UI
+    private final TableView<Fornitore> tableFornitori = new TableView<>();
+    private final ObservableList<Fornitore> fornitoriData = FXCollections.observableArrayList();
 
-    // Pulsanti essenziali
-    private final Button nuovoBtn;
-    private final Button modificaBtn;
-    private final Button eliminaBtn;
-    private final Button applicaFiltriBtn;
-    private final Button resetFiltriBtn;
+    // Pulsanti azione
+    private final Button nuovoBtn = new Button("➕ Nuovo Fornitore");
+    private final Button modificaBtn = new Button("✏️ Modifica");
+    private final Button eliminaBtn = new Button("🗑️ Elimina");
+    private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
+    private final Button resetFiltriBtn = new Button("🔄 Reset");
 
-    // Controlli di ricerca
-    private final TextField ricercaNomeField;
-    private final TextField ricercaCittaField;
+    // Controlli ricerca
+    private final TextField ricercaNomeField = new TextField();
+    private final TextField ricercaCittaField = new TextField();
 
     public FornitoreView() {
-        tableFornitori = new TableView<>();
-        fornitoriData = FXCollections.observableArrayList();
-        nuovoBtn = new Button("➕ Nuovo Fornitore");
-        modificaBtn = new Button("✏️ Modifica");
-        eliminaBtn = new Button("🗑️ Elimina");
-        applicaFiltriBtn = new Button("🔍 Applica Filtri");
-        resetFiltriBtn = new Button("🔄 Reset Filtri");
-        ricercaNomeField = new TextField();
-        ricercaCittaField = new TextField();
-
+        setupStyles();
         setupLayout();
         setupTable();
-        setupControls();
+    }
+
+    private void setupStyles() {
+        getStyleClass().add("main-container");
+
+        // Configurazione campi ricerca
+        ricercaNomeField.setPromptText("Cerca per nome...");
+        ricercaNomeField.setPrefWidth(200);
+        ricercaNomeField.getStyleClass().add("text-field-standard");
+
+        ricercaCittaField.setPromptText("Cerca per città...");
+        ricercaCittaField.setPrefWidth(150);
+        ricercaCittaField.getStyleClass().add("text-field-standard");
+
+        // Configurazione bottoni
+        nuovoBtn.getStyleClass().add("btn-primary");
+        modificaBtn.getStyleClass().add("btn-secondary");
+        modificaBtn.setDisable(true);
+        eliminaBtn.getStyleClass().add("btn-danger");
+        eliminaBtn.setDisable(true);
+        applicaFiltriBtn.getStyleClass().add("btn-secondary");
+        resetFiltriBtn.getStyleClass().add("btn-support");
+
+        // Configurazione tabella
+        tableFornitori.setPlaceholder(new Label("Nessun fornitore trovato. Aggiungi il primo fornitore!"));
     }
 
     private void setupLayout() {
-        setPadding(new Insets(20));
-        setSpacing(20);
-        setStyle("-fx-background-color: #F8F9FA;");
+        // Header
+        VBox header = createHeader();
+
+        // Card ricerca
+        VBox ricercaCard = createRicercaSection();
+
+        // Barra azioni
+        HBox actionBar = createActionBar();
+
+        // Card tabella
+        VBox tableCard = createTableSection();
+
+        getChildren().addAll(header, ricercaCard, actionBar, tableCard);
+        VBox.setVgrow(tableCard, Priority.ALWAYS);
+    }
+
+    private VBox createHeader() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        header.getStyleClass().add("header-section");
+
+        Label title = new Label("🏢 Gestione Fornitori");
+        title.getStyleClass().add("main-title");
+
+        Label subtitle = new Label("Gestisci i fornitori di piante e materiali");
+        subtitle.getStyleClass().add("subtitle");
+
+        header.getChildren().addAll(title, subtitle);
+        return header;
+    }
+
+    private VBox createRicercaSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
+
+        Label cardTitle = new Label("🔍 Ricerca");
+        cardTitle.getStyleClass().add("card-title");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label nomeLabel = new Label("Nome:");
+        nomeLabel.getStyleClass().add("field-label");
+
+        Label cittaLabel = new Label("Città:");
+        cittaLabel.getStyleClass().add("field-label");
+
+        grid.add(nomeLabel, 0, 0);
+        grid.add(ricercaNomeField, 1, 0);
+        grid.add(cittaLabel, 2, 0);
+        grid.add(ricercaCittaField, 3, 0);
+
+        card.getChildren().addAll(cardTitle, grid);
+        return card;
+    }
+
+    private HBox createActionBar() {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(0, 0, 10, 0));
+
+        // Gruppo principale
+        HBox mainGroup = new HBox(10);
+        mainGroup.setAlignment(Pos.CENTER_LEFT);
+        mainGroup.getChildren().add(nuovoBtn);
+
+        // Gruppo secondario
+        HBox secondaryGroup = new HBox(8);
+        secondaryGroup.setAlignment(Pos.CENTER_LEFT);
+        secondaryGroup.getChildren().addAll(modificaBtn, eliminaBtn);
+
+        // Gruppo filtri
+        HBox filterGroup = new HBox(8);
+        filterGroup.setAlignment(Pos.CENTER_LEFT);
+        filterGroup.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
+
+        // Separatori
+        Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep1.getStyleClass().add("v-separator");
+        Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep2.getStyleClass().add("v-separator");
+
+        bar.getChildren().addAll(mainGroup, sep1, secondaryGroup, sep2, filterGroup);
+        return bar;
+    }
+
+    private VBox createTableSection() {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("styled-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
+
+        Label cardTitle = new Label("📋 Elenco Fornitori");
+        cardTitle.getStyleClass().add("card-title");
+
+        VBox.setVgrow(tableFornitori, Priority.ALWAYS);
+
+        card.getChildren().addAll(cardTitle, tableFornitori);
+        return card;
     }
 
     @SuppressWarnings("unchecked")
@@ -78,15 +196,8 @@ public class FornitoreView extends VBox {
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getPartitaIva()));
         pivaCol.setPrefWidth(120);
 
-        // Correzione per evitare generic array creation warning
         tableFornitori.getColumns().clear();
-        tableFornitori.getColumns().add(idCol);
-        tableFornitori.getColumns().add(nomeCol);
-        tableFornitori.getColumns().add(indirizzoCol);
-        tableFornitori.getColumns().add(telefonoCol);
-        tableFornitori.getColumns().add(emailCol);
-        tableFornitori.getColumns().add(pivaCol);
-
+        tableFornitori.getColumns().addAll(idCol, nomeCol, indirizzoCol, telefonoCol, emailCol, pivaCol);
         tableFornitori.setItems(fornitoriData);
 
         // Double-click per modifica
@@ -100,74 +211,12 @@ public class FornitoreView extends VBox {
             return row;
         });
 
-        VBox.setVgrow(tableFornitori, Priority.ALWAYS);
-    }
-
-    private void setupControls() {
-        // Sezione ricerca
-        VBox ricercaBox = new VBox(10);
-        ricercaBox.setPadding(new Insets(15));
-        ricercaBox.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                           "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-
-        Label ricercaLabel = new Label("🔍 Ricerca Fornitori");
-        ricercaLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-
-        HBox ricercaControls = new HBox(10);
-        ricercaNomeField.setPromptText("Cerca per nome...");
-        ricercaNomeField.setPrefWidth(200);
-
-        ricercaCittaField.setPromptText("Cerca per città...");
-        ricercaCittaField.setPrefWidth(150);
-
-        ricercaControls.getChildren().addAll(
-            new Label("Nome:"), ricercaNomeField,
-            new Label("Città:"), ricercaCittaField,
-            applicaFiltriBtn, resetFiltriBtn
-        );
-
-        ricercaBox.getChildren().addAll(ricercaLabel, ricercaControls);
-
-        // Sezione azioni
-        VBox azioniBox = new VBox(10);
-        azioniBox.setPadding(new Insets(15));
-        azioniBox.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                          "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
-
-        Label azioniLabel = new Label("⚡ Azioni");
-        azioniLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-
-        HBox pulsantiBox = new HBox(10);
-
-        // Stili pulsanti
-        nuovoBtn.setStyle("-fx-background-color: #28A745; -fx-text-fill: white; " +
-                         "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-
-        modificaBtn.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        modificaBtn.setDisable(true);
-
-        eliminaBtn.setStyle("-fx-background-color: #DC3545; -fx-text-fill: white; " +
-                           "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        eliminaBtn.setDisable(true);
-
-        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
-                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-
-        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-
         // Gestione selezione
         tableFornitori.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean hasSelection = newSel != null;
             modificaBtn.setDisable(!hasSelection);
             eliminaBtn.setDisable(!hasSelection);
         });
-
-        pulsantiBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn);
-        azioniBox.getChildren().addAll(azioniLabel, pulsantiBox);
-
-        getChildren().addAll(ricercaBox, azioniBox, tableFornitori);
     }
 
     private void modificaFornitore() {

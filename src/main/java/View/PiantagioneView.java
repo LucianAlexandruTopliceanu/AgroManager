@@ -4,181 +4,257 @@ import DomainModel.Piantagione;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import java.time.LocalDate;
 
+/**
+ * View moderna per la gestione delle piantagioni.
+ * Stile coerente con l'applicazione.
+ */
 public class PiantagioneView extends VBox {
-    private final TableView<Piantagione> tablePiantagioni;
-    private final ObservableList<Piantagione> piantagioniData;
 
-    // Controlli essenziali
-    private final Button nuovoBtn;
-    private final Button modificaBtn;
-    private final Button eliminaBtn;
-    private final Button cambiaStatoBtn;
-    private final Button applicaFiltriBtn;
-    private final Button resetFiltriBtn;
+    // Componenti UI
+    private final TableView<Piantagione> tablePiantagioni = new TableView<>();
+    private final ObservableList<Piantagione> piantagioniData = FXCollections.observableArrayList();
 
-    // Filtri
-    private final ComboBox<String> filtroPiantaCombo;
-    private final ComboBox<String> filtroZonaCombo;
-    private final ComboBox<String> filtroStatoCombo;
-    private final DatePicker filtroDataDa;
-    private final DatePicker filtroDataA;
+    // Pulsanti azione
+    private final Button nuovoBtn = new Button("➕ Nuova Piantagione");
+    private final Button modificaBtn = new Button("✏️ Modifica");
+    private final Button eliminaBtn = new Button("🗑️ Elimina");
+    private final Button visualizzaStatiBtn = new Button("📊 Stati");
+    private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
+    private final Button resetFiltriBtn = new Button("🔄 Reset");
+
+    // Controlli ricerca
+    private final ComboBox<String> filtroZonaCombo = new ComboBox<>();
+    private final ComboBox<String> filtroPiantaCombo = new ComboBox<>();
+    private final DatePicker filtroDataDa = new DatePicker();
+    private final DatePicker filtroDataA = new DatePicker();
 
     public PiantagioneView() {
-        setPadding(new Insets(20));
-        setSpacing(15);
-        setStyle("-fx-background-color: #F8F9FA;");
-
-        // Inizializzazione componenti
-        tablePiantagioni = new TableView<>();
-        piantagioniData = FXCollections.observableArrayList();
-        nuovoBtn = new Button("➕ Nuova");
-        modificaBtn = new Button("✏️ Modifica");
-        eliminaBtn = new Button("🗑️ Elimina");
-        cambiaStatoBtn = new Button("🔄 Cambia Stato");
-        applicaFiltriBtn = new Button("🔍 Applica Filtri");
-        resetFiltriBtn = new Button("🔄 Reset");
-
-        filtroPiantaCombo = new ComboBox<>();
-        filtroZonaCombo = new ComboBox<>();
-        filtroStatoCombo = new ComboBox<>();
-        filtroDataDa = new DatePicker();
-        filtroDataA = new DatePicker();
-
-        setupTable();
+        setupStyles();
         setupLayout();
+        setupTable();
     }
 
-    private void setupTable() {
-        // Colonne essenziali
-        TableColumn<Piantagione, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getId()));
+    private void setupStyles() {
+        getStyleClass().add("main-container");
 
-        TableColumn<Piantagione, String> piantaCol = new TableColumn<>("Pianta");
-        piantaCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-            cell.getValue().getPiantaId() != null ? cell.getValue().getPiantaId().toString() : ""
-        ));
+        // Configurazione controlli ricerca
+        filtroZonaCombo.setPromptText("Tutte le zone");
+        filtroZonaCombo.setPrefWidth(180);
+        filtroZonaCombo.getStyleClass().add("combo-box-standard");
 
-        TableColumn<Piantagione, String> zonaCol = new TableColumn<>("Zona");
-        zonaCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-            cell.getValue().getZonaId() != null ? cell.getValue().getZonaId().toString() : ""
-        ));
+        filtroPiantaCombo.setPromptText("Tutte le piante");
+        filtroPiantaCombo.setPrefWidth(180);
+        filtroPiantaCombo.getStyleClass().add("combo-box-standard");
 
-        TableColumn<Piantagione, String> statoCol = new TableColumn<>("Stato");
-        statoCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-            cell.getValue().getStatoPiantagione() != null ?
-                cell.getValue().getStatoPiantagione().getDescrizione() : "N/A"
-        ));
-        statoCol.setPrefWidth(120);
+        filtroDataDa.setPromptText("Data da");
+        filtroDataDa.setPrefWidth(150);
+        filtroDataDa.getStyleClass().add("date-picker-standard");
 
-        TableColumn<Piantagione, String> dataCol = new TableColumn<>("Data");
-        dataCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-            cell.getValue().getMessaADimora() != null ?
-            cell.getValue().getMessaADimora().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : ""
-        ));
+        filtroDataA.setPromptText("Data a");
+        filtroDataA.setPrefWidth(150);
+        filtroDataA.getStyleClass().add("date-picker-standard");
 
-        // Correzione per evitare generic array creation warning
-        tablePiantagioni.getColumns().clear();
-        tablePiantagioni.getColumns().add(idCol);
-        tablePiantagioni.getColumns().add(piantaCol);
-        tablePiantagioni.getColumns().add(zonaCol);
-        tablePiantagioni.getColumns().add(statoCol);
-        tablePiantagioni.getColumns().add(dataCol);
+        // Configurazione bottoni
+        nuovoBtn.getStyleClass().add("btn-primary");
+        modificaBtn.getStyleClass().add("btn-secondary");
+        modificaBtn.setDisable(true);
+        eliminaBtn.getStyleClass().add("btn-danger");
+        eliminaBtn.setDisable(true);
+        visualizzaStatiBtn.getStyleClass().add("btn-secondary");
+        visualizzaStatiBtn.setDisable(true);
+        applicaFiltriBtn.getStyleClass().add("btn-secondary");
+        resetFiltriBtn.getStyleClass().add("btn-support");
 
-        tablePiantagioni.setItems(piantagioniData);
-
-        // Gestione selezione
-        tablePiantagioni.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            boolean hasSelection = sel != null;
-            modificaBtn.setDisable(!hasSelection);
-            eliminaBtn.setDisable(!hasSelection);
-            cambiaStatoBtn.setDisable(!hasSelection);
-        });
+        // Configurazione tabella
+        tablePiantagioni.setPlaceholder(new Label("Nessuna piantagione trovata. Aggiungi la prima piantagione!"));
     }
 
     private void setupLayout() {
-        // Sezione filtri in card
-        VBox filtriCard = createCard("🔍 Filtri di Ricerca");
-        GridPane filtriGrid = new GridPane();
-        filtriGrid.setHgap(10);
-        filtriGrid.setVgap(10);
-        filtriGrid.setPadding(new Insets(10));
+        VBox header = createHeader();
+        VBox ricercaCard = createRicercaSection();
+        HBox actionBar = createActionBar();
+        VBox tableCard = createTableSection();
 
-        // Configurazione filtri
-        filtroPiantaCombo.setPromptText("Tutte le piante");
-        filtroZonaCombo.setPromptText("Tutte le zone");
-        filtroStatoCombo.setPromptText("Tutti gli stati");
-        filtroDataDa.setPromptText("Data da...");
-        filtroDataA.setPromptText("Data a...");
-
-        // Layout filtri
-        filtriGrid.addRow(0, new Label("Pianta:"), filtroPiantaCombo);
-        filtriGrid.addRow(1, new Label("Zona:"), filtroZonaCombo);
-        filtriGrid.addRow(2, new Label("Stato:"), filtroStatoCombo);
-        filtriGrid.addRow(0, new Label("Da:"), filtroDataDa);
-        filtriGrid.addRow(1, new Label("A:"), filtroDataA);
-
-        HBox filtriActions = new HBox(10);
-        applicaFiltriBtn.setStyle("-fx-background-color: #17A2B8; -fx-text-fill: white; " +
-                                 "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        resetFiltriBtn.setStyle("-fx-background-color: #6C757D; -fx-text-fill: white; " +
-                               "-fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;");
-        filtriActions.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
-
-        filtriCard.getChildren().addAll(filtriGrid, filtriActions);
-
-        // Sezione azioni in card
-        VBox azioniCard = createCard("⚡ Azioni");
-        HBox azioniBox = new HBox(10);
-
-        // Stili pulsanti
-        nuovoBtn.setStyle("-fx-background-color: #28A745; -fx-text-fill: white; " +
-                         "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-
-        modificaBtn.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white; " +
-                            "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        modificaBtn.setDisable(true);
-
-        eliminaBtn.setStyle("-fx-background-color: #DC3545; -fx-text-fill: white; " +
-                           "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        eliminaBtn.setDisable(true);
-
-        cambiaStatoBtn.setStyle("-fx-background-color: #FFC107; -fx-text-fill: black; " +
-                               "-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6;");
-        cambiaStatoBtn.setDisable(true);
-
-        // Gestione selezione
-        tablePiantagioni.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            boolean hasSelection = sel != null;
-            modificaBtn.setDisable(!hasSelection);
-            eliminaBtn.setDisable(!hasSelection);
-            cambiaStatoBtn.setDisable(!hasSelection);
-        });
-
-        azioniBox.getChildren().addAll(nuovoBtn, modificaBtn, eliminaBtn, cambiaStatoBtn);
-        azioniCard.getChildren().add(azioniBox);
-
-        getChildren().addAll(filtriCard, azioniCard, tablePiantagioni);
-        VBox.setVgrow(tablePiantagioni, Priority.ALWAYS);
+        getChildren().addAll(header, ricercaCard, actionBar, tableCard);
+        VBox.setVgrow(tableCard, Priority.ALWAYS);
     }
 
-    private VBox createCard(String title) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(15));
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
-                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+    private VBox createHeader() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        header.getStyleClass().add("header-section");
 
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        card.getChildren().add(titleLabel);
+        Label title = new Label("🌾 Gestione Piantagioni");
+        title.getStyleClass().add("main-title");
 
+        Label subtitle = new Label("Monitora le coltivazioni e il loro stato");
+        subtitle.getStyleClass().add("subtitle");
+
+        header.getChildren().addAll(title, subtitle);
+        return header;
+    }
+
+    private VBox createRicercaSection() {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("styled-card");
+
+        Label cardTitle = new Label("🔍 Filtri Ricerca");
+        cardTitle.getStyleClass().add("card-title");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(10);
+        grid.getStyleClass().add("input-grid");
+
+        Label zonaLabel = new Label("Zona:");
+        zonaLabel.getStyleClass().add("field-label");
+
+        Label piantaLabel = new Label("Pianta:");
+        piantaLabel.getStyleClass().add("field-label");
+
+        Label dataDaLabel = new Label("Data da:");
+        dataDaLabel.getStyleClass().add("field-label");
+
+        Label dataALabel = new Label("Data a:");
+        dataALabel.getStyleClass().add("field-label");
+
+        grid.add(zonaLabel, 0, 0);
+        grid.add(filtroZonaCombo, 1, 0);
+        grid.add(piantaLabel, 2, 0);
+        grid.add(filtroPiantaCombo, 3, 0);
+        grid.add(dataDaLabel, 0, 1);
+        grid.add(filtroDataDa, 1, 1);
+        grid.add(dataALabel, 2, 1);
+        grid.add(filtroDataA, 3, 1);
+
+        card.getChildren().addAll(cardTitle, grid);
         return card;
     }
 
-    // Metodi pubblici per il controller
+    private HBox createActionBar() {
+        HBox bar = new HBox(12);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(0, 0, 10, 0));
+
+        HBox mainGroup = new HBox(10);
+        mainGroup.setAlignment(Pos.CENTER_LEFT);
+        mainGroup.getChildren().add(nuovoBtn);
+
+        HBox secondaryGroup = new HBox(8);
+        secondaryGroup.setAlignment(Pos.CENTER_LEFT);
+        secondaryGroup.getChildren().addAll(modificaBtn, eliminaBtn, visualizzaStatiBtn);
+
+        HBox filterGroup = new HBox(8);
+        filterGroup.setAlignment(Pos.CENTER_LEFT);
+        filterGroup.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
+
+        Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep1.getStyleClass().add("v-separator");
+        Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
+        sep2.getStyleClass().add("v-separator");
+
+        bar.getChildren().addAll(mainGroup, sep1, secondaryGroup, sep2, filterGroup);
+        return bar;
+    }
+
+    private VBox createTableSection() {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("styled-card");
+        VBox.setVgrow(card, Priority.ALWAYS);
+
+        Label cardTitle = new Label("📋 Elenco Piantagioni");
+        cardTitle.getStyleClass().add("card-title");
+
+        VBox.setVgrow(tablePiantagioni, Priority.ALWAYS);
+
+        card.getChildren().addAll(cardTitle, tablePiantagioni);
+        return card;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setupTable() {
+        TableColumn<Piantagione, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(cell ->
+            new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getId()));
+        idCol.setPrefWidth(60);
+
+        TableColumn<Piantagione, String> zonaCol = new TableColumn<>("Zona");
+        zonaCol.setCellValueFactory(cell ->
+            new javafx.beans.property.SimpleStringProperty(
+                cell.getValue().getZonaId() != null ? "ID " + cell.getValue().getZonaId() : "N/A"));
+        zonaCol.setPrefWidth(100);
+
+        TableColumn<Piantagione, String> piantaCol = new TableColumn<>("Pianta");
+        piantaCol.setCellValueFactory(cell ->
+            new javafx.beans.property.SimpleStringProperty(
+                cell.getValue().getPiantaId() != null ? "ID " + cell.getValue().getPiantaId() : "N/A"));
+        piantaCol.setPrefWidth(100);
+
+        TableColumn<Piantagione, String> dataCol = new TableColumn<>("Data Piantagione");
+        dataCol.setCellValueFactory(cell ->
+            new javafx.beans.property.SimpleStringProperty(
+                cell.getValue().getMessaADimora() != null ?
+                cell.getValue().getMessaADimora().format(
+                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A"));
+        dataCol.setPrefWidth(130);
+
+        TableColumn<Piantagione, String> numPianteCol = new TableColumn<>("N° Piante");
+        numPianteCol.setCellValueFactory(cell ->
+            new javafx.beans.property.SimpleStringProperty(
+                cell.getValue().getQuantitaPianta() != null ?
+                cell.getValue().getQuantitaPianta().toString() : "N/A"));
+        numPianteCol.setPrefWidth(100);
+
+        TableColumn<Piantagione, String> statoCol = new TableColumn<>("Stato");
+        statoCol.setCellValueFactory(cell -> {
+            Integer numPiante = cell.getValue().getQuantitaPianta();
+            String stato = numPiante != null && numPiante > 100 ? "🟢 Attiva" :
+                          numPiante != null && numPiante > 0 ? "🟡 In crescita" : "⚪ Vuota";
+            return new javafx.beans.property.SimpleStringProperty(stato);
+        });
+        statoCol.setPrefWidth(120);
+
+        TableColumn<Piantagione, String> noteCol = new TableColumn<>("Stato Dettaglio");
+        noteCol.setCellValueFactory(cell -> {
+            DomainModel.StatoPiantagione stato = cell.getValue().getStatoPiantagione();
+            return new javafx.beans.property.SimpleStringProperty(
+                stato != null ? stato.getDescrizione() : "N/A");
+        });
+        noteCol.setPrefWidth(200);
+
+        tablePiantagioni.getColumns().clear();
+        tablePiantagioni.getColumns().addAll(idCol, zonaCol, piantaCol, dataCol, numPianteCol, statoCol, noteCol);
+        tablePiantagioni.setItems(piantagioniData);
+
+        tablePiantagioni.setRowFactory(tv -> {
+            TableRow<Piantagione> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    modificaPiantagione();
+                }
+            });
+            return row;
+        });
+
+        tablePiantagioni.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            boolean hasSelection = newSel != null;
+            modificaBtn.setDisable(!hasSelection);
+            eliminaBtn.setDisable(!hasSelection);
+            visualizzaStatiBtn.setDisable(!hasSelection);
+        });
+    }
+
+    private void modificaPiantagione() {
+        if (getPiantagioneSelezionata() != null) {
+            // Il controller gestirà l'apertura del dialog
+        }
+    }
+
+    // Metodi pubblici
     public void setPiantagioni(java.util.List<Piantagione> piantagioni) {
         piantagioniData.setAll(piantagioni);
     }
@@ -187,7 +263,37 @@ public class PiantagioneView extends VBox {
         return tablePiantagioni.getSelectionModel().getSelectedItem();
     }
 
-    // Event handlers
+    public void setZone(java.util.List<String> zone) {
+        filtroZonaCombo.getItems().clear();
+        filtroZonaCombo.getItems().add("Tutte le zone");
+        filtroZonaCombo.getItems().addAll(zone);
+        filtroZonaCombo.getSelectionModel().selectFirst();
+    }
+
+    public void setPiante(java.util.List<String> piante) {
+        filtroPiantaCombo.getItems().clear();
+        filtroPiantaCombo.getItems().add("Tutte le piante");
+        filtroPiantaCombo.getItems().addAll(piante);
+        filtroPiantaCombo.getSelectionModel().selectFirst();
+    }
+
+    // Metodi richiesti dal controller
+    public void setFiltroPiantaItems(java.util.List<String> items) {
+        setPiante(items);
+    }
+
+    public void setFiltroZonaItems(java.util.List<String> items) {
+        setZone(items);
+    }
+
+    public void setFiltroStatoItems(java.util.List<String> items) {
+        // Per ora non implementato, sarà aggiunto in seguito se necessario
+    }
+
+    public void setOnCambiaStatoPiantagione(Runnable handler) {
+        visualizzaStatiBtn.setOnAction(e -> handler.run());
+    }
+
     public void setOnNuovaPiantagione(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
@@ -200,8 +306,8 @@ public class PiantagioneView extends VBox {
         eliminaBtn.setOnAction(e -> handler.run());
     }
 
-    public void setOnCambiaStatoPiantagione(Runnable handler) {
-        cambiaStatoBtn.setOnAction(e -> handler.run());
+    public void setOnVisualizzaStati(Runnable handler) {
+        visualizzaStatiBtn.setOnAction(e -> handler.run());
     }
 
     public void setOnApplicaFiltri(Runnable handler) {
@@ -212,58 +318,35 @@ public class PiantagioneView extends VBox {
         resetFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    // Gestione filtri
-    public void setFiltroPiantaItems(java.util.List<String> items) {
-        filtroPiantaCombo.getItems().setAll(items);
-    }
-
-    public void setFiltroZonaItems(java.util.List<String> items) {
-        filtroZonaCombo.getItems().setAll(items);
-    }
-
-    public void setFiltroStatoItems(java.util.List<String> items) {
-        filtroStatoCombo.getItems().setAll(items);
-    }
-
     public CriteriFiltro getCriteriFiltro() {
-        return new CriteriFiltro(
-            filtroPiantaCombo.getValue(),
-            filtroZonaCombo.getValue(),
-            filtroStatoCombo.getValue(),
-            filtroDataDa.getValue(),
-            filtroDataA.getValue()
-        );
+        String zona = filtroZonaCombo.getValue();
+        if (zona != null && zona.equals("Tutte le zone")) zona = null;
+
+        String pianta = filtroPiantaCombo.getValue();
+        if (pianta != null && pianta.equals("Tutte le piante")) pianta = null;
+
+        return new CriteriFiltro(zona, pianta, filtroDataDa.getValue(), filtroDataA.getValue());
     }
 
     public void resetFiltri() {
-        filtroPiantaCombo.setValue(null);
-        filtroZonaCombo.setValue(null);
-        filtroStatoCombo.setValue(null);
+        filtroZonaCombo.getSelectionModel().selectFirst();
+        filtroPiantaCombo.getSelectionModel().selectFirst();
         filtroDataDa.setValue(null);
         filtroDataA.setValue(null);
     }
 
-    // Metodo per conferma eliminazione
     public boolean confermaEliminazione(Piantagione piantagione) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Conferma Eliminazione");
         alert.setHeaderText("Stai per eliminare la piantagione:");
         alert.setContentText("ID: " + piantagione.getId() +
-                            "\nPianta: " + piantagione.getPiantaId() +
-                            "\nZona: " + piantagione.getZonaId() +
+                            "\nData: " + piantagione.getMessaADimora() +
                             "\n\nQuesta operazione non può essere annullata.");
-
         return alert.showAndWait()
                 .filter(response -> response == ButtonType.OK)
                 .isPresent();
     }
 
-    // Record per criteri di filtro
-    public record CriteriFiltro(
-        String pianta,
-        String zona,
-        String stato,
-        LocalDate dataDa,
-        LocalDate dataA
-    ) {}
+    public record CriteriFiltro(String zona, String pianta,
+                                java.time.LocalDate dataDa, java.time.LocalDate dataA) {}
 }
