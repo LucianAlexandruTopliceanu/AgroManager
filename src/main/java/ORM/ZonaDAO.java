@@ -52,4 +52,23 @@ public class ZonaDAO extends BaseDAO<Zona> {
     protected void setEntityId(Zona zona, int id) {
         zona.setId(id);
     }
+
+    public java.util.List<String> getTipiTerrenoDistinti() throws SQLException {
+        String query = "SELECT DISTINCT tipo_terreno FROM zona WHERE tipo_terreno IS NOT NULL ORDER BY tipo_terreno";
+        java.util.List<String> tipi = new java.util.ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String tipo = rs.getString("tipo_terreno");
+                if (tipo != null && !tipo.trim().isEmpty()) {
+                    tipi.add(tipo);
+                }
+            }
+        }
+
+        return tipi;
+    }
 }

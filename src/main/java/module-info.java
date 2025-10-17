@@ -1,6 +1,6 @@
 module AgroManager {
     requires javafx.controls;
-    requires javafx.fxml;
+    requires javafx.base;
     requires java.sql;
     requires java.logging;
     // aggiungi altri requires se servono

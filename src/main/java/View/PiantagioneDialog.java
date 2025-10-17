@@ -19,7 +19,7 @@ public class PiantagioneDialog extends Stage {
     private final TextField quantitaField = new TextField();
     private final DatePicker messaADimoraPicker = new DatePicker();
     private final Button salvaBtn = new Button("Salva");
-    private Piantagione piantagione;
+    private final Piantagione piantagione;
     private boolean confermato = false;
 
     public PiantagioneDialog(Piantagione piantagione, List<Zona> zone, List<Pianta> piante, List<StatoPiantagione> stati) {

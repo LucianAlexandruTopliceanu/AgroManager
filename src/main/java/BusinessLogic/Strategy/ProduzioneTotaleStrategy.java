@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ProduzioneTotaleStrategy implements DataProcessingStrategy<BigDecimal> {
     @Override
-    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException, BusinessLogicException {
+    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException {
         validateParameters(data);
 
         List<Raccolto> raccolti = castToRaccoltiList(data[0]);

@@ -1,7 +1,7 @@
 package DomainModel;
 
 import java.time.LocalDateTime;
-
+import java.util.Objects;
 
 public class StatoPiantagione {
     private Integer id;
@@ -9,7 +9,6 @@ public class StatoPiantagione {
     private String descrizione;
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
-
 
     public StatoPiantagione() {}
 
@@ -24,7 +23,6 @@ public class StatoPiantagione {
     public static final String IN_RACCOLTA = "IN_RACCOLTA";
     public static final String COMPLETATA = "COMPLETATA";
     public static final String SOSPESA = "SOSPESA";
-
 
     public Integer getId() {
         return id;
@@ -66,7 +64,6 @@ public class StatoPiantagione {
         this.dataAggiornamento = dataAggiornamento;
     }
 
-
     public boolean isAttiva() {
         return ATTIVA.equals(codice);
     }
@@ -89,7 +86,7 @@ public class StatoPiantagione {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         StatoPiantagione that = (StatoPiantagione) obj;
-        return id != null ? id.equals(that.id) : that.id == null;
+        return Objects.equals(id, that.id);
     }
 
     @Override

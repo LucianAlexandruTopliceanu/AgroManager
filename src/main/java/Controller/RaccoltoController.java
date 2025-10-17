@@ -8,6 +8,7 @@ import BusinessLogic.Service.RaccoltoService;
 import BusinessLogic.Service.PiantagioneService;
 import DomainModel.Raccolto;
 import DomainModel.Piantagione;
+import ORM.DAOFactory;
 import View.RaccoltoDialog;
 import View.RaccoltoView;
 import View.NotificationHelper;
@@ -51,10 +52,28 @@ public class RaccoltoController {
     private void inizializzaFiltri() {
         try {
             List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
-            List<String> nomiPiantagioni = piantagioni.stream()
-                .map(p -> p.getId() + " - Zona:" + p.getZonaId())
+            var zone = DAOFactory.getZonaDAO().findAll();
+            var piante = DAOFactory.getPiantaDAO().findAll();
+
+            List<String> descrizioniPiantagioni = piantagioni.stream()
+                .map(p -> {
+                    String nomeZona = zone.stream()
+                        .filter(z -> z.getId().equals(p.getZonaId()))
+                        .map(DomainModel.Zona::getNome)
+                        .findFirst()
+                        .orElse("Zona sconosciuta");
+
+                    String nomePianta = piante.stream()
+                        .filter(pi -> pi.getId().equals(p.getPiantaId()))
+                        .map(pi -> pi.getTipo() + (pi.getVarieta() != null ? " " + pi.getVarieta() : ""))
+                        .findFirst()
+                        .orElse("Pianta sconosciuta");
+
+                    return String.format("ID %d - %s (%s)", p.getId(), nomePianta, nomeZona);
+                })
                 .toList();
-            raccoltoView.setPiantagioni(nomiPiantagioni);
+
+            raccoltoView.setPiantagioni(descrizioniPiantagioni);
         } catch (Exception e) {
             ErrorService.handleException("caricamento piantagioni per filtri", e);
         }

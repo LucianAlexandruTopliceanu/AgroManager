@@ -30,35 +30,28 @@ public class BusinessLogic {
         return reportService;
     }
 
-
     public RaccoltoService getRaccoltoService() {
         return raccoltoService;
     }
 
-    // Nuovo metodo che restituisce i dati puri per permettere formattazione custom
     public ProcessingResult<?> eseguiStrategiaConDati(DataProcessingStrategy.ProcessingType tipo, String strategia, String piantagioneId,
                                                        LocalDate dataInizio, LocalDate dataFine, Integer topN)
             throws ValidationException, DataAccessException, BusinessLogicException {
         try {
-            // Recupera i dati necessari con gestione errori tipizzata
             List<Raccolto> raccolti = DAOFactory.getRaccoltoDAO().findAll();
             List<Piantagione> piantagioni = DAOFactory.getPiantagioneDAO().findAll();
             List<Zona> zone = DAOFactory.getZonaDAO().findAll();
 
-            // Crea la strategia appropriata
             DataProcessingStrategy<?> strategy = StrategyFactory.createStrategy(strategia);
 
-            // Verifica che la strategia sia del tipo richiesto
             if (strategy.getType() != tipo) {
                 throw new ValidationException("tipoStrategia", strategia,
                         "non è del tipo richiesto " + tipo);
             }
 
-            // Prepara i parametri e valida
             Object[] params = prepareParameters(strategy, raccolti, piantagioni, zone,
                 piantagioneId, dataInizio, dataFine, topN);
 
-            // Esegui la strategia e restituisci i dati puri
             return strategy.execute(params);
 
         } catch (SQLException e) {
@@ -66,7 +59,6 @@ public class BusinessLogic {
         }
     }
 
-    // Metodo legacy mantenuto per compatibilità - ora delega alla formattazione di default
     public String eseguiStrategia(DataProcessingStrategy.ProcessingType tipo, String strategia, String piantagioneId,
                                   LocalDate dataInizio, LocalDate dataFine, Integer topN) {
         try {
@@ -88,7 +80,6 @@ public class BusinessLogic {
         }
     }
 
-    // Metodo di formattazione di default per compatibilità
     private String formatResult(ProcessingResult<?> result, String strategia, String piantagioneId,
                                LocalDate dataInizio, LocalDate dataFine, Integer topN) {
         Object value = result.getValue();
@@ -122,16 +113,21 @@ public class BusinessLogic {
             return String.format("🏆 Piantagione più produttiva:\nID: %d\nProduzione totale: %.2f kg",
                 best.getKey(), best.getValue());
         } else {
-            StringBuilder sb = new StringBuilder(String.format("Top %d piantagioni per produzione:\n",
-                Math.min(topN, topPiantagioni.size())));
-            int pos = 1;
-            for (Map.Entry<Integer, BigDecimal> entry : topPiantagioni.entrySet()) {
-                String medal = pos == 1 ? "🥇" : pos == 2 ? "🥈" : pos == 3 ? "🥉" : "▫️";
-                sb.append(String.format("%s #%d: Piantagione %d - %.2f kg\n",
-                    medal, pos++, entry.getKey(), entry.getValue()));
-            }
+            StringBuilder sb = getStringBuilder(topPiantagioni, topN);
             return sb.toString();
         }
+    }
+
+    private static StringBuilder getStringBuilder(Map<Integer, BigDecimal> topPiantagioni, Integer topN) {
+        StringBuilder sb = new StringBuilder(String.format("Top %d piantagioni per produzione:\n",
+            Math.min(topN, topPiantagioni.size())));
+        int pos = 1;
+        for (Map.Entry<Integer, BigDecimal> entry : topPiantagioni.entrySet()) {
+            String medal = pos == 1 ? "🥇" : pos == 2 ? "🥈" : pos == 3 ? "🥉" : "▫️";
+            sb.append(String.format("%s #%d: Piantagione %d - %.2f kg\n",
+                medal, pos++, entry.getKey(), entry.getValue()));
+        }
+        return sb;
     }
 
     private Object[] prepareParameters(DataProcessingStrategy<?> strategy,
@@ -143,7 +139,6 @@ public class BusinessLogic {
                                      LocalDate dataFine,
                                      Integer topN) throws ValidationException {
 
-        // Prepara i parametri in base al tipo di strategia
         if (strategy instanceof ProduzioneTotaleStrategy) {
             return preparePiantagioneParams(raccolti, piantagioneId);
 
@@ -195,6 +190,12 @@ public class BusinessLogic {
 
     private Object[] preparePeriodoParams(List<Raccolto> raccolti, LocalDate dataInizio, LocalDate dataFine)
             throws ValidationException {
+        isDataRangeValid(dataInizio, dataFine);
+
+        return new Object[]{raccolti, dataInizio, dataFine};
+    }
+
+    public static void isDataRangeValid(LocalDate dataInizio, LocalDate dataFine) throws ValidationException {
         if (dataInizio == null) {
             throw ValidationException.requiredField("Data inizio periodo");
         }
@@ -205,12 +206,9 @@ public class BusinessLogic {
             throw new ValidationException("periodo", dataInizio + " - " + dataFine,
                     "la data di fine non può essere precedente alla data di inizio");
         }
-
-        return new Object[]{raccolti, dataInizio, dataFine};
     }
 
     private Object[] prepareTopParams(List<Raccolto> raccolti, Integer topN) throws ValidationException {
-        // Per "Piantagione Migliore" usa 1, per "Top Piantagioni" usa il valore specificato
         int n = topN != null ? topN : 1;
 
         if (n <= 0) {
@@ -229,7 +227,7 @@ public class BusinessLogic {
     }
 
     public ProcessingResult<?> eseguiStrategiaAvanzata(String nomeStrategia, Object... parametri)
-            throws ValidationException, BusinessLogicException, DataAccessException {
+            throws ValidationException {
         try {
             DataProcessingStrategy<?> strategy = StrategyFactory.createStrategy(nomeStrategia);
             return processingContext.executeStrategy(strategy, parametri);
@@ -249,86 +247,7 @@ public class BusinessLogic {
                 "zone", zone.stream().map(z -> z.getNome()).toList()
             );
         } catch (SQLException e) {
-            throw DataAccessException.queryError("recupero dati per combo box", e);
-        }
-    }
-
-    public Map<String, Object> aggiornaEOttieniStatistiche() throws DataAccessException {
-        try {
-            var raccolti = DAOFactory.getRaccoltoDAO().findAll();
-            var piantagioni = DAOFactory.getPiantagioneDAO().findAll();
-            var zone = DAOFactory.getZonaDAO().findAll();
-
-            return Map.of(
-                "totaleRaccolti", raccolti.size(),
-                "totalePiantagioni", piantagioni.size(),
-                "totaleZone", zone.size(),
-                "ultimoAggiornamento", java.time.LocalDateTime.now()
-            );
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("aggiornamento statistiche", e);
-        }
-    }
-
-    /**
-     * Genera un report completo dei raccolti usando le strategy integrate
-     */
-    public ProcessingResult<Map<String, Object>> generaReportCompletoRaccolti()
-            throws DataAccessException, BusinessLogicException, ValidationException {
-
-        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
-
-        if (raccolti.isEmpty()) {
-            throw new BusinessLogicException("Nessun raccolto disponibile per generare il report",
-                "Database vuoto o nessun raccolto inserito");
-        }
-
-        ReportRaccoltiStrategy strategy = new ReportRaccoltiStrategy();
-        return strategy.execute(raccolti);
-    }
-
-    /**
-     * Genera statistiche generali dei raccolti
-     */
-    public ProcessingResult<Map<String, Object>> generaStatisticheGeneraliRaccolti()
-            throws DataAccessException, BusinessLogicException, ValidationException {
-
-        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
-        StatisticheGeneraliRaccoltiStrategy strategy = new StatisticheGeneraliRaccoltiStrategy();
-        return strategy.execute(raccolti);
-    }
-
-    /**
-     * Genera statistiche mensili dei raccolti
-     */
-    public ProcessingResult<Map<String, Object>> generaStatisticheMensiliRaccolti()
-            throws DataAccessException, BusinessLogicException, ValidationException {
-
-        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
-        StatisticheMensiliRaccoltiStrategy strategy = new StatisticheMensiliRaccoltiStrategy();
-        return strategy.execute(raccolti);
-    }
-
-    /**
-     * Calcola il periodo coperto dai raccolti
-     */
-    public ProcessingResult<Map<String, Object>> calcolaPeriodoCopertoRaccolti()
-            throws DataAccessException, BusinessLogicException, ValidationException {
-
-        List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
-        PeriodoCopertoRaccoltiStrategy strategy = new PeriodoCopertoRaccoltiStrategy();
-        return strategy.execute(raccolti);
-    }
-
-    /**
-     * Verifica se ci sono raccolti disponibili
-     */
-    public boolean hasRaccoltiDisponibili() throws DataAccessException {
-        try {
-            List<Raccolto> raccolti = raccoltoService.getAllRaccolti();
-            return !raccolti.isEmpty();
-        } catch (Exception e) {
-            throw DataAccessException.queryError("verifica raccolti disponibili", e);
+            throw DataAccessException.queryError("recupero dati combo box", e);
         }
     }
 }

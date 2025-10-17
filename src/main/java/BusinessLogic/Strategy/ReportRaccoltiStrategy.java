@@ -34,17 +34,17 @@ public class ReportRaccoltiStrategy implements DataProcessingStrategy<Map<String
             // Delega il calcolo delle statistiche generali alla strategy specifica
             ProcessingResult<Map<String, Object>> statisticheResult =
                 statisticheGeneraliStrategy.execute(raccolti);
-            reportData.put("statisticheGenerali", statisticheResult.getData());
+            reportData.put("statisticheGenerali", statisticheResult.data());
 
             // Delega il calcolo delle statistiche mensili alla strategy specifica
             ProcessingResult<Map<String, Object>> mensiliResult =
                 statisticheMensiliStrategy.execute(raccolti);
-            reportData.put("raccoltiPerMese", mensiliResult.getData());
+            reportData.put("raccoltiPerMese", mensiliResult.data());
 
             // Delega il calcolo del periodo coperto alla strategy specifica
             ProcessingResult<Map<String, Object>> periodoResult =
                 periodoCopertoStrategy.execute(raccolti);
-            reportData.put("periodoCoperto", periodoResult.getData());
+            reportData.put("periodoCoperto", periodoResult.data());
 
         } catch (ValidationException e) {
             throw e;

@@ -7,26 +7,16 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import java.util.function.Consumer;
 
-/**
- * View moderna per la gestione dei fornitori.
- * Stile coerente con l'applicazione.
- */
 public class FornitoreView extends VBox {
 
-    // Componenti UI
     private final TableView<Fornitore> tableFornitori = new TableView<>();
     private final ObservableList<Fornitore> fornitoriData = FXCollections.observableArrayList();
-
-    // Pulsanti azione
     private final Button nuovoBtn = new Button("➕ Nuovo Fornitore");
     private final Button modificaBtn = new Button("✏️ Modifica");
     private final Button eliminaBtn = new Button("🗑️ Elimina");
     private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
     private final Button resetFiltriBtn = new Button("🔄 Reset");
-
-    // Controlli ricerca
     private final TextField ricercaNomeField = new TextField();
     private final TextField ricercaCittaField = new TextField();
 
@@ -39,7 +29,6 @@ public class FornitoreView extends VBox {
     private void setupStyles() {
         getStyleClass().add("main-container");
 
-        // Configurazione campi ricerca
         ricercaNomeField.setPromptText("Cerca per nome...");
         ricercaNomeField.setPrefWidth(200);
         ricercaNomeField.getStyleClass().add("text-field-standard");
@@ -48,7 +37,6 @@ public class FornitoreView extends VBox {
         ricercaCittaField.setPrefWidth(150);
         ricercaCittaField.getStyleClass().add("text-field-standard");
 
-        // Configurazione bottoni
         nuovoBtn.getStyleClass().add("btn-primary");
         modificaBtn.getStyleClass().add("btn-secondary");
         modificaBtn.setDisable(true);
@@ -57,21 +45,13 @@ public class FornitoreView extends VBox {
         applicaFiltriBtn.getStyleClass().add("btn-secondary");
         resetFiltriBtn.getStyleClass().add("btn-support");
 
-        // Configurazione tabella
         tableFornitori.setPlaceholder(new Label("Nessun fornitore trovato. Aggiungi il primo fornitore!"));
     }
 
     private void setupLayout() {
-        // Header
         VBox header = createHeader();
-
-        // Card ricerca
         VBox ricercaCard = createRicercaSection();
-
-        // Barra azioni
         HBox actionBar = createActionBar();
-
-        // Card tabella
         VBox tableCard = createTableSection();
 
         getChildren().addAll(header, ricercaCard, actionBar, tableCard);
@@ -125,22 +105,18 @@ public class FornitoreView extends VBox {
         bar.setAlignment(Pos.CENTER_LEFT);
         bar.setPadding(new Insets(0, 0, 10, 0));
 
-        // Gruppo principale
         HBox mainGroup = new HBox(10);
         mainGroup.setAlignment(Pos.CENTER_LEFT);
         mainGroup.getChildren().add(nuovoBtn);
 
-        // Gruppo secondario
         HBox secondaryGroup = new HBox(8);
         secondaryGroup.setAlignment(Pos.CENTER_LEFT);
         secondaryGroup.getChildren().addAll(modificaBtn, eliminaBtn);
 
-        // Gruppo filtri
         HBox filterGroup = new HBox(8);
         filterGroup.setAlignment(Pos.CENTER_LEFT);
         filterGroup.getChildren().addAll(applicaFiltriBtn, resetFiltriBtn);
 
-        // Separatori
         Separator sep1 = new Separator(javafx.geometry.Orientation.VERTICAL);
         sep1.getStyleClass().add("v-separator");
         Separator sep2 = new Separator(javafx.geometry.Orientation.VERTICAL);
@@ -200,7 +176,6 @@ public class FornitoreView extends VBox {
         tableFornitori.getColumns().addAll(idCol, nomeCol, indirizzoCol, telefonoCol, emailCol, pivaCol);
         tableFornitori.setItems(fornitoriData);
 
-        // Double-click per modifica
         tableFornitori.setRowFactory(tv -> {
             TableRow<Fornitore> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -211,7 +186,6 @@ public class FornitoreView extends VBox {
             return row;
         });
 
-        // Gestione selezione
         tableFornitori.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean hasSelection = newSel != null;
             modificaBtn.setDisable(!hasSelection);
@@ -220,12 +194,8 @@ public class FornitoreView extends VBox {
     }
 
     private void modificaFornitore() {
-        if (getFornitoreSelezionato() != null) {
-            // Il controller gestirà l'apertura del dialog
-        }
     }
 
-    // Metodi pubblici per il controller
     public void setFornitori(java.util.List<Fornitore> fornitori) {
         fornitoriData.setAll(fornitori);
     }
@@ -234,7 +204,6 @@ public class FornitoreView extends VBox {
         return tableFornitori.getSelectionModel().getSelectedItem();
     }
 
-    // Handler per i pulsanti principali
     public void setOnNuovoFornitore(Runnable handler) {
         nuovoBtn.setOnAction(e -> handler.run());
     }
@@ -255,7 +224,6 @@ public class FornitoreView extends VBox {
         resetFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    // Metodi per gestione filtri
     public CriteriFiltro getCriteriFiltro() {
         return new CriteriFiltro(
             ricercaNomeField.getText().trim(),
@@ -268,7 +236,6 @@ public class FornitoreView extends VBox {
         ricercaCittaField.clear();
     }
 
-    // Metodo per conferma eliminazione
     public boolean confermaEliminazione(Fornitore fornitore) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Conferma Eliminazione");
@@ -281,6 +248,5 @@ public class FornitoreView extends VBox {
                 .isPresent();
     }
 
-    // Record per criteri di filtro
     public record CriteriFiltro(String nome, String citta) {}
 }

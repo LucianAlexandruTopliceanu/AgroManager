@@ -49,12 +49,8 @@ public class PiantagioneController {
 
     private void inizializzaView() {
         try {
-            // Inizializza filtri nella view
             inizializzaFiltri();
-
-            // Carica tutte le piantagioni
             aggiornaListaPiantagioni();
-
         } catch (Exception e) {
             ErrorService.handleException("inizializzazione view", e);
         }
@@ -64,32 +60,24 @@ public class PiantagioneController {
         try {
             List<Zona> zone = zonaService.getAllZone();
             List<Pianta> piante = piantaService.getAllPiante();
-            List<StatoPiantagione> stati = statoPiantagioneService.getAllStati();
 
-            List<String> nomiZone = zone.stream().map(z -> z.getId() + " - " + z.getNome()).toList();
-            List<String> nomiPiante = piante.stream().map(p -> p.getId() + " - " + p.getTipo()).toList();
-            List<String> nomiStati = stati.stream().map(s -> s.getDescrizione()).toList();
+            List<String> nomiZone = zone.stream().map(Zona::getNome).toList();
+            List<String> descrizioniPiante = piante.stream()
+                .map(p -> p.getTipo() + (p.getVarieta() != null ? " - " + p.getVarieta() : ""))
+                .toList();
 
-            piantagioneView.setFiltroPiantaItems(nomiPiante);
+            piantagioneView.setFiltroPiantaItems(descrizioniPiante);
             piantagioneView.setFiltroZonaItems(nomiZone);
-            piantagioneView.setFiltroStatoItems(nomiStati);
         } catch (Exception e) {
             ErrorService.handleException("inizializzazione filtri piantagioni", e);
         }
     }
 
-    // Event handlers - solo coordinamento
     private void onApplicaFiltri() {
         try {
-            // Ottieni i criteri di filtro dalla view
             var criteriFiltro = piantagioneView.getCriteriFiltro();
-
-            // Delega al service il recupero dei dati filtrati
             var piantagioniFiltrate = piantagioneService.getPiantagioniConFiltri(criteriFiltro);
-
-            // Passa i risultati alla view
             piantagioneView.setPiantagioni(piantagioniFiltrate);
-
         } catch (Exception e) {
             ErrorService.handleException("applicazione filtri", e);
         }
@@ -113,7 +101,6 @@ public class PiantagioneController {
 
     public void onNuovaPiantagione() {
         try {
-            // Prepara i dati per il dialog
             var zone = zonaService.getAllZone();
             var piante = piantaService.getAllPiante();
             var stati = statoPiantagioneService.getAllStati();
@@ -169,7 +156,6 @@ public class PiantagioneController {
         }
 
         try {
-            // Chiedi conferma tramite la view
             boolean confermato = piantagioneView.confermaEliminazione(selezionata);
             if (confermato) {
                 piantagioneService.cambiaStatoPiantagione(selezionata.getId(), StatoPiantagione.RIMOSSA);
@@ -196,7 +182,6 @@ public class PiantagioneController {
             dialog.showAndWait();
 
             if (dialog.isConfermato()) {
-                // Uso un metodo generico che dovrebbe esistere - probabilmente getStatoSelezionato()
                 StatoPiantagione nuovoStato = dialog.getStatoSelezionato();
                 piantagioneService.cambiaStatoPiantagione(selezionata.getId(), nuovoStato.getCodice());
                 NotificationHelper.showSuccess("Operazione completata", "Stato piantagione cambiato con successo!");
@@ -209,7 +194,6 @@ public class PiantagioneController {
         }
     }
 
-    // Metodo pubblico per refresh
     public void refreshData() {
         aggiornaListaPiantagioni();
     }

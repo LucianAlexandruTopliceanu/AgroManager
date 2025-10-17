@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
 public class FornitoreService {
     private final FornitoreDAO fornitoreDAO;
     private static final Pattern EMAIL_PATTERN =
@@ -18,7 +17,6 @@ public class FornitoreService {
     public FornitoreService(FornitoreDAO fornitoreDAO) {
         this.fornitoreDAO = fornitoreDAO;
     }
-
 
     private void validaFornitore(Fornitore fornitore) throws ValidationException {
         if (fornitore == null) {
@@ -49,7 +47,6 @@ public class FornitoreService {
         validaFornitore(fornitore);
 
         try {
-            // Verifica duplicati
             List<Fornitore> esistenti = fornitoreDAO.findAll();
             boolean duplicato = esistenti.stream()
                     .anyMatch(f -> f.getNome().equalsIgnoreCase(fornitore.getNome()) ||
@@ -74,7 +71,6 @@ public class FornitoreService {
         }
 
         try {
-            // Verifica che il fornitore esista
             Fornitore esistente = fornitoreDAO.read(fornitore.getId());
             if (esistente == null) {
                 throw BusinessLogicException.entityNotFound("Fornitore", fornitore.getId());
@@ -92,7 +88,6 @@ public class FornitoreService {
         }
 
         try {
-            // Verifica che il fornitore esista
             Fornitore esistente = fornitoreDAO.read(id);
             if (esistente == null) {
                 throw BusinessLogicException.entityNotFound("Fornitore", id);
@@ -124,7 +119,6 @@ public class FornitoreService {
         }
     }
 
-    // Metodo per filtri - richiesto dal controller
     public List<Fornitore> getFornitoriConFiltri(View.FornitoreView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
             var tuttiFornitori = fornitoreDAO.findAll();

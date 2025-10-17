@@ -46,17 +46,17 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
 
     // Sovrascrivo tutti i metodi di scrittura per impedire operazioni non consentite
     @Override
-    public void create(StatoPiantagione entity) throws SQLException {
+    public void create(StatoPiantagione entity) {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 
     @Override
-    public void update(StatoPiantagione entity) throws SQLException {
+    public void update(StatoPiantagione entity) {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 
     @Override
-    public void delete(int id) throws SQLException {
+    public void delete(int id) {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 
@@ -72,12 +72,12 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
     }
 
     @Override
-    protected void setInsertParameters(PreparedStatement stmt, StatoPiantagione entity) throws SQLException {
+    protected void setInsertParameters(PreparedStatement stmt, StatoPiantagione entity) {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 
     @Override
-    protected void setUpdateParameters(PreparedStatement stmt, StatoPiantagione entity) throws SQLException {
+    protected void setUpdateParameters(PreparedStatement stmt, StatoPiantagione entity) {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 

@@ -30,18 +30,11 @@ public class FornitoreController {
         fornitoreView.setOnResetFiltri(this::onResetFiltri);
     }
 
-    // Event handlers - solo coordinamento
     private void onApplicaFiltri() {
         try {
-            // Ottieni i criteri di filtro dalla view
             var criteriFiltro = fornitoreView.getCriteriFiltro();
-
-            // Delega al service il recupero dei dati filtrati
             var fornitoriFiltrati = fornitoreService.getFornitoriConFiltri(criteriFiltro);
-
-            // Passa i risultati alla view
             fornitoreView.setFornitori(fornitoriFiltrati);
-
         } catch (Exception e) {
             ErrorService.handleException("applicazione filtri", e);
         }

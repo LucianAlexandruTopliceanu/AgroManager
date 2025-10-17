@@ -15,7 +15,7 @@ public class BusinessLogicException extends AgroManagerException {
         return new BusinessLogicException(
                 ErrorCode.ENTITY_NOT_FOUND,
                 String.format("%s con ID '%s' non trovato", entityType, id),
-                String.format("L'elemento richiesto non è stato trovato")
+                "L'elemento richiesto non è stato trovato"
         );
     }
 
@@ -23,7 +23,7 @@ public class BusinessLogicException extends AgroManagerException {
         return new BusinessLogicException(
                 ErrorCode.DUPLICATE_ENTRY,
                 String.format("%s con %s '%s' già esistente", entityType, field, value),
-                String.format("Esiste già un elemento con questo valore")
+                "Esiste già un elemento con questo valore"
         );
     }
 
@@ -31,7 +31,7 @@ public class BusinessLogicException extends AgroManagerException {
         return new BusinessLogicException(
                 ErrorCode.INSUFFICIENT_DATA,
                 String.format("Dati insufficienti per l'operazione: %s", operation),
-                String.format("Non ci sono abbastanza dati per completare l'operazione")
+                "Non ci sono abbastanza dati per completare l'operazione"
         );
     }
 

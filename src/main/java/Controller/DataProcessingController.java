@@ -16,7 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -60,13 +59,20 @@ public class DataProcessingController {
         try {
             // 1. Valida input (coordinamento)
             if (!validaInput()) {
-                return; // La view mostrerà i messaggi di errore
+                return;
             }
 
             // 2. Ottieni parametri dalla view
             var parametri = estraiParametriDallaView();
 
-            // 3. Delega elaborazione al BusinessLogic
+            // 3. Gestione speciale per i report (che hanno emoji nei nomi)
+            if (isReportStrategy(parametri.strategia())) {
+                String tipoReport = mapStrategiaToReportType(parametri.strategia());
+                elaboraReportRaccolti(tipoReport);
+                return;
+            }
+
+            // 4. Delega elaborazione normale al BusinessLogic
             ProcessingResult<?> result = businessLogic.eseguiStrategiaConDati(
                 parametri.tipo(),
                 parametri.strategia(),
@@ -76,7 +82,7 @@ public class DataProcessingController {
                 parametri.topN()
             );
 
-            // 4. Passa i dati puri alla view per la presentazione
+            // 5. Passa i dati puri alla view per la presentazione
             ultimoRisultato = result;
             view.mostraRisultato(result, parametri);
 
@@ -139,9 +145,6 @@ public class DataProcessingController {
         try {
             var datiComboBox = businessLogic.getDatiPerComboBox();
             view.updateComboBoxes(datiComboBox.get("piantagioni"), datiComboBox.get("zone"));
-
-            var statistiche = businessLogic.aggiornaEOttieniStatistiche();
-            view.mostraStatistiche(statistiche);
         } catch (Exception e) {
             ErrorService.handleException("aggiornamento dati", e);
         }
@@ -191,9 +194,7 @@ public class DataProcessingController {
         }
     }
 
-    /**
-     * Gestisce l'elaborazione dei report raccolti come parte del data processing
-     */
+
     public void elaboraReportRaccolti(String tipoReport) {
         try {
             // Verifica prima se ci sono dati disponibili
@@ -207,19 +208,19 @@ public class DataProcessingController {
             switch (tipoReport.toLowerCase()) {
                 case "completo" -> {
                     result = businessLogic.getReportService().generaReportCompleto();
-                    view.mostraReportCompleto(result.getData());
+                    view.mostraReportCompleto(result.data());
                 }
                 case "statistiche_generali" -> {
                     result = businessLogic.getReportService().generaStatisticheGenerali();
-                    view.mostraStatisticheGenerali(result.getData());
+                    view.mostraStatisticheGenerali(result.data());
                 }
                 case "statistiche_mensili" -> {
                     result = businessLogic.getReportService().generaStatisticheMensili();
-                    view.mostraStatisticheMensili(result.getData());
+                    view.mostraStatisticheMensili(result.data());
                 }
                 case "periodo_coperto" -> {
                     result = businessLogic.getReportService().calcolaPeriodoCoperto();
-                    view.mostraPeriodoCoperto(result.getData());
+                    view.mostraPeriodoCoperto(result.data());
                 }
                 default -> {
                     view.mostraErrore("Tipo di report non riconosciuto: " + tipoReport);
@@ -245,16 +246,23 @@ public class DataProcessingController {
         }
     }
 
-    /**
-     * Verifica se ci sono dati disponibili per i report
-     */
-    public boolean hasRaccoltiDisponibili() {
-        try {
-            return businessLogic.getReportService().hasRaccoltiDisponibili();
-        } catch (DataAccessException e) {
-            ErrorService.handleException(e);
-            return false;
-        }
+    private boolean isReportStrategy(String strategia) {
+        return strategia != null && (
+            strategia.startsWith("📋") ||
+            strategia.startsWith("📊") ||
+            strategia.startsWith("📅") ||
+            strategia.startsWith("⏰")
+        );
+    }
+
+    private String mapStrategiaToReportType(String strategia) {
+        return switch (strategia) {
+            case "📋 Report Completo" -> "completo";
+            case "📊 Statistiche Generali" -> "statistiche_generali";
+            case "📅 Analisi Mensile" -> "statistiche_mensili";
+            case "⏰ Periodo Coperto" -> "periodo_coperto";
+            default -> "completo";
+        };
     }
 
     // Record per parametri - immutabile e type-safe
@@ -267,8 +275,4 @@ public class DataProcessingController {
         Integer topN
     ) {}
 
-    // Metodo pubblico per refresh - delega al model
-    public void refreshData() {
-        onAggiornaDati();
-    }
 }

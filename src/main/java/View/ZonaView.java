@@ -8,24 +8,15 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
-/**
- * View moderna per la gestione delle zone.
- * Stile coerente con l'applicazione.
- */
 public class ZonaView extends VBox {
 
-    // Componenti UI
     private final TableView<Zona> tableZone = new TableView<>();
     private final ObservableList<Zona> zoneData = FXCollections.observableArrayList();
-
-    // Pulsanti azione
     private final Button nuovoBtn = new Button("➕ Nuova Zona");
     private final Button modificaBtn = new Button("✏️ Modifica");
     private final Button eliminaBtn = new Button("🗑️ Elimina");
     private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
     private final Button resetFiltriBtn = new Button("🔄 Reset");
-
-    // Controlli ricerca
     private final TextField ricercaField = new TextField();
     private final ComboBox<String> filtroTipoTerreno = new ComboBox<>();
 
@@ -38,7 +29,6 @@ public class ZonaView extends VBox {
     private void setupStyles() {
         getStyleClass().add("main-container");
 
-        // Configurazione campi ricerca
         ricercaField.setPromptText("Cerca zona per nome...");
         ricercaField.setPrefWidth(250);
         ricercaField.getStyleClass().add("text-field-standard");
@@ -47,7 +37,6 @@ public class ZonaView extends VBox {
         filtroTipoTerreno.setPrefWidth(180);
         filtroTipoTerreno.getStyleClass().add("combo-box-standard");
 
-        // Configurazione bottoni
         nuovoBtn.getStyleClass().add("btn-primary");
         modificaBtn.getStyleClass().add("btn-secondary");
         modificaBtn.setDisable(true);
@@ -58,16 +47,9 @@ public class ZonaView extends VBox {
     }
 
     private void setupLayout() {
-        // Header
         VBox header = createHeader();
-
-        // Card ricerca
         VBox ricercaCard = createRicercaSection();
-
-        // Barra azioni
         HBox actionBar = createActionBar();
-
-        // Card tabella
         VBox tableCard = createTableSection();
 
         getChildren().addAll(header, ricercaCard, actionBar, tableCard);
@@ -211,11 +193,9 @@ public class ZonaView extends VBox {
 
     private void modificaZona() {
         if (getZonaSelezionata() != null) {
-            // Il controller gestirà l'apertura del dialog
         }
     }
 
-    // Metodi pubblici
     public void setZone(java.util.List<Zona> zone) {
         zoneData.setAll(zone);
     }

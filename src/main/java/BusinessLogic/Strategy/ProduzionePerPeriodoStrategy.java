@@ -6,13 +6,12 @@ import DomainModel.Raccolto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.time.temporal.ChronoUnit;
 
 
 public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigDecimal> {
 
     @Override
-    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException, BusinessLogicException {
+    public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException {
         validateParameters(data);
 
         List<Raccolto> raccolti = castToRaccoltiList(data[0]);
@@ -44,11 +43,9 @@ public class ProduzionePerPeriodoStrategy implements DataProcessingStrategy<BigD
         if (data == null) throw new ValidationException("I parametri non possono essere null");
         if (data.length < 3) throw new ValidationException("Necessari: lista raccolti, data inizio e data fine");
         if (!(data[0] instanceof List)) throw new ValidationException("Primo parametro deve essere List<Raccolto>");
-        if (!(data[1] instanceof LocalDate)) throw new ValidationException("Secondo parametro deve essere LocalDate (data inizio)");
-        if (!(data[2] instanceof LocalDate)) throw new ValidationException("Terzo parametro deve essere LocalDate (data fine)");
+        if (!(data[1] instanceof LocalDate inizio)) throw new ValidationException("Secondo parametro deve essere LocalDate (data inizio)");
+        if (!(data[2] instanceof LocalDate fine)) throw new ValidationException("Terzo parametro deve essere LocalDate (data fine)");
 
-        LocalDate inizio = (LocalDate) data[1];
-        LocalDate fine = (LocalDate) data[2];
         if (fine.isBefore(inizio)) throw new ValidationException("La data di fine non può essere precedente alla data di inizio");
     }
 

@@ -1,5 +1,6 @@
 package BusinessLogic.Service;
 
+import BusinessLogic.BusinessLogic;
 import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Exception.BusinessLogicException;
 import BusinessLogic.Exception.DataAccessException;
@@ -17,7 +18,6 @@ public class RaccoltoService {
         this.raccoltoDAO = raccoltoDAO;
     }
 
-
     private void validaRaccolto(Raccolto raccolto) throws ValidationException {
         if (raccolto == null) {
             throw new ValidationException("Raccolto non può essere null");
@@ -27,7 +27,6 @@ public class RaccoltoService {
             throw ValidationException.requiredField("Data di raccolto");
         }
 
-        // Validazione logica della data
         if (raccolto.getDataRaccolto().isAfter(LocalDate.now())) {
             throw new ValidationException("dataRaccolto", raccolto.getDataRaccolto().toString(),
                     "non può essere nel futuro");
@@ -56,7 +55,6 @@ public class RaccoltoService {
         validaRaccolto(raccolto);
 
         try {
-            // Validazione business: non permettere raccolti multipli nella stessa data per la stessa piantagione
             List<Raccolto> raccoltiEsistenti = raccoltoDAO.findByPiantagione(raccolto.getPiantagioneId());
             boolean raccoltoGiaEsistente = raccoltiEsistenti.stream()
                     .anyMatch(r -> r.getDataRaccolto().equals(raccolto.getDataRaccolto()));
@@ -80,7 +78,6 @@ public class RaccoltoService {
         }
 
         try {
-            // Verifica che il raccolto esista
             Raccolto esistente = raccoltoDAO.read(raccolto.getId());
             if (esistente == null) {
                 throw BusinessLogicException.entityNotFound("Raccolto", raccolto.getId());
@@ -98,7 +95,6 @@ public class RaccoltoService {
         }
 
         try {
-            // Verifica che il raccolto esista
             Raccolto esistente = raccoltoDAO.read(id);
             if (esistente == null) {
                 throw BusinessLogicException.entityNotFound("Raccolto", id);
@@ -162,16 +158,7 @@ public class RaccoltoService {
 
     public List<Raccolto> getRaccoltiPerPeriodo(LocalDate dataInizio, LocalDate dataFine)
             throws ValidationException, DataAccessException {
-        if (dataInizio == null) {
-            throw ValidationException.requiredField("Data inizio periodo");
-        }
-        if (dataFine == null) {
-            throw ValidationException.requiredField("Data fine periodo");
-        }
-        if (dataFine.isBefore(dataInizio)) {
-            throw new ValidationException("periodo", dataInizio + " - " + dataFine,
-                    "la data di fine non può essere precedente alla data di inizio");
-        }
+        BusinessLogic.isDataRangeValid(dataInizio, dataFine);
 
         try {
             return raccoltoDAO.findAll().stream()
@@ -184,15 +171,24 @@ public class RaccoltoService {
         }
     }
 
-    // Metodo per filtri - richiesto dal controller
     public List<Raccolto> getRaccoltiConFiltri(View.RaccoltoView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
             var tuttiRaccolti = raccoltoDAO.findAll();
 
             return tuttiRaccolti.stream()
                 .filter(r -> {
-                    boolean matchPiantagione = criteriFiltro.piantagione() == null || criteriFiltro.piantagione().isEmpty() ||
-                                              (r.getPiantagioneId() != null && r.getPiantagioneId().toString().equals(criteriFiltro.piantagione()));
+                    boolean matchPiantagione = true;
+                    if (criteriFiltro.piantagione() != null && !criteriFiltro.piantagione().isEmpty()) {
+                        // Estrae l'ID dalla descrizione "ID X - ..."
+                        try {
+                            String idStr = criteriFiltro.piantagione().replaceFirst("ID (\\d+).*", "$1");
+                            Integer idPiantagione = Integer.parseInt(idStr);
+                            matchPiantagione = r.getPiantagioneId() != null && r.getPiantagioneId().equals(idPiantagione);
+                        } catch (NumberFormatException e) {
+                            matchPiantagione = false;
+                        }
+                    }
+
                     boolean matchDataDa = criteriFiltro.dataDa() == null ||
                                          (r.getDataRaccolto() != null && !r.getDataRaccolto().isBefore(criteriFiltro.dataDa()));
                     boolean matchDataA = criteriFiltro.dataA() == null ||

@@ -10,6 +10,8 @@ import View.ZonaDialog;
 import View.ZonaView;
 import View.NotificationHelper;
 
+import java.util.List;
+
 public class ZonaController {
     private final ZonaService zonaService;
     private final ZonaView zonaView;
@@ -19,6 +21,7 @@ public class ZonaController {
         this.zonaView = zonaView;
 
         setupEventHandlers();
+        inizializzaFiltri();
         aggiornaListaZone();
     }
 
@@ -28,6 +31,15 @@ public class ZonaController {
         zonaView.setOnEliminaZona(this::onEliminaZona);
         zonaView.setOnApplicaFiltri(this::onApplicaFiltri);
         zonaView.setOnResetFiltri(this::onResetFiltri);
+    }
+
+    private void inizializzaFiltri() {
+        try {
+            List<String> tipiTerreno = zonaService.getTipiTerrenoDisponibili();
+            zonaView.setTipiTerreno(tipiTerreno);
+        } catch (Exception e) {
+            ErrorService.handleException("inizializzazione filtri", e);
+        }
     }
 
     private void onApplicaFiltri() {

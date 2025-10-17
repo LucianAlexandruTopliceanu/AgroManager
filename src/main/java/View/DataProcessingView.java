@@ -62,6 +62,7 @@ public class DataProcessingView extends VBox {
     // SETUP INIZIALE
     // =================================================================
 
+    @SuppressWarnings("GrazieInspection")
     private void setupStyles() {
         getStyleClass().add("main-container");
 
@@ -285,7 +286,10 @@ public class DataProcessingView extends VBox {
                 "Statistiche Zone"
             );
             case REPORT -> strategiaCombo.getItems().addAll(
-                "Report Raccolti"
+                "📋 Report Completo",
+                "📊 Statistiche Generali",
+                "📅 Analisi Mensile",
+                "⏰ Periodo Coperto"
             );
         }
 
@@ -304,21 +308,11 @@ public class DataProcessingView extends VBox {
         if (strategia == null) return;
 
         switch (strategia) {
-            case "Produzione Totale", "Media per Pianta", "Efficienza Produttiva" -> {
-                mostraParametriPiantagione();
-            }
-            case "Produzione per Periodo" -> {
-                mostraParametriPeriodo();
-            }
-            case "Top Piantagioni" -> {
-                mostraParametriTopN();
-            }
-            case "Report Raccolti" -> {
-                mostraSelettoreReport();
-            }
-            case "Piantagione Migliore", "Statistiche Zone" -> {
-                mostraInfoNessunParametro();
-            }
+            case "Produzione Totale", "Media per Pianta", "Efficienza Produttiva" -> mostraParametriPiantagione();
+            case "Produzione per Periodo" -> mostraParametriPeriodo();
+            case "Top Piantagioni" -> mostraParametriTopN();
+            case "Report Raccolti" -> mostraInfoNessunParametro();
+            case "Piantagione Migliore", "Statistiche Zone" -> mostraInfoNessunParametro();
         }
     }
 
@@ -392,126 +386,6 @@ public class DataProcessingView extends VBox {
         parametriContainer.getChildren().add(infoLabel);
     }
 
-    private void mostraSelettoreReport() {
-        eseguiBtn.setDisable(true);
-
-        VBox reportContainer = new VBox(15);
-        reportContainer.getStyleClass().add("report-selection-container");
-
-        // Titolo sezione
-        Label sectionTitle = new Label("📊 Scegli il Report da Generare");
-        sectionTitle.getStyleClass().add("section-title");
-
-        // Report principale
-        VBox mainReportGroup = createMainReportGroup();
-
-        // Separatore
-        Separator separator = new Separator();
-        separator.getStyleClass().add("section-separator");
-
-        // Report dettagliati
-        VBox detailedReportsGroup = createDetailedReportsGroup();
-
-        // Info box
-        HBox infoBox = createInfoBox();
-
-        reportContainer.getChildren().addAll(
-            sectionTitle,
-            mainReportGroup,
-            separator,
-            detailedReportsGroup,
-            infoBox
-        );
-
-        parametriContainer.getChildren().add(reportContainer);
-        statusLabel.setText("Seleziona un report usando i pulsanti sopra");
-    }
-
-    private VBox createMainReportGroup() {
-        VBox group = new VBox(10);
-        group.getStyleClass().add("report-group");
-
-        Label groupTitle = new Label("🎯 Report Completo");
-        groupTitle.getStyleClass().add("group-title");
-
-        Button reportBtn = new Button("📋 Genera Report Completo");
-        reportBtn.getStyleClass().addAll("btn-report", "btn-report-complete");
-        reportBtn.setPrefWidth(220);
-        reportBtn.setOnAction(e -> eseguiReportSpecifico("completo"));
-
-        Label desc = new Label("Include tutte le statistiche e analisi");
-        desc.getStyleClass().add("help-label");
-
-        group.getChildren().addAll(groupTitle, reportBtn, desc);
-        return group;
-    }
-
-    private VBox createDetailedReportsGroup() {
-        VBox group = new VBox(10);
-        group.getStyleClass().add("report-group");
-
-        Label groupTitle = new Label("📈 Report Dettagliati");
-        groupTitle.getStyleClass().add("group-title");
-
-        // Griglia 2x2 per i report
-        GridPane reportGrid = new GridPane();
-        reportGrid.setHgap(10);
-        reportGrid.setVgap(10);
-
-        // Report statistiche generali
-        Button statsBtn = new Button("📊 Statistiche Generali");
-        statsBtn.getStyleClass().addAll("btn-report", "btn-report-stats");
-        statsBtn.setPrefWidth(180);
-        statsBtn.setOnAction(e -> eseguiReportSpecifico("statistiche_generali"));
-
-        Label statsDesc = new Label("Totali e produzione");
-        statsDesc.getStyleClass().add("help-label-small");
-
-        // Report mensili
-        Button monthBtn = new Button("📅 Analisi Mensile");
-        monthBtn.getStyleClass().addAll("btn-report", "btn-report-monthly");
-        monthBtn.setPrefWidth(180);
-        monthBtn.setOnAction(e -> eseguiReportSpecifico("statistiche_mensili"));
-
-        Label monthDesc = new Label("Per mese");
-        monthDesc.getStyleClass().add("help-label-small");
-
-        // Report periodo
-        Button periodBtn = new Button("⏰ Periodo Coperto");
-        periodBtn.getStyleClass().addAll("btn-report", "btn-report-period");
-        periodBtn.setPrefWidth(180);
-        periodBtn.setOnAction(e -> eseguiReportSpecifico("periodo_coperto"));
-
-        Label periodDesc = new Label("Date raccolta");
-        periodDesc.getStyleClass().add("help-label-small");
-
-        reportGrid.add(statsBtn, 0, 0);
-        reportGrid.add(monthBtn, 1, 0);
-        reportGrid.add(statsDesc, 0, 1);
-        reportGrid.add(monthDesc, 1, 1);
-        reportGrid.add(periodBtn, 0, 2);
-        reportGrid.add(periodDesc, 0, 3);
-
-        group.getChildren().addAll(groupTitle, reportGrid);
-        return group;
-    }
-
-    private HBox createInfoBox() {
-        HBox box = new HBox(10);
-        box.getStyleClass().add("info-box");
-        box.setAlignment(Pos.CENTER_LEFT);
-
-        Label icon = new Label("💡");
-        icon.getStyleClass().add("info-icon");
-
-        Label text = new Label("Seleziona il tipo di report. Il report completo include tutte le informazioni.");
-        text.getStyleClass().add("info-text");
-        text.setWrapText(true);
-
-        box.getChildren().addAll(icon, text);
-        return box;
-    }
-
     // =================================================================
     // EVENT HANDLERS E LOGICA DI BUSINESS SEPARATA
     // =================================================================
@@ -528,28 +402,6 @@ public class DataProcessingView extends VBox {
         statusLabel.setText("Risultati cancellati");
     }
 
-    private void eseguiReportSpecifico(String tipoReport) {
-        if (controller != null) {
-            // Mostra indicatore di caricamento
-            progressIndicator.setVisible(true);
-            statusLabel.setText("Generazione " + getTipoReportLabel(tipoReport) + " in corso...");
-
-            // Disabilita tutti i controlli durante l'elaborazione
-            setControlsEnabled(false);
-
-            // Esegue il report tramite il controller
-            controller.elaboraReportRaccolti(tipoReport);
-
-            // Riabilita i controlli
-            setControlsEnabled(true);
-            progressIndicator.setVisible(false);
-
-            // Abilita il salvataggio se il report è stato generato con successo
-            salvaRisultatiBtn.setDisable(false);
-        } else {
-            mostraErrore("Errore: controller non inizializzato");
-        }
-    }
 
     /**
      * Restituisce l'etichetta leggibile per il tipo di report
@@ -630,19 +482,19 @@ public class DataProcessingView extends VBox {
             java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n\n");
 
         // Formattazione risultati basata sul tipo
-        if (result.getData() instanceof BigDecimal value) {
+        if (result.data() instanceof BigDecimal value) {
             output.append("Valore: ").append(String.format("%.2f", value)).append("\n");
-        } else if (result.getData() instanceof Map<?, ?> map) {
+        } else if (result.data() instanceof Map<?, ?> map) {
             formatMapResults(output, map);
-        } else if (result.getData() instanceof java.util.List<?> list) {
+        } else if (result.data() instanceof java.util.List<?> list) {
             formatListResults(output, list);
         } else {
-            output.append("Risultato: ").append(result.getData().toString()).append("\n");
+            output.append("Risultato: ").append(result.data().toString()).append("\n");
         }
 
-        if (result.getMetadata() != null && !result.getMetadata().isEmpty()) {
+        if (result.metadata() != null && !result.metadata().isEmpty()) {
             output.append("\n=== INFORMAZIONI AGGIUNTIVE ===\n");
-            result.getMetadata().forEach((key, value) ->
+            result.metadata().forEach((key, value) ->
                 output.append(key).append(": ").append(value).append("\n"));
         }
 
@@ -739,14 +591,13 @@ public class DataProcessingView extends VBox {
      * Mostra solo le statistiche generali
      */
     public void mostraStatisticheGenerali(Map<String, Object> statistiche) {
-        StringBuilder contenuto = new StringBuilder();
-        contenuto.append("📈 STATISTICHE GENERALI RACCOLTI\n");
-        contenuto.append("═".repeat(40)).append("\n\n");
 
-        contenuto.append(String.format("▸ Numero totale raccolti: %d\n", statistiche.get("numeroTotaleRaccolti")));
-        contenuto.append(String.format("▸ Produzione totale: %.2f kg\n", statistiche.get("produzioneTotale")));
+        String contenuto = "📈 STATISTICHE GENERALI RACCOLTI\n" +
+                "═".repeat(40) + "\n\n" +
+                String.format("▸ Numero totale raccolti: %d\n", statistiche.get("numeroTotaleRaccolti")) +
+                String.format("▸ Produzione totale: %.2f kg\n", statistiche.get("produzioneTotale"));
 
-        risultatoArea.setText(contenuto.toString());
+        risultatoArea.setText(contenuto);
         setStatus("Statistiche generali raccolti generate con successo");
     }
 

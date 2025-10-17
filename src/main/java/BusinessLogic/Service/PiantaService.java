@@ -4,6 +4,7 @@ import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Exception.BusinessLogicException;
 import BusinessLogic.Exception.DataAccessException;
 import ORM.PiantaDAO;
+import ORM.DAOFactory;
 import DomainModel.Pianta;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -137,6 +138,7 @@ public class PiantaService {
     public List<Pianta> getPianteConFiltri(View.PiantaView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
             var tuttePiante = piantaDAO.findAll();
+            var tuttiFornitori = DAOFactory.getFornitoreDAO().findAll();
 
             return tuttePiante.stream()
                 .filter(p -> {
@@ -144,8 +146,15 @@ public class PiantaService {
                                        p.getTipo().toLowerCase().contains(criteriFiltro.tipo().toLowerCase());
                     boolean matchVarieta = criteriFiltro.varieta() == null || criteriFiltro.varieta().isEmpty() ||
                                           p.getVarieta().toLowerCase().contains(criteriFiltro.varieta().toLowerCase());
-                    boolean matchFornitore = criteriFiltro.fornitore() == null || criteriFiltro.fornitore().isEmpty() ||
-                                           (p.getFornitoreId() != null && p.getFornitoreId().toString().equals(criteriFiltro.fornitore()));
+
+                    boolean matchFornitore = true;
+                    if (criteriFiltro.fornitore() != null && !criteriFiltro.fornitore().isEmpty()) {
+                        String nomeFornitore = criteriFiltro.fornitore().split(" - ")[0];
+                        matchFornitore = tuttiFornitori.stream()
+                            .anyMatch(f -> f.getId().equals(p.getFornitoreId()) &&
+                                         f.getNome().equalsIgnoreCase(nomeFornitore));
+                    }
+
                     return matchTipo && matchVarieta && matchFornitore;
                 })
                 .toList();

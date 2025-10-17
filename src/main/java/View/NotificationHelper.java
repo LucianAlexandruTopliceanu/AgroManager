@@ -37,12 +37,12 @@ public class NotificationHelper {
     private static void showErrorNotification(ErrorService.ErrorNotification notification) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("⚠️ Errore - " + notification.getErrorCode().getCode());
-            alert.setHeaderText(notification.getErrorCode().getDescription());
-            alert.setContentText(notification.getUserMessage());
+            alert.setTitle("⚠️ Errore - " + notification.errorCode().getCode());
+            alert.setHeaderText(notification.errorCode().getDescription());
+            alert.setContentText(notification.userMessage());
 
             // Personalizza l'aspetto in base alla severità
-            customizeAlertBySeverity(alert, notification.getSeverity());
+            customizeAlertBySeverity(alert, notification.severity());
 
             alert.showAndWait();
         });
@@ -51,9 +51,9 @@ public class NotificationHelper {
     private static void showInfoNotification(ErrorService.InfoNotification notification) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("ℹ️ " + notification.getTitle());
+            alert.setTitle("ℹ️ " + notification.title());
             alert.setHeaderText(null);
-            alert.setContentText(notification.getMessage());
+            alert.setContentText(notification.message());
 
             // Applica stili personalizzati
             alert.getDialogPane().getStyleClass().add("info-dialog");

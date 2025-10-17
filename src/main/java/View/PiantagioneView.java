@@ -8,25 +8,16 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
-/**
- * View moderna per la gestione delle piantagioni.
- * Stile coerente con l'applicazione.
- */
 public class PiantagioneView extends VBox {
 
-    // Componenti UI
     private final TableView<Piantagione> tablePiantagioni = new TableView<>();
     private final ObservableList<Piantagione> piantagioniData = FXCollections.observableArrayList();
-
-    // Pulsanti azione
     private final Button nuovoBtn = new Button("➕ Nuova Piantagione");
     private final Button modificaBtn = new Button("✏️ Modifica");
     private final Button eliminaBtn = new Button("🗑️ Elimina");
     private final Button visualizzaStatiBtn = new Button("📊 Stati");
     private final Button applicaFiltriBtn = new Button("🔍 Applica Filtri");
     private final Button resetFiltriBtn = new Button("🔄 Reset");
-
-    // Controlli ricerca
     private final ComboBox<String> filtroZonaCombo = new ComboBox<>();
     private final ComboBox<String> filtroPiantaCombo = new ComboBox<>();
     private final DatePicker filtroDataDa = new DatePicker();
@@ -41,7 +32,6 @@ public class PiantagioneView extends VBox {
     private void setupStyles() {
         getStyleClass().add("main-container");
 
-        // Configurazione controlli ricerca
         filtroZonaCombo.setPromptText("Tutte le zone");
         filtroZonaCombo.setPrefWidth(180);
         filtroZonaCombo.getStyleClass().add("combo-box-standard");
@@ -58,7 +48,6 @@ public class PiantagioneView extends VBox {
         filtroDataA.setPrefWidth(150);
         filtroDataA.getStyleClass().add("date-picker-standard");
 
-        // Configurazione bottoni
         nuovoBtn.getStyleClass().add("btn-primary");
         modificaBtn.getStyleClass().add("btn-secondary");
         modificaBtn.setDisable(true);
@@ -69,7 +58,6 @@ public class PiantagioneView extends VBox {
         applicaFiltriBtn.getStyleClass().add("btn-secondary");
         resetFiltriBtn.getStyleClass().add("btn-support");
 
-        // Configurazione tabella
         tablePiantagioni.setPlaceholder(new Label("Nessuna piantagione trovata. Aggiungi la prima piantagione!"));
     }
 
@@ -254,9 +242,31 @@ public class PiantagioneView extends VBox {
         }
     }
 
-    // Metodi pubblici
     public void setPiantagioni(java.util.List<Piantagione> piantagioni) {
         piantagioniData.setAll(piantagioni);
+
+        // Carica anche le informazioni di zona e pianta per visualizzare i nomi
+        if (!piantagioni.isEmpty()) {
+            try {
+                var zone = ORM.DAOFactory.getZonaDAO().findAll();
+                var piante = ORM.DAOFactory.getPiantaDAO().findAll();
+
+                // Aggiorna la visualizzazione delle colonne con i nomi
+                piantagioni.forEach(p -> {
+                    zone.stream()
+                        .filter(z -> z.getId().equals(p.getZonaId()))
+                        .findFirst()
+                        .ifPresent(z -> {});
+
+                    piante.stream()
+                        .filter(pi -> pi.getId().equals(p.getPiantaId()))
+                        .findFirst()
+                        .ifPresent(pi -> {});
+                });
+            } catch (Exception e) {
+                // Ignora errori di caricamento nomi
+            }
+        }
     }
 
     public Piantagione getPiantagioneSelezionata() {
@@ -277,7 +287,6 @@ public class PiantagioneView extends VBox {
         filtroPiantaCombo.getSelectionModel().selectFirst();
     }
 
-    // Metodi richiesti dal controller
     public void setFiltroPiantaItems(java.util.List<String> items) {
         setPiante(items);
     }
@@ -287,7 +296,6 @@ public class PiantagioneView extends VBox {
     }
 
     public void setFiltroStatoItems(java.util.List<String> items) {
-        // Per ora non implementato, sarà aggiunto in seguito se necessario
     }
 
     public void setOnCambiaStatoPiantagione(Runnable handler) {

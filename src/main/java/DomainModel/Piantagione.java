@@ -9,15 +9,13 @@ public class Piantagione {
     private LocalDate messaADimora;
     private Integer piantaId;
     private Integer zonaId;
-    private Integer idStatoPiantagione; // NUOVO: FK verso Stato_Piantagione
+    private Integer idStatoPiantagione;
     private LocalDateTime dataCreazione;
     private LocalDateTime dataAggiornamento;
-
-
     private StatoPiantagione statoPiantagione;
 
     public Piantagione() {
-        this.idStatoPiantagione = 1; // Default: ATTIVA
+        this.idStatoPiantagione = 1;
     }
 
     public Piantagione(Integer id, Integer quantitaPianta, LocalDate messaADimora,
@@ -30,7 +28,7 @@ public class Piantagione {
         this.zonaId = zona;
         this.dataCreazione = dataCreazione;
         this.dataAggiornamento = dataAggiornamento;
-        this.idStatoPiantagione = 1; // Default: ATTIVA
+        this.idStatoPiantagione = 1;
     }
 
     public Integer getId() { return id; }

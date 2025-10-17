@@ -9,6 +9,7 @@ import java.util.logging.SimpleFormatter;
  * Logger specializzato per test con output pulito e strutturato
  * Implementa le best practice per logging di test
  */
+@SuppressWarnings("GrazieInspection")
 public class TestLogger {
 
     private static final String ANSI_RESET = "\u001B[0m";
@@ -110,6 +111,7 @@ public class TestLogger {
     /**
      * Formatter personalizzato per output pulito
      */
+    @SuppressWarnings("GrazieInspection")
     private static class TestFormatter extends SimpleFormatter {
         @Override
         public String format(java.util.logging.LogRecord record) {

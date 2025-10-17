@@ -36,10 +36,10 @@ public class PiantaController {
     private void inizializzaFiltri() {
         try {
             List<Fornitore> fornitori = fornitoreService.getAllFornitori();
-            List<String> nomiFornitori = fornitori.stream()
-                .map(f -> f.getId() + " - " + f.getNome())
+            List<String> descrizioniFornitori = fornitori.stream()
+                .map(f -> f.getNome() + (f.getIndirizzo() != null ? " - " + f.getIndirizzo() : ""))
                 .toList();
-            piantaView.setFornitori(nomiFornitori);
+            piantaView.setFornitori(descrizioniFornitori);
         } catch (Exception e) {
             ErrorService.handleException("caricamento fornitori per filtri", e);
         }
@@ -72,7 +72,14 @@ public class PiantaController {
     public void onNuovaPianta() {
         try {
             List<Fornitore> fornitori = fornitoreService.getAllFornitori();
-            PiantaDialog dialog = new PiantaDialog(new Pianta());
+
+            if (fornitori.isEmpty()) {
+                NotificationHelper.showWarning("Nessun fornitore disponibile",
+                    "Devi prima creare almeno un fornitore prima di aggiungere una pianta.");
+                return;
+            }
+
+            PiantaDialog dialog = new PiantaDialog(new Pianta(), fornitori);
             dialog.showAndWait();
 
             if (dialog.isConfermato()) {
@@ -95,7 +102,7 @@ public class PiantaController {
 
         try {
             List<Fornitore> fornitori = fornitoreService.getAllFornitori();
-            PiantaDialog dialog = new PiantaDialog(selezionata);
+            PiantaDialog dialog = new PiantaDialog(selezionata, fornitori);
             dialog.showAndWait();
 
             if (dialog.isConfermato()) {

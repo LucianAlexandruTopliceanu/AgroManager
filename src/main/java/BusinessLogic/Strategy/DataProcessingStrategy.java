@@ -3,7 +3,6 @@ package BusinessLogic.Strategy;
 import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Exception.BusinessLogicException;
 
-
 public interface DataProcessingStrategy<T> {
 
     enum ProcessingType {
@@ -22,9 +21,7 @@ public interface DataProcessingStrategy<T> {
         }
     }
 
-
     ProcessingResult<T> execute(Object... data) throws ValidationException, BusinessLogicException;
-
 
     ProcessingType getType();
 

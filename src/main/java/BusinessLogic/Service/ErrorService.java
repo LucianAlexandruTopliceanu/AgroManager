@@ -115,37 +115,11 @@ public class ErrorService {
     }
 
     // Inner classes per le notifiche
-    public static class ErrorNotification {
-        private final ErrorCode errorCode;
-        private final String userMessage;
-        private final String technicalMessage;
-        private final SeverityLevel severity;
-
-        public ErrorNotification(ErrorCode errorCode, String userMessage, String technicalMessage, SeverityLevel severity) {
-            this.errorCode = errorCode;
-            this.userMessage = userMessage;
-            this.technicalMessage = technicalMessage;
-            this.severity = severity;
-        }
-
-        // Getters
-        public ErrorCode getErrorCode() { return errorCode; }
-        public String getUserMessage() { return userMessage; }
-        public String getTechnicalMessage() { return technicalMessage; }
-        public SeverityLevel getSeverity() { return severity; }
+        public record ErrorNotification(ErrorCode errorCode, String userMessage, String technicalMessage,
+                                        SeverityLevel severity) {
     }
 
-    public static class InfoNotification {
-        private final String title;
-        private final String message;
-
-        public InfoNotification(String title, String message) {
-            this.title = title;
-            this.message = message;
-        }
-
-        public String getTitle() { return title; }
-        public String getMessage() { return message; }
+    public record InfoNotification(String title, String message) {
     }
 
     public static class ConfirmationRequest {

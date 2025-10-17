@@ -74,5 +74,3 @@ public abstract class BaseDAO<T> {
 
     protected abstract void setEntityId(T entity, int id);
 }
-
-

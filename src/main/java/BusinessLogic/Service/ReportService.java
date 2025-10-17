@@ -5,9 +5,7 @@ import BusinessLogic.Exception.DataAccessException;
 import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Strategy.*;
 import DomainModel.Raccolto;
-import ORM.DAOFactory;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 

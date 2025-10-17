@@ -26,7 +26,7 @@ public class PiantagioneService {
         this.statoPiantagioneService = statoPiantagioneService;
     }
 
-    private void validaPiantagione(Piantagione piantagione) throws ValidationException, BusinessLogicException {
+    private void validaPiantagione(Piantagione piantagione) throws ValidationException {
         if (piantagione == null) {
             throw ValidationException.requiredField("Piantagione");
         }
@@ -141,25 +141,41 @@ public class PiantagioneService {
     // Metodo per filtri - richiesto dal controller
     public List<Piantagione> getPiantagioniConFiltri(View.PiantagioneView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
-            var tuttePiantagioni = piantagioneDAO.findAll();
+            var tuttePiantagioni = piantagioneDAO.findAllWithStato();
+            var tutteZone = ORM.DAOFactory.getZonaDAO().findAll();
+            var tuttePiante = ORM.DAOFactory.getPiantaDAO().findAll();
 
             return tuttePiantagioni.stream()
                 .filter(p -> {
-                    boolean matchPianta = criteriFiltro.pianta() == null || criteriFiltro.pianta().isEmpty() ||
-                                         (p.getPiantaId() != null && p.getPiantaId().toString().equals(criteriFiltro.pianta()));
-                    boolean matchZona = criteriFiltro.zona() == null || criteriFiltro.zona().isEmpty() ||
-                                       (p.getZonaId() != null && p.getZonaId().toString().equals(criteriFiltro.zona()));
-                    boolean matchData = true;
+                    boolean matchZona = true;
+                    if (criteriFiltro.zona() != null && !criteriFiltro.zona().isEmpty()) {
+                        matchZona = tutteZone.stream()
+                            .anyMatch(z -> z.getId().equals(p.getZonaId()) &&
+                                         z.getNome().equalsIgnoreCase(criteriFiltro.zona()));
+                    }
+
+                    boolean matchPianta = true;
+                    if (criteriFiltro.pianta() != null && !criteriFiltro.pianta().isEmpty()) {
+                        matchPianta = tuttePiante.stream()
+                            .anyMatch(pianta -> pianta.getId().equals(p.getPiantaId()) &&
+                                              (pianta.getTipo() + (pianta.getVarieta() != null ? " - " + pianta.getVarieta() : ""))
+                                              .equalsIgnoreCase(criteriFiltro.pianta()));
+                    }
+
+                    boolean matchDataDa = true;
                     if (criteriFiltro.dataDa() != null && p.getMessaADimora() != null) {
-                        matchData = !p.getMessaADimora().isBefore(criteriFiltro.dataDa());
+                        matchDataDa = !p.getMessaADimora().isBefore(criteriFiltro.dataDa());
                     }
+
+                    boolean matchDataA = true;
                     if (criteriFiltro.dataA() != null && p.getMessaADimora() != null) {
-                        matchData = matchData && !p.getMessaADimora().isAfter(criteriFiltro.dataA());
+                        matchDataA = !p.getMessaADimora().isAfter(criteriFiltro.dataA());
                     }
-                    return matchPianta && matchZona && matchData;
+
+                    return matchZona && matchPianta && matchDataDa && matchDataA;
                 })
                 .toList();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw DataAccessException.queryError("applicazione filtri piantagioni", e);
         }
     }

@@ -15,7 +15,6 @@ public class ZonaService {
         this.zonaDAO = zonaDAO;
     }
 
-
     private void validaZona(Zona zona) throws ValidationException {
         if (zona == null) {
             throw new ValidationException("Zona non può essere null");
@@ -39,7 +38,6 @@ public class ZonaService {
         validaZona(zona);
 
         try {
-            // Verifica duplicati per nome zona
             List<Zona> esistenti = zonaDAO.findAll();
             boolean duplicato = esistenti.stream()
                     .anyMatch(z -> z.getNome().equalsIgnoreCase(zona.getNome()));
@@ -62,7 +60,6 @@ public class ZonaService {
         }
 
         try {
-            // Verifica che la zona esista
             Zona esistente = zonaDAO.read(zona.getId());
             if (esistente == null) {
                 throw BusinessLogicException.entityNotFound("Zona", zona.getId());
@@ -80,7 +77,6 @@ public class ZonaService {
         }
 
         try {
-            // Verifica che la zona esista
             Zona esistente = zonaDAO.read(id);
             if (esistente == null) {
                 throw BusinessLogicException.entityNotFound("Zona", id);
@@ -112,7 +108,6 @@ public class ZonaService {
         }
     }
 
-    // Metodo per filtri - richiesto dal controller
     public List<Zona> getZoneConFiltri(View.ZonaView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
             var tutteZone = zonaDAO.findAll();
@@ -128,6 +123,14 @@ public class ZonaService {
                 .toList();
         } catch (SQLException e) {
             throw DataAccessException.queryError("applicazione filtri zone", e);
+        }
+    }
+
+    public List<String> getTipiTerrenoDisponibili() throws DataAccessException {
+        try {
+            return zonaDAO.getTipiTerrenoDistinti();
+        } catch (SQLException e) {
+            throw DataAccessException.queryError("lettura tipi terreno", e);
         }
     }
 }
