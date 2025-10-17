@@ -36,13 +36,13 @@ public class RaccoltoServiceTest {
         }
 
         @Override
-        public java.util.List<Raccolto> findByPiantagione(Integer piantagioneId) throws java.sql.SQLException {
+        public java.util.List<Raccolto> findByPiantagione(Integer piantagioneId) {
             // Restituisce una lista vuota per evitare conflitti con il database reale
             return new java.util.ArrayList<>();
         }
 
         @Override
-        public Raccolto read(int id) throws java.sql.SQLException {
+        public Raccolto read(int id) {
             // Simula che il raccolto esista
             if (id > 0) {
                 Raccolto raccolto = new Raccolto();

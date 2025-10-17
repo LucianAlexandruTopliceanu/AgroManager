@@ -4,11 +4,8 @@ import BusinessLogic.Exception.BusinessLogicException;
 import BusinessLogic.Exception.DataAccessException;
 import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Strategy.*;
-import DomainModel.Raccolto;
 import org.junit.jupiter.api.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,12 +66,12 @@ class ReportServiceTest {
             ProcessingResult<Map<String, Object>> result = reportService.generaReportCompleto();
 
             assertNotNull(result, "Il risultato non dovrebbe essere null");
-            assertNotNull(result.getData(), "I dati del report non dovrebbero essere null");
-            Map<String, Object> data = result.getData();
+            assertNotNull(result.data(), "I dati del report non dovrebbero essere null");
+            Map<String, Object> data = result.data();
             testLogger.operation("Report generato", "Chiavi: " + data.keySet());
 
             // Verifica che contenga le sezioni principali
-            assertTrue(data.containsKey("statisticheGenerali") || data.size() > 0,
+            assertTrue(data.containsKey("statisticheGenerali") || !data.isEmpty(),
                 "Il report dovrebbe contenere dati");
 
             testLogger.assertion("Report contiene dati", true);
@@ -127,9 +124,9 @@ class ReportServiceTest {
             ProcessingResult<Map<String, Object>> result = reportService.generaStatisticheGenerali();
 
             assertNotNull(result, "Il risultato non dovrebbe essere null");
-            assertNotNull(result.getData(), "I dati delle statistiche non dovrebbero essere null");
+            assertNotNull(result.data(), "I dati delle statistiche non dovrebbero essere null");
 
-            testLogger.operation("Statistiche generate", "Keys: " + result.getData().keySet().size());
+            testLogger.operation("Statistiche generate", "Keys: " + result.data().size());
             testLogger.testPassed("generaStatisticheGenerali - OK");
 
         } catch (BusinessLogicException | DataAccessException | ValidationException e) {
@@ -153,9 +150,9 @@ class ReportServiceTest {
             ProcessingResult<Map<String, Object>> result = reportService.generaStatisticheMensili();
 
             assertNotNull(result, "Il risultato non dovrebbe essere null");
-            assertNotNull(result.getData(), "I dati delle statistiche mensili non dovrebbero essere null");
+            assertNotNull(result.data(), "I dati delle statistiche mensili non dovrebbero essere null");
 
-            testLogger.operation("Statistiche mensili generate", result.getData().size() + " chiavi");
+            testLogger.operation("Statistiche mensili generate", result.data().size() + " chiavi");
             testLogger.testPassed("generaStatisticheMensili - OK");
 
         } catch (BusinessLogicException | DataAccessException | ValidationException e) {
@@ -179,13 +176,13 @@ class ReportServiceTest {
             ProcessingResult<Map<String, Object>> result = reportService.calcolaPeriodoCoperto();
 
             assertNotNull(result, "Il risultato non dovrebbe essere null");
-            assertNotNull(result.getData(), "I dati del periodo non dovrebbero essere null");
+            assertNotNull(result.data(), "I dati del periodo non dovrebbero essere null");
 
-            Map<String, Object> data = result.getData();
+            Map<String, Object> data = result.data();
             testLogger.operation("Periodo calcolato", "Chiavi presenti: " + data.keySet());
 
             // Verifica che contenga informazioni sul periodo
-            assertTrue(data.size() > 0, "Dovrebbe contenere informazioni sul periodo");
+            assertFalse(data.isEmpty(), "Dovrebbe contenere informazioni sul periodo");
 
             testLogger.testPassed("calcolaPeriodoCoperto - OK");
 

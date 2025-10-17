@@ -14,7 +14,7 @@ public class ZonaDAOTest {
     private Zona testZona;
 
     @BeforeAll
-    void setUp() throws SQLException {
+    void setUp() {
         zonaDAO = new ZonaDAO();
         DatabaseConnection.setTestMode(true);
     }
@@ -30,7 +30,7 @@ public class ZonaDAOTest {
     }
 
     @AfterAll
-    void setTestModeOff() throws SQLException {
+    void setTestModeOff() {
         DatabaseConnection.setTestMode(false);
     }
 
@@ -42,7 +42,7 @@ public class ZonaDAOTest {
     }
 
     @Test
-    void testCreateZona() throws SQLException {
+    void testCreateZona() {
         assertNotNull(testZona.getId());
         assertTrue(testZona.getId() > 0);
     }

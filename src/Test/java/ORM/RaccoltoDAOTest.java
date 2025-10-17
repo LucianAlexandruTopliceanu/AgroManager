@@ -28,7 +28,7 @@ public class RaccoltoDAOTest {
     private Fornitore testFornitore;
 
     @BeforeAll
-    void setUp() throws SQLException {
+    void setUp() {
         raccoltoDAO = new RaccoltoDAO();
         piantagioneDAO = new PiantagioneDAO();
         piantaDAO = new PiantaDAO();
@@ -80,7 +80,7 @@ public class RaccoltoDAOTest {
     }
 
     @AfterAll
-    void setTestModeOff() throws SQLException {
+    void setTestModeOff() {
         DatabaseConnection.setTestMode(false);
     }
 
@@ -104,7 +104,7 @@ public class RaccoltoDAOTest {
     }
 
     @Test
-    void testCreateRaccolto() throws SQLException {
+    void testCreateRaccolto() {
         assertNotNull(testRaccolto.getId());
         assertTrue(testRaccolto.getId() > 0);
     }

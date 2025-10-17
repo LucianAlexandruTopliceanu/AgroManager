@@ -1,7 +1,6 @@
 package BusinessLogic.Service;
 
 import BusinessLogic.Exception.ValidationException;
-import BusinessLogic.Exception.DataAccessException;
 import BusinessLogic.Exception.BusinessLogicException;
 import DomainModel.Piantagione;
 import DomainModel.StatoPiantagione;
@@ -51,7 +50,7 @@ public class PiantagioneServiceTest {
             Piantagione p1 = new Piantagione();
             p1.setId(1);
             p1.setIdStatoPiantagione(1);
-            return Arrays.asList(p1);
+            return List.of(p1);
         }
 
         @Override
@@ -94,7 +93,7 @@ public class PiantagioneServiceTest {
         }
 
         @Override
-        public StatoPiantagione getStatoByCodice(String codice) throws ValidationException, BusinessLogicException {
+        public StatoPiantagione getStatoByCodice(String codice) {
             StatoPiantagione stato = new StatoPiantagione();
             stato.setId(1);
             stato.setCodice(codice);
@@ -103,7 +102,7 @@ public class PiantagioneServiceTest {
         }
 
         @Override
-        public StatoPiantagione getStatoById(Integer id) throws ValidationException, BusinessLogicException {
+        public StatoPiantagione getStatoById(Integer id) {
             StatoPiantagione stato = new StatoPiantagione();
             stato.setId(id);
             stato.setCodice(StatoPiantagione.ATTIVA);
@@ -216,7 +215,7 @@ public class PiantagioneServiceTest {
 
     @Test
     @DisplayName("Test cambio stato piantagione")
-    void testCambiaStatoPiantagione() throws BusinessLogicException {
+    void testCambiaStatoPiantagione() {
         testLogger.startTest("cambiaStatoPiantagione");
 
         assertDoesNotThrow(() -> {

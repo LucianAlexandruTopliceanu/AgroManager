@@ -3,7 +3,6 @@ package BusinessLogic.Strategy;
 import BusinessLogic.Service.TestLogger;
 import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Exception.BusinessLogicException;
-import BusinessLogic.Strategy.DataProcessingStrategy.ProcessingType;
 import DomainModel.Piantagione;
 import DomainModel.Raccolto;
 import DomainModel.Zona;
@@ -101,14 +100,14 @@ public class DataProcessingStrategyTest {
         ProcessingResult<BigDecimal> result = strategy.execute(raccolti, 1);
 
         assertNotNull(result);
-        assertNotNull(result.getData());
+        assertNotNull(result.data());
         assertEquals(DataProcessingStrategy.ProcessingType.CALCULATION, strategy.getType());
 
         // Verifica il calcolo: raccolto1 (25.50) + raccolto2 (18.25) = 43.75
         BigDecimal expected = new BigDecimal("43.75");
-        assertEquals(0, expected.compareTo(result.getData()));
+        assertEquals(0, expected.compareTo(result.data()));
 
-        testLogger.operation("Produzione totale calcolata", result.getData().toString() + " kg");
+        testLogger.operation("Produzione totale calcolata", result.data().toString() + " kg");
         testLogger.testPassed("ProduzioneTotaleStrategy calcolo");
     }
 
@@ -122,14 +121,14 @@ public class DataProcessingStrategyTest {
         ProcessingResult<BigDecimal> result = strategy.execute(raccolti, piantagioni, 1);
 
         assertNotNull(result);
-        assertNotNull(result.getData());
+        assertNotNull(result.data());
         assertEquals(DataProcessingStrategy.ProcessingType.CALCULATION, strategy.getType());
 
         // Verifica il calcolo: totale 43.75 kg / 100 piante = 0.44 kg per pianta
         BigDecimal expected = new BigDecimal("0.44");
-        assertEquals(0, expected.compareTo(result.getData()));
+        assertEquals(0, expected.compareTo(result.data()));
 
-        testLogger.operation("Media produzione calcolata", result.getData().toString() + " kg/pianta");
+        testLogger.operation("Media produzione calcolata", result.data().toString() + " kg/pianta");
         testLogger.testPassed("MediaProduzioneStrategy calcolo");
     }
 
@@ -205,12 +204,12 @@ public class DataProcessingStrategyTest {
         ProcessingResult<BigDecimal> result = strategy.execute(raccolti, 1);
 
         // Test metodi della classe ProcessingResult
-        assertNotNull(result.getData());
-        assertNotNull(result.getMetadata());
-        assertTrue(result.getMetadata().isEmpty()); // Metadata vuoto per default
+        assertNotNull(result.data());
+        assertNotNull(result.metadata());
+        assertTrue(result.metadata().isEmpty()); // Metadata vuoto per default
 
         // Test compatibilità metodo legacy
-        assertEquals(result.getData(), result.getValue());
+        assertEquals(result.data(), result.getValue());
 
         testLogger.operation("ProcessingResult validato", "getData() e metadata verificati");
         testLogger.testPassed("ProcessingResult struttura");
@@ -225,12 +224,12 @@ public class DataProcessingStrategyTest {
         ProcessingResult<BigDecimal> result = strategy.execute(raccolti, 1);
 
         // Verifica che la strategy restituisca solo dati numerici puri
-        assertTrue(result.getData() instanceof BigDecimal);
-        assertFalse(result.getData().toString().contains("kg")); // Nessuna unità di misura
-        assertFalse(result.getData().toString().contains("€")); // Nessun simbolo di valuta
+        assertInstanceOf(BigDecimal.class, result.data());
+        assertFalse(result.data().toString().contains("kg")); // Nessuna unità di misura
+        assertFalse(result.data().toString().contains("€")); // Nessun simbolo di valuta
 
         // Il dato deve essere numerico puro per permettere alla view di formattarlo
-        BigDecimal data = result.getData();
+        BigDecimal data = result.data();
         assertTrue(data.compareTo(BigDecimal.ZERO) >= 0);
 
         testLogger.operation("Dati puri verificati", "Nessuna formattazione nella strategy");

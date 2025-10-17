@@ -37,7 +37,7 @@ public class PiantagioneDAOTest {
     private Fornitore testFornitore;
 
     @BeforeAll
-    void setUp() throws SQLException {
+    void setUp() {
         logger.info("Inizializzazione test suite PiantagioneDAO");
         piantagioneDAO = new PiantagioneDAO();
         piantaDAO = new PiantaDAO();
@@ -81,7 +81,7 @@ public class PiantagioneDAOTest {
     }
 
     @AfterEach
-    void cleanUp() throws SQLException {
+    void cleanUp() {
         logger.info("Pulizia oggetti test");
 
         // Elimino tutte le piantagioni create in questo test
@@ -128,7 +128,7 @@ public class PiantagioneDAOTest {
     }
 
     @AfterAll
-    void tearDown() throws SQLException {
+    void tearDown() {
         logger.info("Spegnimento test mode per PiantagioneDAO");
         DatabaseConnection.setTestMode(false);
     }
@@ -242,7 +242,7 @@ public class PiantagioneDAOTest {
 
         // Assert
         assertNotNull(piantagioni, "La lista non deve essere null");
-        assertTrue(piantagioni.size() > 0, "Deve esserci almeno una piantagione");
+        assertFalse(piantagioni.isEmpty(), "Deve esserci almeno una piantagione");
 
         boolean trovata = piantagioni.stream()
             .anyMatch(p -> p.getId().equals(testPiantagione.getId()));

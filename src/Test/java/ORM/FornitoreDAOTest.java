@@ -21,14 +21,14 @@ public class FornitoreDAOTest {
     private Fornitore testFornitore;
 
     @BeforeAll
-    void setupSuite() throws SQLException {
+    void setupSuite() {
         testLogger.startTestSuite("FornitoreDAO");
         fornitoreDAO = new FornitoreDAO();
         DatabaseConnection.setTestMode(true);
     }
 
     @AfterAll
-    void tearDownSuite() throws SQLException {
+    void tearDownSuite() {
         testLogger.endTestSuite("FornitoreDAO", 4, 4, 0);
         DatabaseConnection.setTestMode(false);
     }
@@ -54,7 +54,7 @@ public class FornitoreDAOTest {
 
     @Test
     @DisplayName("Test creazione fornitore")
-    void testCreateFornitore() throws SQLException {
+    void testCreateFornitore() {
         testLogger.startTest("create fornitore");
 
         assertNotNull(testFornitore.getId());
@@ -107,7 +107,7 @@ public class FornitoreDAOTest {
         List<Fornitore> fornitori = fornitoreDAO.findAll();
 
         assertNotNull(fornitori);
-        assertTrue(fornitori.size() > 0);
+        assertFalse(fornitori.isEmpty());
 
         testLogger.operation("Fornitori trovati", fornitori.size());
         testLogger.testPassed("findAll fornitori");

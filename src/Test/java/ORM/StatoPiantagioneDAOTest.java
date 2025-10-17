@@ -20,14 +20,14 @@ public class StatoPiantagioneDAOTest {
     private StatoPiantagioneDAO statoPiantagioneDAO;
 
     @BeforeAll
-    void setupSuite() throws SQLException {
+    void setupSuite() {
         testLogger.startTestSuite("StatoPiantagioneDAO");
         statoPiantagioneDAO = new StatoPiantagioneDAO();
         DatabaseConnection.setTestMode(true);
     }
 
     @AfterAll
-    void tearDownSuite() throws SQLException {
+    void tearDownSuite() {
         testLogger.endTestSuite("StatoPiantagioneDAO", 4, 4, 0);
         DatabaseConnection.setTestMode(false);
     }

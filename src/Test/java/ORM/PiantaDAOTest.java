@@ -25,7 +25,7 @@ public class PiantaDAOTest {
     private Fornitore testFornitore;
 
     @BeforeAll
-    void setupSuite() throws SQLException {
+    void setupSuite() {
         testLogger.startTestSuite("PiantaDAO");
         piantaDAO = new PiantaDAO();
         fornitoreDAO = new FornitoreDAO();
@@ -33,7 +33,7 @@ public class PiantaDAOTest {
     }
 
     @AfterAll
-    void tearDownSuite() throws SQLException {
+    void tearDownSuite() {
         testLogger.endTestSuite("PiantaDAO", 5, 5, 0);
         DatabaseConnection.setTestMode(false);
     }
@@ -72,7 +72,7 @@ public class PiantaDAOTest {
 
     @Test
     @DisplayName("Test creazione pianta")
-    void testCreatePianta() throws SQLException {
+    void testCreatePianta() {
         testLogger.startTest("create pianta");
 
         assertNotNull(testPianta.getId());
@@ -125,7 +125,7 @@ public class PiantaDAOTest {
         List<Pianta> piante = piantaDAO.findAll();
 
         assertNotNull(piante);
-        assertTrue(piante.size() > 0);
+        assertFalse(piante.isEmpty());
 
         testLogger.operation("Piante trovate", piante.size());
         testLogger.testPassed("findAll piante");
@@ -140,7 +140,7 @@ public class PiantaDAOTest {
         List<Pianta> risultati = piantaDAO.findByFornitore(testFornitore.getId());
 
         assertNotNull(risultati);
-        assertTrue(risultati.size() > 0);
+        assertFalse(risultati.isEmpty());
         assertEquals(testFornitore.getId(), risultati.get(0).getFornitoreId());
 
         testLogger.operation("Piante per fornitore", risultati.size());
