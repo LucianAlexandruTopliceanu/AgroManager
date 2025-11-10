@@ -34,7 +34,7 @@ public class RaccoltoDAOTest {
         piantaDAO = new PiantaDAO();
         zonaDAO = new ZonaDAO();
         fornitoreDAO = new FornitoreDAO();
-        DatabaseConnection.setTestMode(true);
+        DatabaseConnection.getInstance().setTestMode(true);
     }
 
     @BeforeEach
@@ -81,7 +81,7 @@ public class RaccoltoDAOTest {
 
     @AfterAll
     void setTestModeOff() {
-        DatabaseConnection.setTestMode(false);
+        DatabaseConnection.getInstance().setTestMode(false);
     }
 
     @AfterEach

@@ -16,7 +16,7 @@ public class ZonaDAOTest {
     @BeforeAll
     void setUp() {
         zonaDAO = new ZonaDAO();
-        DatabaseConnection.setTestMode(true);
+        DatabaseConnection.getInstance().setTestMode(true);
     }
 
     @BeforeEach
@@ -31,7 +31,7 @@ public class ZonaDAOTest {
 
     @AfterAll
     void setTestModeOff() {
-        DatabaseConnection.setTestMode(false);
+        DatabaseConnection.getInstance().setTestMode(false);
     }
 
     @AfterEach

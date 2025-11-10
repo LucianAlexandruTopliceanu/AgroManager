@@ -4,6 +4,7 @@ import BusinessLogic.Exception.BusinessLogicException;
 import BusinessLogic.Exception.DataAccessException;
 import BusinessLogic.Exception.ValidationException;
 import BusinessLogic.Strategy.*;
+import ORM.DAOFactory;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -24,8 +25,8 @@ class ReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Mock del RaccoltoService per test isolati
-        raccoltoService = new RaccoltoService(ORM.DAOFactory.getRaccoltoDAO());
+        // Mock del RaccoltoService per test isolati - utilizzo pattern Singleton
+        raccoltoService = new RaccoltoService(DAOFactory.getInstance().getRaccoltoDAO());
         reportService = new ReportService(raccoltoService);
         testLogger.setup("Inizializzato ReportService");
     }

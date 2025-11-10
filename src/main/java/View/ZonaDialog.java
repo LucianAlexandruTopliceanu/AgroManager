@@ -22,7 +22,6 @@ public class ZonaDialog extends Stage {
         setTitle(zona == null || zona.getId() == null ? "Nuova Zona" : "Modifica Zona");
         initModality(Modality.APPLICATION_MODAL);
 
-        // Setup campi
         nomeField.setPromptText("es. Zona Nord, Campo A...");
         dimensioneField.setPromptText("es. 2.5");
         tipoTerrenoField.setPromptText("es. Argilloso, Sabbioso...");

@@ -23,13 +23,13 @@ public class StatoPiantagioneDAOTest {
     void setupSuite() {
         testLogger.startTestSuite("StatoPiantagioneDAO");
         statoPiantagioneDAO = new StatoPiantagioneDAO();
-        DatabaseConnection.setTestMode(true);
+        DatabaseConnection.getInstance().setTestMode(true);
     }
 
     @AfterAll
     void tearDownSuite() {
         testLogger.endTestSuite("StatoPiantagioneDAO", 4, 4, 0);
-        DatabaseConnection.setTestMode(false);
+        DatabaseConnection.getInstance().setTestMode(false);
     }
 
     @Test

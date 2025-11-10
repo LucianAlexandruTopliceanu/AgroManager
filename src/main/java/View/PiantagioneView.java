@@ -1,6 +1,7 @@
 package View;
 
 import DomainModel.Piantagione;
+import ORM.DAOFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -248,8 +249,9 @@ public class PiantagioneView extends VBox {
         // Carica anche le informazioni di zona e pianta per visualizzare i nomi
         if (!piantagioni.isEmpty()) {
             try {
-                var zone = ORM.DAOFactory.getZonaDAO().findAll();
-                var piante = ORM.DAOFactory.getPiantaDAO().findAll();
+                DAOFactory daoFactory = DAOFactory.getInstance();
+                var zone = daoFactory.getZonaDAO().findAll();
+                var piante = daoFactory.getPiantaDAO().findAll();
 
                 // Aggiorna la visualizzazione delle colonne con i nomi
                 piantagioni.forEach(p -> {

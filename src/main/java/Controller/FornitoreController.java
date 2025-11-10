@@ -118,7 +118,4 @@ public class FornitoreController {
         }
     }
 
-    public void refreshData() {
-        aggiornaListaFornitori();
-    }
 }

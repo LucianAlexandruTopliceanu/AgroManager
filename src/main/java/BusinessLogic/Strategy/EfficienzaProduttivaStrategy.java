@@ -14,7 +14,6 @@ public class EfficienzaProduttivaStrategy implements DataProcessingStrategy<BigD
     public ProcessingResult<BigDecimal> execute(Object... data) throws ValidationException, BusinessLogicException {
         validateParameters(data);
 
-        // Cast type-safe con validazione runtime
         List<Raccolto> raccolti = castToRaccoltiList(data[0]);
         List<Piantagione> piantagioni = castToPiantagioniList(data[1]);
         int piantagioneId = (Integer) data[2];

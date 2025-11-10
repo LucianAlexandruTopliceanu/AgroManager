@@ -52,8 +52,9 @@ public class RaccoltoController {
     private void inizializzaFiltri() {
         try {
             List<Piantagione> piantagioni = piantagioneService.getAllPiantagioni();
-            var zone = DAOFactory.getZonaDAO().findAll();
-            var piante = DAOFactory.getPiantaDAO().findAll();
+            DAOFactory daoFactory = DAOFactory.getInstance();
+            var zone = daoFactory.getZonaDAO().findAll();
+            var piante = daoFactory.getPiantaDAO().findAll();
 
             List<String> descrizioniPiantagioni = piantagioni.stream()
                 .map(p -> {
@@ -176,7 +177,4 @@ public class RaccoltoController {
         }
     }
 
-    public void refreshData() {
-        aggiornaListaRaccolti();
-    }
 }

@@ -9,11 +9,7 @@ import DomainModel.Raccolto;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Service dedicato alla generazione di report sui raccolti.
- * Incapsula la logica di business per i report e coordina le strategy specifiche.
- * Fa parte del layer BusinessLogic e non deve gestire aspetti di presentazione.
- */
+
 public class ReportService {
 
     private final RaccoltoService raccoltoService;
@@ -22,9 +18,6 @@ public class ReportService {
         this.raccoltoService = raccoltoService;
     }
 
-    /**
-     * Genera un report completo con tutte le statistiche sui raccolti
-     */
     public ProcessingResult<Map<String, Object>> generaReportCompleto()
             throws DataAccessException, BusinessLogicException, ValidationException {
 
@@ -39,9 +32,6 @@ public class ReportService {
         return strategy.execute(raccolti);
     }
 
-    /**
-     * Genera solo le statistiche generali dei raccolti
-     */
     public ProcessingResult<Map<String, Object>> generaStatisticheGenerali()
             throws DataAccessException, BusinessLogicException, ValidationException {
 
@@ -56,9 +46,6 @@ public class ReportService {
         return strategy.execute(raccolti);
     }
 
-    /**
-     * Genera le statistiche mensili dei raccolti
-     */
     public ProcessingResult<Map<String, Object>> generaStatisticheMensili()
             throws DataAccessException, BusinessLogicException, ValidationException {
 
@@ -73,9 +60,6 @@ public class ReportService {
         return strategy.execute(raccolti);
     }
 
-    /**
-     * Calcola il periodo coperto dai raccolti (prima e ultima data)
-     */
     public ProcessingResult<Map<String, Object>> calcolaPeriodoCoperto()
             throws DataAccessException, BusinessLogicException, ValidationException {
 
@@ -90,9 +74,6 @@ public class ReportService {
         return strategy.execute(raccolti);
     }
 
-    /**
-     * Verifica se ci sono dati disponibili per generare report
-     */
     public boolean hasRaccoltiDisponibili() throws DataAccessException {
         try {
             List<Raccolto> raccolti = raccoltoService.getAllRaccolti();

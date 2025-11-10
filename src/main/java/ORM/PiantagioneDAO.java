@@ -86,7 +86,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         return "UPDATE piantagione SET quantita_pianta = ?, messa_a_dimora = ?, id_pianta = ?, id_zona = ?, id_stato_piantagione = ?, data_aggiornamento = ? WHERE id = ?";
     }
 
-    //TODO:Controllare se meglio la ricerca nel db o nelle liste gia caricate in memoria
+
     public List<Piantagione> findAllWithStato() {
         String query = """
             SELECT p.*, s.id as stato_id, s.codice as stato_codice, s.descrizione as stato_descrizione
@@ -97,7 +97,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
 
         List<Piantagione> piantagioni = new ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -123,7 +123,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
 
         List<Piantagione> piantagioni = new ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, codiceStato);
@@ -148,7 +148,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
     public void cambiaStato(Integer piantagioneId, Integer nuovoStatoId) {
         String query = "UPDATE piantagione SET id_stato_piantagione = ?, data_aggiornamento = ? WHERE id = ?";
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, nuovoStatoId);
@@ -168,7 +168,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         String sql = "SELECT * FROM " + getTableName() + " WHERE id_zona = ?";
         java.util.List<Piantagione> piantagioni = new java.util.ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, zonaId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -184,7 +184,7 @@ public class PiantagioneDAO extends BaseDAO<Piantagione> {
         String sql = "SELECT * FROM " + getTableName() + " WHERE id_pianta = ?";
         java.util.List<Piantagione> piantagioni = new java.util.ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, piantaId);
             try (ResultSet rs = stmt.executeQuery()) {

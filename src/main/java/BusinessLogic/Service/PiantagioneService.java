@@ -18,7 +18,7 @@ public class PiantagioneService {
 
     public PiantagioneService(PiantagioneDAO piantagioneDAO) {
         this.piantagioneDAO = piantagioneDAO;
-        this.statoPiantagioneService = new StatoPiantagioneService(DAOFactory.getStatoPiantagioneDAO());
+        this.statoPiantagioneService = new StatoPiantagioneService(DAOFactory.getInstance().getStatoPiantagioneDAO());
     }
 
     public PiantagioneService(PiantagioneDAO piantagioneDAO, StatoPiantagioneService statoPiantagioneService) {
@@ -126,24 +126,13 @@ public class PiantagioneService {
         }
     }
 
-    public Piantagione getPiantagioneById(Integer id) throws ValidationException, DataAccessException {
-        if (id == null) {
-            throw ValidationException.requiredField("ID piantagione");
-        }
 
-        try {
-            return piantagioneDAO.read(id);
-        } catch (Exception e) {
-            throw DataAccessException.queryError("lettura piantagione", e);
-        }
-    }
-
-    // Metodo per filtri - richiesto dal controller
     public List<Piantagione> getPiantagioniConFiltri(View.PiantagioneView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
             var tuttePiantagioni = piantagioneDAO.findAllWithStato();
-            var tutteZone = ORM.DAOFactory.getZonaDAO().findAll();
-            var tuttePiante = ORM.DAOFactory.getPiantaDAO().findAll();
+            DAOFactory daoFactory = DAOFactory.getInstance();
+            var tutteZone = daoFactory.getZonaDAO().findAll();
+            var tuttePiante = daoFactory.getPiantaDAO().findAll();
 
             return tuttePiantagioni.stream()
                 .filter(p -> {

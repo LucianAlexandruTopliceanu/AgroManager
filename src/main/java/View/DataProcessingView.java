@@ -11,15 +11,8 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.math.BigDecimal;
 
-/**
- * View moderna e completa per l'elaborazione dati agricoli.
- * Stile coerente con l'applicazione, semplice ma funzionale.
- */
-public class DataProcessingView extends VBox {
 
-    // =================================================================
-    // COMPONENTI UI - ORGANIZZATI PER FUNZIONALITÀ
-    // =================================================================
+public class DataProcessingView extends VBox {
 
     // Selezione strategia
     private final ComboBox<DataProcessingStrategy.ProcessingType> tipoElaborazioneCombo = new ComboBox<>();
@@ -58,27 +51,22 @@ public class DataProcessingView extends VBox {
         setupValidation();
     }
 
-    // =================================================================
-    // SETUP INIZIALE
-    // =================================================================
-
-    @SuppressWarnings("GrazieInspection")
     private void setupStyles() {
         getStyleClass().add("main-container");
 
-        // Configurazione combo tipo elaborazione
+
         tipoElaborazioneCombo.getItems().addAll(DataProcessingStrategy.ProcessingType.values());
         tipoElaborazioneCombo.setValue(DataProcessingStrategy.ProcessingType.CALCULATION);
         tipoElaborazioneCombo.setPromptText("Tipo elaborazione");
         tipoElaborazioneCombo.setPrefWidth(200);
         tipoElaborazioneCombo.getStyleClass().add("combo-box-standard");
 
-        // Configurazione combo strategia
+
         strategiaCombo.setPrefWidth(250);
         strategiaCombo.setPromptText("Seleziona strategia");
         strategiaCombo.getStyleClass().add("combo-box-standard");
 
-        // Configurazione campi input
+
         piantagioneIdField.setPromptText("ID piantagione");
         piantagioneIdField.setPrefWidth(150);
         piantagioneIdField.getStyleClass().add("text-field-standard");
@@ -101,14 +89,14 @@ public class DataProcessingView extends VBox {
         zonaCombo.setPrefWidth(180);
         zonaCombo.getStyleClass().add("combo-box-standard");
 
-        // Configurazione bottoni
+
         eseguiBtn.getStyleClass().add("btn-primary");
         salvaRisultatiBtn.getStyleClass().add("btn-secondary");
         salvaRisultatiBtn.setDisable(true);
         clearBtn.getStyleClass().add("btn-danger");
         aggiornaDatiBtn.getStyleClass().add("btn-support");
 
-        // Configurazione feedback
+
         progressIndicator.setVisible(false);
         progressIndicator.getStyleClass().add("progress-standard");
         progressIndicator.setMaxSize(24, 24);
@@ -119,7 +107,7 @@ public class DataProcessingView extends VBox {
         validationLabel.setVisible(false);
         validationLabel.setWrapText(true);
 
-        // Configurazione area risultati
+
         risultatoArea.setEditable(false);
         risultatoArea.setPrefRowCount(18);
         risultatoArea.setWrapText(true);
@@ -153,9 +141,6 @@ public class DataProcessingView extends VBox {
         VBox.setVgrow(resultCard, Priority.ALWAYS);
     }
 
-    // =================================================================
-    // CREAZIONE SEZIONI UI
-    // =================================================================
 
     private VBox createHeader() {
         VBox header = new VBox(8);
@@ -264,10 +249,6 @@ public class DataProcessingView extends VBox {
         card.getChildren().addAll(cardTitle, scrollPane, statusLabel);
         return card;
     }
-
-    // =================================================================
-    // GESTIONE DINAMICA PARAMETRI
-    // =================================================================
 
     private void aggiornaStrategieDisponibili() {
         DataProcessingStrategy.ProcessingType tipo = tipoElaborazioneCombo.getValue();
@@ -386,9 +367,6 @@ public class DataProcessingView extends VBox {
         parametriContainer.getChildren().add(infoLabel);
     }
 
-    // =================================================================
-    // EVENT HANDLERS E LOGICA DI BUSINESS SEPARATA
-    // =================================================================
 
     private void setupEventHandlers() {
         tipoElaborazioneCombo.setOnAction(e -> aggiornaStrategieDisponibili());
@@ -403,9 +381,7 @@ public class DataProcessingView extends VBox {
     }
 
 
-    /**
-     * Restituisce l'etichetta leggibile per il tipo di report
-     */
+
     private String getTipoReportLabel(String tipoReport) {
         return switch (tipoReport) {
             case "completo" -> "Report Completo";
@@ -416,9 +392,7 @@ public class DataProcessingView extends VBox {
         };
     }
 
-    /**
-     * Abilita/disabilita i controlli dell'interfaccia
-     */
+
     private void setControlsEnabled(boolean enabled) {
         tipoElaborazioneCombo.setDisable(!enabled);
         strategiaCombo.setDisable(!enabled);
@@ -436,7 +410,7 @@ public class DataProcessingView extends VBox {
         });
     }
 
-    // Metodi per ottenere dati dalla view (usati dal controller)
+
     public DataProcessingStrategy.ProcessingType getTipoElaborazioneSelezionato() {
         return tipoElaborazioneCombo.getValue();
     }
@@ -463,7 +437,7 @@ public class DataProcessingView extends VBox {
         return topNSpinner.getValue();
     }
 
-    // Metodi per aggiornare la view (chiamati dal controller)
+
     public void updateComboBoxes(java.util.List<String> piantagioni, java.util.List<String> zone) {
         piantagioneCombo.getItems().setAll(piantagioni);
         zonaCombo.getItems().setAll(zone);
@@ -536,14 +510,12 @@ public class DataProcessingView extends VBox {
         statusLabel.setText(status);
     }
 
-    // Metodo per formattazione per salvataggio
+
     public String formatPerSalvataggio(ProcessingResult<?> result) {
         return risultatoArea.getText();
     }
 
-    /**
-     * Mostra il report completo dei raccolti
-     */
+
     @SuppressWarnings("unchecked")
     public void mostraReportCompleto(Map<String, Object> reportData) {
         StringBuilder contenuto = new StringBuilder();
@@ -587,9 +559,6 @@ public class DataProcessingView extends VBox {
         setStatus("Report completo raccolti generato con successo");
     }
 
-    /**
-     * Mostra solo le statistiche generali
-     */
     public void mostraStatisticheGenerali(Map<String, Object> statistiche) {
 
         String contenuto = "📈 STATISTICHE GENERALI RACCOLTI\n" +
@@ -601,9 +570,6 @@ public class DataProcessingView extends VBox {
         setStatus("Statistiche generali raccolti generate con successo");
     }
 
-    /**
-     * Mostra solo le statistiche mensili
-     */
     @SuppressWarnings("unchecked")
     public void mostraStatisticheMensili(Map<String, Object> statisticheMensili) {
         StringBuilder contenuto = new StringBuilder();
@@ -626,9 +592,7 @@ public class DataProcessingView extends VBox {
         setStatus("Statistiche mensili raccolti generate con successo");
     }
 
-    /**
-     * Mostra il periodo coperto dai raccolti
-     */
+
     public void mostraPeriodoCoperto(Map<String, Object> periodo) {
         StringBuilder contenuto = new StringBuilder();
         contenuto.append("⏰ PERIODO COPERTO DAI RACCOLTI\n");
@@ -654,9 +618,6 @@ public class DataProcessingView extends VBox {
         setStatus("Periodo coperto raccolti calcolato con successo");
     }
 
-    /**
-     * Formatta il mese per la visualizzazione
-     */
     private String formatMese(String meseAnno) {
         String[] parti = meseAnno.split("-");
         if (parti.length != 2) return meseAnno;
@@ -679,9 +640,6 @@ public class DataProcessingView extends VBox {
         return meseAnno;
     }
 
-    // =================================================================
-    // VALIDAZIONE E EVENT HANDLERS
-    // =================================================================
 
     private void setupValidation() {
         // Validazione in tempo reale per ID piantagione

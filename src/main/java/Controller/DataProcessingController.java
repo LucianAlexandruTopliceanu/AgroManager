@@ -28,7 +28,7 @@ public class DataProcessingController {
         this.view = view;
         this.businessLogic = businessLogic;
 
-        // Configura i callback della view
+
         setupEventHandlers();
 
         // Imposta il riferimento al controller nella view per i report
@@ -265,7 +265,7 @@ public class DataProcessingController {
         };
     }
 
-    // Record per parametri - immutabile e type-safe
+    // Record per parametri - immutabile
     public record ParametriElaborazione(
         DataProcessingStrategy.ProcessingType tipo,
         String strategia,

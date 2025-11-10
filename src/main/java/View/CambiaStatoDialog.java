@@ -26,7 +26,7 @@ public class CambiaStatoDialog extends Stage {
         initModality(Modality.APPLICATION_MODAL);
         setResizable(false);
 
-        // Setup ComboBox stati
+
         statoCombo.getItems().addAll(statiDisponibili);
         statoCombo.setCellFactory(lv -> new ListCell<StatoPiantagione>() {
             @Override
@@ -48,7 +48,7 @@ public class CambiaStatoDialog extends Stage {
             statoCombo.setValue(piantagione.getStatoPiantagione());
         }
 
-        // Setup layout
+
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(15));
         grid.setHgap(10);

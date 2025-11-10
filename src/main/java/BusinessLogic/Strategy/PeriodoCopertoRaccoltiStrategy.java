@@ -5,9 +5,6 @@ import DomainModel.Raccolto;
 import java.time.LocalDate;
 import java.util.*;
 
-/**
- * Strategy per calcolare il periodo coperto dai raccolti
- */
 public class PeriodoCopertoRaccoltiStrategy implements DataProcessingStrategy<Map<String, Object>> {
 
     @Override

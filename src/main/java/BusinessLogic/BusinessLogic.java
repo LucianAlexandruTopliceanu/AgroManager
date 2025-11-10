@@ -16,13 +16,11 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public class BusinessLogic {
-    private final DataProcessingContext processingContext;
     private final RaccoltoService raccoltoService;
     private final ReportService reportService;
 
     public BusinessLogic() {
-        this.processingContext = new DataProcessingContext();
-        this.raccoltoService = new RaccoltoService(DAOFactory.getRaccoltoDAO());
+        this.raccoltoService = new RaccoltoService(DAOFactory.getInstance().getRaccoltoDAO());
         this.reportService = new ReportService(raccoltoService);
     }
 
@@ -30,17 +28,14 @@ public class BusinessLogic {
         return reportService;
     }
 
-    public RaccoltoService getRaccoltoService() {
-        return raccoltoService;
-    }
-
     public ProcessingResult<?> eseguiStrategiaConDati(DataProcessingStrategy.ProcessingType tipo, String strategia, String piantagioneId,
                                                        LocalDate dataInizio, LocalDate dataFine, Integer topN)
             throws ValidationException, DataAccessException, BusinessLogicException {
         try {
-            List<Raccolto> raccolti = DAOFactory.getRaccoltoDAO().findAll();
-            List<Piantagione> piantagioni = DAOFactory.getPiantagioneDAO().findAll();
-            List<Zona> zone = DAOFactory.getZonaDAO().findAll();
+            DAOFactory daoFactory = DAOFactory.getInstance();
+            List<Raccolto> raccolti = daoFactory.getRaccoltoDAO().findAll();
+            List<Piantagione> piantagioni = daoFactory.getPiantagioneDAO().findAll();
+            List<Zona> zone = daoFactory.getZonaDAO().findAll();
 
             DataProcessingStrategy<?> strategy = StrategyFactory.createStrategy(strategia);
 
@@ -67,18 +62,19 @@ public class BusinessLogic {
 
         } catch (ValidationException e) {
             ErrorService.handleException(e);
-            return "❌ Errore di validazione: " + e.getUserMessage();
+            return "Errore di validazione: " + e.getUserMessage();
         } catch (DataAccessException e) {
             ErrorService.handleException(e);
-            return "❌ Errore di accesso ai dati: " + e.getUserMessage();
+            return "Errore di accesso ai dati: " + e.getUserMessage();
         } catch (BusinessLogicException e) {
             ErrorService.handleException(e);
-            return "❌ Errore di business logic: " + e.getUserMessage();
+            return "Errore di business logic: " + e.getUserMessage();
         } catch (Exception e) {
             ErrorService.handleException("esecuzione strategia", e);
-            return "❌ Errore imprevisto durante l'elaborazione";
+            return "Errore imprevisto durante l'elaborazione";
         }
     }
+
 
     private String formatResult(ProcessingResult<?> result, String strategia, String piantagioneId,
                                LocalDate dataInizio, LocalDate dataFine, Integer topN) {
@@ -105,12 +101,12 @@ public class BusinessLogic {
 
     private String formatTopPiantagioni(Map<Integer, BigDecimal> topPiantagioni, Integer topN) {
         if (topPiantagioni.isEmpty()) {
-            return "⚠️ Nessuna piantagione trovata nei dati";
+            return "⚠Nessuna piantagione trovata nei dati";
         }
 
         if (topN == null || topN == 1) {
             Map.Entry<Integer, BigDecimal> best = topPiantagioni.entrySet().iterator().next();
-            return String.format("🏆 Piantagione più produttiva:\nID: %d\nProduzione totale: %.2f kg",
+            return String.format("Piantagione più produttiva:\nID: %d\nProduzione totale: %.2f kg",
                 best.getKey(), best.getValue());
         } else {
             StringBuilder sb = getStringBuilder(topPiantagioni, topN);
@@ -123,7 +119,7 @@ public class BusinessLogic {
             Math.min(topN, topPiantagioni.size())));
         int pos = 1;
         for (Map.Entry<Integer, BigDecimal> entry : topPiantagioni.entrySet()) {
-            String medal = pos == 1 ? "🥇" : pos == 2 ? "🥈" : pos == 3 ? "🥉" : "▫️";
+            String medal = "";
             sb.append(String.format("%s #%d: Piantagione %d - %.2f kg\n",
                 medal, pos++, entry.getKey(), entry.getValue()));
         }
@@ -226,21 +222,11 @@ public class BusinessLogic {
         return !dataRaccolto.isBefore(inizio) && !dataRaccolto.isAfter(fine);
     }
 
-    public ProcessingResult<?> eseguiStrategiaAvanzata(String nomeStrategia, Object... parametri)
-            throws ValidationException {
-        try {
-            DataProcessingStrategy<?> strategy = StrategyFactory.createStrategy(nomeStrategia);
-            return processingContext.executeStrategy(strategy, parametri);
-
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Parametri strategia non validi: " + e.getMessage());
-        }
-    }
-
     public Map<String, List<String>> getDatiPerComboBox() throws DataAccessException {
         try {
-            var piantagioni = DAOFactory.getPiantagioneDAO().findAll();
-            var zone = DAOFactory.getZonaDAO().findAll();
+            DAOFactory daoFactory = DAOFactory.getInstance();
+            var piantagioni = daoFactory.getPiantagioneDAO().findAll();
+            var zone = daoFactory.getZonaDAO().findAll();
 
             return Map.of(
                 "piantagioni", piantagioni.stream().map(p -> p.getId().toString()).toList(),

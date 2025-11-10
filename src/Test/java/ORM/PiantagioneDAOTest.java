@@ -44,7 +44,7 @@ public class PiantagioneDAOTest {
         zonaDAO = new ZonaDAO();
         fornitoreDAO = new FornitoreDAO();
         statoPiantagioneDAO = new StatoPiantagioneDAO();
-        DatabaseConnection.setTestMode(true);
+        DatabaseConnection.getInstance().setTestMode(true);
         logger.info("Test mode attivato per PiantagioneDAO");
     }
 
@@ -130,7 +130,7 @@ public class PiantagioneDAOTest {
     @AfterAll
     void tearDown() {
         logger.info("Spegnimento test mode per PiantagioneDAO");
-        DatabaseConnection.setTestMode(false);
+        DatabaseConnection.getInstance().setTestMode(false);
     }
 
     /**

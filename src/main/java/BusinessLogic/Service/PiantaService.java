@@ -102,18 +102,6 @@ public class PiantaService {
         }
     }
 
-    public Pianta getPiantaById(Integer id) throws ValidationException, DataAccessException {
-        if (id == null) {
-            throw ValidationException.requiredField("ID pianta");
-        }
-
-        try {
-            return piantaDAO.read(id);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura pianta", e);
-        }
-    }
-
     public List<Pianta> getAllPiante() throws DataAccessException {
         try {
             return piantaDAO.findAll();
@@ -122,23 +110,10 @@ public class PiantaService {
         }
     }
 
-    public List<Pianta> getPianteByFornitore(Integer fornitoreId) throws ValidationException, DataAccessException {
-        if (fornitoreId == null) {
-            throw ValidationException.requiredField("ID fornitore");
-        }
-
-        try {
-            return piantaDAO.findByFornitore(fornitoreId);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura piante per fornitore", e);
-        }
-    }
-
-    // Metodo per filtri - richiesto dal controller
     public List<Pianta> getPianteConFiltri(View.PiantaView.CriteriFiltro criteriFiltro) throws DataAccessException {
         try {
             var tuttePiante = piantaDAO.findAll();
-            var tuttiFornitori = DAOFactory.getFornitoreDAO().findAll();
+            var tuttiFornitori = DAOFactory.getInstance().getFornitoreDAO().findAll();
 
             return tuttePiante.stream()
                 .filter(p -> {

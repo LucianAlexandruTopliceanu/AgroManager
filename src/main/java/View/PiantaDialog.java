@@ -27,7 +27,7 @@ public class PiantaDialog extends Stage {
         setTitle(pianta == null || pianta.getId() == null ? "Nuova Pianta" : "Modifica Pianta");
         initModality(Modality.APPLICATION_MODAL);
 
-        // Setup ComboBox fornitori
+
         fornitoreCombo.getItems().addAll(fornitori);
         fornitoreCombo.setPromptText("Seleziona fornitore...");
         fornitoreCombo.setPrefWidth(250);

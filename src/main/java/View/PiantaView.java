@@ -8,10 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
-/**
- * View moderna per la gestione delle piante.
- * Stile coerente con l'applicazione.
- */
+
 public class PiantaView extends VBox {
 
     // Componenti UI
@@ -39,7 +36,7 @@ public class PiantaView extends VBox {
     private void setupStyles() {
         getStyleClass().add("main-container");
 
-        // Configurazione campi ricerca
+
         ricercaTipoField.setPromptText("Cerca per tipo...");
         ricercaTipoField.setPrefWidth(180);
         ricercaTipoField.getStyleClass().add("text-field-standard");
@@ -52,7 +49,7 @@ public class PiantaView extends VBox {
         filtroFornitoreCombo.setPrefWidth(200);
         filtroFornitoreCombo.getStyleClass().add("combo-box-standard");
 
-        // Configurazione bottoni
+
         nuovoBtn.getStyleClass().add("btn-primary");
         modificaBtn.getStyleClass().add("btn-secondary");
         modificaBtn.setDisable(true);
@@ -221,7 +218,7 @@ public class PiantaView extends VBox {
             return row;
         });
 
-        // Gestione selezione
+
         tablePiante.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             boolean hasSelection = newSel != null;
             modificaBtn.setDisable(!hasSelection);
@@ -272,7 +269,7 @@ public class PiantaView extends VBox {
         resetFiltriBtn.setOnAction(e -> handler.run());
     }
 
-    // Gestione filtri
+
     public CriteriFiltro getCriteriFiltro() {
         String fornitore = filtroFornitoreCombo.getValue();
         if (fornitore != null && fornitore.equals("Tutti i fornitori")) {

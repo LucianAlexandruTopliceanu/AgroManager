@@ -58,12 +58,12 @@ public class PiantaDAO extends BaseDAO<Pianta> {
         pianta.setId(id);
     }
 
-    //TODO: Valutare se meglio cercare nel db o nelle liste gia caricate in memoria
+
     public List<Pianta> findByFornitore(Integer fornitoreId) throws SQLException {
         String sql = "SELECT * FROM " + getTableName() + " WHERE fornitore_id = ?";
         List<Pianta> piante = new java.util.ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, fornitoreId);
             try (ResultSet rs = stmt.executeQuery()) {

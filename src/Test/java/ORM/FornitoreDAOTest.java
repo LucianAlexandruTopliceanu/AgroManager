@@ -24,13 +24,13 @@ public class FornitoreDAOTest {
     void setupSuite() {
         testLogger.startTestSuite("FornitoreDAO");
         fornitoreDAO = new FornitoreDAO();
-        DatabaseConnection.setTestMode(true);
+        DatabaseConnection.getInstance().setTestMode(true);
     }
 
     @AfterAll
     void tearDownSuite() {
         testLogger.endTestSuite("FornitoreDAO", 4, 4, 0);
-        DatabaseConnection.setTestMode(false);
+        DatabaseConnection.getInstance().setTestMode(false);
     }
 
     @BeforeEach

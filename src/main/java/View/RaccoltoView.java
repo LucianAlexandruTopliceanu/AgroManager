@@ -9,10 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import java.time.LocalDate;
 
-/**
- * View moderna per la gestione dei raccolti.
- * Stile coerente con l'applicazione.
- */
+
 public class RaccoltoView extends VBox {
 
     // Componenti UI
@@ -42,7 +39,7 @@ public class RaccoltoView extends VBox {
     private void setupStyles() {
         getStyleClass().add("main-container");
 
-        // Configurazione controlli ricerca
+
         filtroPiantagioneCombo.setPromptText("Tutte le piantagioni");
         filtroPiantagioneCombo.setPrefWidth(200);
         filtroPiantagioneCombo.getStyleClass().add("combo-box-standard");
@@ -63,7 +60,7 @@ public class RaccoltoView extends VBox {
         filtroQuantitaMax.setPrefWidth(100);
         filtroQuantitaMax.getStyleClass().add("spinner-standard");
 
-        // Configurazione bottoni
+
         nuovoBtn.getStyleClass().add("btn-primary");
         modificaBtn.getStyleClass().add("btn-secondary");
         modificaBtn.setDisable(true);
@@ -72,7 +69,7 @@ public class RaccoltoView extends VBox {
         applicaFiltriBtn.getStyleClass().add("btn-secondary");
         resetFiltriBtn.getStyleClass().add("btn-support");
 
-        // Configurazione tabella
+
         tableRaccolti.setPlaceholder(new Label("Nessun raccolto registrato. Aggiungi il primo raccolto!"));
     }
 

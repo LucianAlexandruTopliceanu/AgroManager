@@ -88,18 +88,6 @@ public class ZonaService {
         }
     }
 
-    public Zona getZonaById(Integer id) throws ValidationException, DataAccessException {
-        if (id == null) {
-            throw ValidationException.requiredField("ID zona");
-        }
-
-        try {
-            return zonaDAO.read(id);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura zona", e);
-        }
-    }
-
     public List<Zona> getAllZone() throws DataAccessException {
         try {
             return zonaDAO.findAll();

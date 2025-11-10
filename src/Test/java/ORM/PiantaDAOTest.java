@@ -29,13 +29,13 @@ public class PiantaDAOTest {
         testLogger.startTestSuite("PiantaDAO");
         piantaDAO = new PiantaDAO();
         fornitoreDAO = new FornitoreDAO();
-        DatabaseConnection.setTestMode(true);
+        DatabaseConnection.getInstance().setTestMode(true);
     }
 
     @AfterAll
     void tearDownSuite() {
         testLogger.endTestSuite("PiantaDAO", 5, 5, 0);
-        DatabaseConnection.setTestMode(false);
+        DatabaseConnection.getInstance().setTestMode(false);
     }
 
     @BeforeEach

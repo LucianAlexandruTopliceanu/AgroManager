@@ -181,12 +181,14 @@ public class MainApp extends Application {
     }
 
     private void initializeServices() {
-        zonaService = new ZonaService(DAOFactory.getZonaDAO());
-        fornitoreService = new FornitoreService(DAOFactory.getFornitoreDAO());
-        piantaService = new PiantaService(DAOFactory.getPiantaDAO());
-        piantagioneService = new PiantagioneService(DAOFactory.getPiantagioneDAO());
-        raccoltoService = new RaccoltoService(DAOFactory.getRaccoltoDAO());
-        statoPiantagioneService = new StatoPiantagioneService(DAOFactory.getStatoPiantagioneDAO());
+        DAOFactory daoFactory = DAOFactory.getInstance();
+
+        zonaService = new ZonaService(daoFactory.getZonaDAO());
+        fornitoreService = new FornitoreService(daoFactory.getFornitoreDAO());
+        piantaService = new PiantaService(daoFactory.getPiantaDAO());
+        piantagioneService = new PiantagioneService(daoFactory.getPiantagioneDAO());
+        raccoltoService = new RaccoltoService(daoFactory.getRaccoltoDAO());
+        statoPiantagioneService = new StatoPiantagioneService(daoFactory.getStatoPiantagioneDAO());
         businessLogic = new BusinessLogic();
     }
 

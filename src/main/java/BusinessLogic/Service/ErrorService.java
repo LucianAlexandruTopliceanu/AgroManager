@@ -17,7 +17,7 @@ public class ErrorService {
     private static final List<Consumer<InfoNotification>> infoListeners = new ArrayList<>();
     private static final List<Consumer<ConfirmationRequest>> confirmationListeners = new ArrayList<>();
 
-    // Metodi per registrare i listener (tipicamente i Controller)
+
     public static void addErrorListener(Consumer<ErrorNotification> listener) {
         errorListeners.add(listener);
     }
@@ -62,19 +62,6 @@ public class ErrorService {
     }
 
 
-    public static void showInfo(String title, String message) {
-        LOGGER.info(String.format("%s: %s", title, message));
-
-        InfoNotification notification = new InfoNotification(title, message);
-        notifyInfoListeners(notification);
-    }
-
-
-    public static void requestConfirmation(String title, String message, Consumer<Boolean> callback) {
-        ConfirmationRequest request = new ConfirmationRequest(title, message, callback);
-        notifyConfirmationListeners(request);
-    }
-
     private static void notifyErrorListeners(ErrorNotification notification) {
         errorListeners.forEach(listener -> {
             try {
@@ -85,25 +72,6 @@ public class ErrorService {
         });
     }
 
-    private static void notifyInfoListeners(InfoNotification notification) {
-        infoListeners.forEach(listener -> {
-            try {
-                listener.accept(notification);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Errore durante la notifica informativa", e);
-            }
-        });
-    }
-
-    private static void notifyConfirmationListeners(ConfirmationRequest request) {
-        confirmationListeners.forEach(listener -> {
-            try {
-                listener.accept(request);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Errore durante la richiesta di conferma", e);
-            }
-        });
-    }
 
     private static SeverityLevel getSeverityLevel(ErrorCode errorCode) {
         return switch (errorCode) {

@@ -13,7 +13,6 @@ public record ProcessingResult<T>(T data, Map<String, Object> metadata) {
         this.metadata = metadata != null ? new HashMap<>(metadata) : new HashMap<>();
     }
 
-    // Metodo legacy per compatibilità
     public T getValue() {
         return data;
     }

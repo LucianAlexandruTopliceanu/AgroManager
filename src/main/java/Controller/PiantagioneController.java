@@ -194,7 +194,4 @@ public class PiantagioneController {
         }
     }
 
-    public void refreshData() {
-        aggiornaListaPiantagioni();
-    }
 }

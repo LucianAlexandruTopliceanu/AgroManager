@@ -27,7 +27,7 @@ public class PiantagioneDialog extends Stage {
         setTitle(piantagione == null ? "Nuova Piantagione" : "Modifica Piantagione");
         initModality(Modality.APPLICATION_MODAL);
 
-        // Setup ComboBoxes
+
         zonaCombo.getItems().addAll(zone);
         piantaCombo.getItems().addAll(piante);
         statoCombo.getItems().addAll(stati);

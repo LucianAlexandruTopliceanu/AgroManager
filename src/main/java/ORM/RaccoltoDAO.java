@@ -59,7 +59,7 @@ public class RaccoltoDAO extends BaseDAO<Raccolto> {
         String sql = "SELECT * FROM " + getTableName() + " WHERE piantagione_id = ?";
         java.util.List<Raccolto> raccolti = new java.util.ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, piantagioneId);
             try (ResultSet rs = stmt.executeQuery()) {

@@ -7,11 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DAO per gestione stati piantagione - MODALITÀ SOLA LETTURA
- * Gli stati sono pre-inseriti nel database e non possono essere modificati
- * Implementa il principio Single Responsibility (SRP) - solo lettura
- */
+
 public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
 
     @Override
@@ -81,7 +77,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
         throw new UnsupportedOperationException("Operazione non supportata: gli stati piantagione sono read-only");
     }
 
-    //TODO:Controllare se e meglio fare le query o cercare nelle liste in memoria
+
     public StatoPiantagione findByCodice(String codice) {
         if (codice == null || codice.trim().isEmpty()) {
             DataAccessException ex = new DataAccessException(
@@ -95,7 +91,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
 
         String query = "SELECT * FROM stato_piantagione WHERE codice = ?";
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, codice.trim().toUpperCase());
@@ -149,7 +145,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
         String query = "SELECT * FROM stato_piantagione ORDER BY id";
         List<StatoPiantagione> stati = new ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -187,7 +183,7 @@ public class StatoPiantagioneDAO extends BaseDAO<StatoPiantagione> {
     public int countStati() {
         String query = "SELECT COUNT(*) FROM stato_piantagione";
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 

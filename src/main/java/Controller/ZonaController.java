@@ -130,7 +130,4 @@ public class ZonaController {
         }
     }
 
-    public void refreshData() {
-        aggiornaListaZone();
-    }
 }

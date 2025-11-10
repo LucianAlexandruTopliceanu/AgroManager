@@ -1,21 +1,47 @@
 package ORM;
 
-
 public class DAOFactory {
-    public static ZonaDAO getZonaDAO() {
-        return new ZonaDAO();
+
+    private DAOFactory() {}
+
+    private static class FactoryHolder {
+        private static final DAOFactory INSTANCE = new DAOFactory();
     }
-    public static PiantaDAO getPiantaDAO() {
-        return new PiantaDAO();
+
+    public static DAOFactory getInstance() {
+        return FactoryHolder.INSTANCE;
     }
-    public static FornitoreDAO getFornitoreDAO() {
-        return new FornitoreDAO();
+
+    private static class DAOHolders {
+        private static final ZonaDAO ZONA_DAO = new ZonaDAO();
+        private static final PiantaDAO PIANTA_DAO = new PiantaDAO();
+        private static final FornitoreDAO FORNITORE_DAO = new FornitoreDAO();
+        private static final PiantagioneDAO PIANTAGIONE_DAO = new PiantagioneDAO();
+        private static final RaccoltoDAO RACCOLTO_DAO = new RaccoltoDAO();
+        private static final StatoPiantagioneDAO STATO_PIANTAGIONE_DAO = new StatoPiantagioneDAO();
     }
-    public static PiantagioneDAO getPiantagioneDAO() {
-        return new PiantagioneDAO();
+
+    public ZonaDAO getZonaDAO() {
+        return DAOHolders.ZONA_DAO;
     }
-    public static RaccoltoDAO getRaccoltoDAO() {
-        return new RaccoltoDAO();
+
+    public PiantaDAO getPiantaDAO() {
+        return DAOHolders.PIANTA_DAO;
     }
-    public static StatoPiantagioneDAO getStatoPiantagioneDAO() {return new StatoPiantagioneDAO(); }
+
+    public FornitoreDAO getFornitoreDAO() {
+        return DAOHolders.FORNITORE_DAO;
+    }
+
+    public PiantagioneDAO getPiantagioneDAO() {
+        return DAOHolders.PIANTAGIONE_DAO;
+    }
+
+    public RaccoltoDAO getRaccoltoDAO() {
+        return DAOHolders.RACCOLTO_DAO;
+    }
+
+    public StatoPiantagioneDAO getStatoPiantagioneDAO() {
+        return DAOHolders.STATO_PIANTAGIONE_DAO;
+    }
 }

@@ -27,7 +27,7 @@ public class RaccoltoDialog extends Stage {
         setTitle(raccolto == null || raccolto.getId() == null ? "Nuovo Raccolto" : "Modifica Raccolto");
         initModality(Modality.APPLICATION_MODAL);
 
-        // Setup ComboBox piantagioni
+
         piantagioneCombo.getItems().addAll(piantagioni);
         piantagioneCombo.setPromptText("Seleziona piantagione...");
         piantagioneCombo.setPrefWidth(300);

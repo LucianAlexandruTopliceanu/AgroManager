@@ -17,12 +17,9 @@ public class NotificationHelper {
     private static Stage toastStage;
 
     public static void initialize() {
-        // Registra i listener per le diverse tipologie di notifiche
         ErrorService.addErrorListener(NotificationHelper::showErrorNotification);
         ErrorService.addInfoListener(NotificationHelper::showInfoNotification);
         ErrorService.addConfirmationListener(NotificationHelper::showConfirmationRequest);
-
-        // Inizializza il sistema di toast per notifiche non invasive
         initializeToastSystem();
     }
 
@@ -41,7 +38,6 @@ public class NotificationHelper {
             alert.setHeaderText(notification.errorCode().getDescription());
             alert.setContentText(notification.userMessage());
 
-            // Personalizza l'aspetto in base alla severità
             customizeAlertBySeverity(alert, notification.severity());
 
             alert.showAndWait();
@@ -69,7 +65,6 @@ public class NotificationHelper {
             alert.setHeaderText(null);
             alert.setContentText(request.getMessage());
 
-            // Personalizza i pulsanti
             alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
 
             alert.showAndWait().ifPresent(buttonType -> {
@@ -79,7 +74,6 @@ public class NotificationHelper {
         });
     }
 
-    // Metodi pubblici per notifiche dirette
     public static void showSuccess(String title, String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -113,7 +107,6 @@ public class NotificationHelper {
         });
     }
 
-    // Toast notifications per feedback non invasivo
     public static void showToast(String message, ToastType type) {
         Platform.runLater(() -> {
             if (toastStage == null) {
@@ -141,7 +134,6 @@ public class NotificationHelper {
 
             toastStage.show();
 
-            // Auto-hide dopo 3 secondi
             PauseTransition delay = new PauseTransition(Duration.seconds(3));
             delay.setOnFinished(e -> toastStage.hide());
             delay.play();
@@ -193,7 +185,6 @@ public class NotificationHelper {
         }
     }
 
-    // Metodo per gestire eccezioni di connessione database
     public static void showDatabaseError(String operation) {
         showError("Errore Database",
                   "Impossibile completare l'operazione: " + operation + "\n\n" +
@@ -203,18 +194,5 @@ public class NotificationHelper {
                   "• Errore nei dati\n\n" +
                   "Verificare la connessione e riprovare.");
     }
-
-    // Metodo per confermare operazioni critiche
-    public static boolean confirmCriticalOperation(String operation, String details) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("⚠️ Conferma Operazione");
-        alert.setHeaderText("Stai per eseguire: " + operation);
-        alert.setContentText("Dettagli: " + details + "\n\nSei sicuro di voler continuare?");
-
-        alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-
-        return alert.showAndWait()
-                   .map(response -> response == ButtonType.YES)
-                   .orElse(false);
-    }
 }
+

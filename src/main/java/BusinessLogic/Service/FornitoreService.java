@@ -99,18 +99,6 @@ public class FornitoreService {
         }
     }
 
-    public Fornitore getFornitoreById(Integer id) throws ValidationException, DataAccessException {
-        if (id == null) {
-            throw ValidationException.requiredField("ID fornitore");
-        }
-
-        try {
-            return fornitoreDAO.read(id);
-        } catch (SQLException e) {
-            throw DataAccessException.queryError("lettura fornitore", e);
-        }
-    }
-
     public List<Fornitore> getAllFornitori() throws DataAccessException {
         try {
             return fornitoreDAO.findAll();

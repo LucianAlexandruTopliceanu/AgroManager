@@ -7,9 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Strategy per calcolare le statistiche mensili dei raccolti
- */
+
 public class StatisticheMensiliRaccoltiStrategy implements DataProcessingStrategy<Map<String, Object>> {
 
     @Override
