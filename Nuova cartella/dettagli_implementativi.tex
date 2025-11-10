@@ -1,0 +1,275 @@
+\section{Dettagli implementativi}\label{sec:dettagli_implementativi}
+In questa sezione verrà fornita una panoramica dettagliata dell'implementazione del progetto, con particolare attenzione alle responsabilità dei componenti principali, ai design patterns utilizzati e alla gestione degli errori.
+\subsection{Responsabilità dei componenti principali}
+\subsubsection{MainApp (Entry Point)}
+La classe MainApp implementa il bootstrap per l'applicativo. Agisce come dependency injector manuale e lifecycle manager per tutti i componenti del sistema, garantendo l'ordine corretto di inizializzazione e la gestione degli stati di errore. MainApp implementa un sistema di dependency injection manuale che:
+\begin{itemize}
+	\item Risolve le dipendenze in ordine topologico (DAO → Service → Controller).
+	\item Gestisce il lifecycle completo dell'applicazione.
+	\item Fornisce error handling centralizzato per l'inizializzazione.
+	\item Implementa il pattern fail-fast per errori critici.
+\end{itemize}
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=8,
+	caption={Snippet del metodo start() in MainApp.},
+	label={lst:mainapp_start}
+]{code/MainApp.java}
+La classe coordina l'inizializzazione di tutti i layer seguendo l'architettura MVC in modo asincrono per evitare Thread Blocking durante l'avvio dell'applicazione dovuto ai servizi database che bloccano l'Event Dispatch Thread di JavaFX, causando UI non responsive. Il metodo \texttt{start()} (Listing \ref{lst:mainapp_start}) avvia l'inizializzazione in un thread separato, mantenendo l'interfaccia utente reattiva.
+\lstinputlisting[
+	language=Java,
+	firstline=9,
+	lastline=37,
+	caption={Snippet del metodo initializeApplicationAsync() in MainApp.},
+	label={lst:mainapp_initialize}
+]{code/MainApp.java}
+I layer sono eseguiti nel seguente ordine per rispettare le dipendenze:
+\begin{itemize}
+	\item \textbf{Data Access Layer:} Vengono create le istanze dei DAO tramite la DAOFactory.
+	\item \textbf{Service Layer:} Vengono istanziati i Service, iniettando i DAO necessari (es. new ZonaService(DAOFactory.getZonaDAO())).
+	\item \textbf{Presentation Layer:} Vengono istanziati i Controller, iniettando i Service e le View corrispondenti (es. new ZonaController(zonaService, zonaView)).
+\end{itemize}
+\subsubsection{Service Layer- Validazione e Business Logic}
+Il Service Layer implementa il business logic dell'architettura, separando le regole di dominio dalla persistenza e dalla presentazione. Ogni Service agisce come domain expert per la propria entità, implementando validation rules, business constraints e operazioni multi-entity. In particolare, i Service sono responsabili di:
+\begin{itemize}
+	\item Incapsulare la logica di business complessa.
+	\item Eseguire controlli stratificati di validazione.
+	\item Mappare errori tecnici a errori business.
+\end{itemize}
+La validazione segue un approccio defense-in-depth con controlli incrementali:
+\begin{itemize}
+	\item \textbf{Structural validation:} Null checks, required fields, format validation.
+	\item \textbf{Semantic validation:} Business rules specifiche del dominio.
+	\item \textbf{Integrity   validation:} Cross-entity constraints e referential integrity.
+	\item \textbf{Business validation:} Complex domain rules e policy enforcement.
+\end{itemize}
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=56,
+	caption={Snippet del metodo di validazione in FornitoreService.},
+	label={lst:fornitore_service_validation}
+]{code/FornitoreService.java}
+\newpage
+\subsection{Design Patterns utilizzati}
+Nella realizzazione del progetto sono stati adottati diversi design patterns per migliorare la manutenibilità, la scalabilità e la leggibilità del codice. Di seguito sono descritti i principali pattern utilizzati insieme a esempi di codice.
+\subsubsection{Model-View-Controller (MVC)}
+L'architettura MVC è stata implementata per separare le responsabilità tra la gestione dei dati (Model), la logica di presentazione (View) e il controllo del flusso dell'applicazione (Controller). Questo approccio consente una maggiore modularità e facilita la manutenzione del codice.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/mvc.png}
+	\caption{Architettura Model-View-Controller (MVC) dell'entità fornitore.}
+	\label{fig:mvc_fornitore}
+\end{figure}
+
+Le dipendenze tra i componenti sono gestite in MainApp, che funge da entry point dell'applicazione. I DAO vengono iniettati nei Service, che a loro volta vengono iniettati nei Controller insieme alle View corrispondenti.
+\lstinputlisting[
+	language=Java,
+	firstline=39,
+	lastline=50,
+	caption={Snippet dell'inizializzazione dei componenti MVC in MainApp.},
+	label={lst:mvc_initialization}
+]{code/MainApp.java}
+\newpage
+\subsubsection{Data Access Object (DAO)}
+Il pattern DAO è stato utilizzato per astrarre l'accesso ai dati e separare la logica di persistenza dal resto dell'applicazione. Ogni entità del dominio ha un DAO dedicato che gestisce le operazioni CRUD e le query specifiche.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/dao.png}
+	\caption{Struttura del pattern Data Access Object (DAO) per l'entità fornitore.}
+	\label{fig:dao_fornitore}
+\end{figure}
+
+La logica business non ha accesso diretto al database, ma garantisce la persistenza dei dati tramite i DAO che gestiscono le comunicazioni con il database.
+\lstinputlisting[
+	language=Java,
+	firstline=58,
+	lastline=73,
+	caption={Snippet della classe FornitoreService che garantisce la persistenza dei dati attraverso il FornitoreDAO.},
+	label={lst:fornitore_service_dao}
+]{code/FornitoreService.java}
+\subsubsection{Template Method}
+Il BaseDAO implementa il Template Method Pattern per standardizzare le operazioni CRUD eliminando code duplication tra DAO specifici. La classe definisce le operazioni database delegando solo i dettagli alle sottoclassi, cio permette una riduzione delle duplicazioni di codice del $N\times M$ dove $N$ è il numero di entità e $M$ il numero di operazioni CRUD. In questo modo, ogni DAO specifico (es. FornitoreDAO) eredita da BaseDAO e implementa solo i metodi astratti per le query specifiche, mentre le operazioni comuni (es. apertura/chiusura connessione, gestione transazioni) sono centralizzate in BaseDAO.
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=20,
+	caption={Snippet della classe BaseDAO che implementa il Template Method Pattern.},
+	label={lst:base_dao}
+]{code/BaseDAO.java}
+Per esempio, il metodo \texttt{create(T entity)} (Listing \ref{lst:base_dao}) definisce il flusso generale per l'inserimento di un'entità nel database, mentre i dettagli specifici della query e del mapping sono delegati ai metodi astratti \texttt{getInsertSQL()}, \texttt{setInsertParameters()} e \texttt{setEntityId()} che devono essere implementati dalle sottoclassi (FornitoreDAO (Listing \ref{lst:fornitore_dao})).
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=27,
+	caption={Snippet della classe FornitoreDAO che estende BaseDAO.},
+	label={lst:fornitore_dao}
+]{code/FornitoreDAO.java}
+\subsubsection{Strategy}\label{sec:strategy_pattern}
+Il Strategy Pattern implementato per l'elaborazione dati agricoli fornisce un framework di computational algorithms intercambiabili. Il sistema consente di applicare diversi algoritmi allo stesso set di dati per ricavare insight specifici, garantendo un disaccoppiamento totale dai dettagli implementativi. Ogni algoritmo implementa l'interfaccia \texttt{DataProcessingStrategy} e può essere selezionato dinamicamente in fase di esecuzione in base alle esigenze dell'utente o del contesto.
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=24,
+	caption={Snippet dell'interfaccia DataProcessingStrategy.},
+	label={lst:data_processing_strategy}
+]{code/DataProcessingStrategy.java}
+Per esempio, la classe \texttt{ProduzioneTotaleStrategy} (Listing \ref{lst:produzione_totale_strategy}) implementa l'algoritmo per calcolare la produzione totale da un elenco di raccolti, incapsulando tutta la logica necessaria per questa specifica elaborazione.
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=25,
+	caption={Snippet della classe ProduzioneTotaleStrategy che implementa DataProcessingStrategy.},
+	label={lst:produzione_totale_strategy}
+]{code/ProduzioneTotaleStrategy.java}
+\subsubsection{Factory}
+Il Factory Pattern è stato utilizzato per la creazione di oggetti Strategy e DAO, centralizzando la logica di istanziazione e promuovendo il principio di separazione delle responsabilità. I Factory forniscono metodi statici per ottenere istanze  specifiche, nascondendo i dettagli di creazione e configurazione.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/factory.png}
+	\caption{Struttura del Factory Pattern per la creazione di Strategy.}
+	\label{fig:factory_pattern}
+\end{figure}
+
+La classe \texttt{BusinessLogic} (Listing \ref{lst:business_logic}) utilizza il Factory Pattern per selezionare e eseguire la strategia di elaborazione dati appropriata in base al tipo di analisi richiesto, garantendo un'architettura flessibile e facilmente estendibile. L'accesso ai DAO avviene tramite la DAOFactory, che incapsula la logica di creazione e configurazione dei DAO.
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=24,
+	caption={Snippet della classe BusinessLogic che implementa l'esecuzione delle strategie di elaborazione dati mediante l'utilizzo del Factory Pattern.},
+	label={lst:business_logic}
+]{code/BusinessLogic.java}
+\subsubsection{Singleton}
+Il Singleton Pattern è stato adottato per garantire che alcune classi abbiano una sola istanza globale accessibile in modo controllato. Questo è particolarmente utile per componenti come la connessione al database, DAOFactory e l'ErrorService, dove un'unica istanza è sufficiente e desiderabile per gestire le operazioni di accesso ai dati e la gestione degli errori.
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=27,
+	caption={Snippet della classe DatabaseConnection che implementa il Singleton Pattern.},
+	label={lst:database_connection}
+]{code/DatabaseConnection.java}
+\subsubsection{Observer}
+Il pattern Observer è stato implementato per facilitare la comunicazione tra componenti disaccoppiati, in particolare tra le View e i Controller. Questo pattern consente alle View di notificare automaticamente i Controller quando si verificano cambiamenti di stato, migliorando la reattività dell'interfaccia utente e mantenendo una separazione chiara delle responsabilità.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/observer.png}
+	\caption{Struttura del pattern Observer dove la classe ViewFornitore è il soggetto e la classe ControllerFornitore è l'observer.}
+	\label{fig:observer_pattern}
+\end{figure}
+Nella classe FornitoreView viene mantenuta una lista di observer (implementata internamente a JavaFX) che vengono notificati ogni volta che si verifica un cambiamento di stato rilevante, come l'aggiunta o la modifica di un fornitore. In questo caso il ControllerFornitore si registra come observer della ViewFornitore per ricevere aggiornamenti e reagire di conseguenza.
+\lstinputlisting[
+	language=Java,
+	firstline=1,
+	lastline=9,
+	caption={Snippet della classe ViewFornitore che implementa il pattern Observer(JavaFX), e il soggetto del pattern observer.},
+	label={lst:observer_pattern_view_fornitore}
+]{code/ObserverPattern.java}
+\lstinputlisting[
+	language=Java,
+	firstline=11,
+	lastline=23,
+	caption={Snippet della classe ControllerFornitore che implementa il pattern Observer, la classe si registra come observer della ViewFornitore.},
+	label={lst:observer_pattern_controller_fornitore}
+]{code/ObserverPattern.java}
+\subsection{Gestione Errori e Exception Hierarchy}
+AgroManager implementa una gerarchia di eccezioni personalizzate (già introdotta visivamente nella Figura \ref{fig:business_logic_exception} a pagina \pageref{fig:business_logic_exception}). Ogni eccezione personalizzata AgroManagerException trasporta tre informazioni fondamentali:
+\begin{itemize}
+	\item \textbf{ErrorCode:} Un enum ErrorCode che classifica
+	      l'errore (es. \texttt{VALIDATION\_002}, \texttt{DB\_001}), centralizzando
+	      tutti i codici e le descrizioni.
+	\item \textbf{User Message:} Un messaggio pulito e comprensibile destinato
+	      all'utente finale (es. "Il campo 'nome' è obbligatorio").
+	\item \textbf{Technical Message:} Un messaggio di debug dettagliato destinato
+	      ai log (es. "Validazione fallita per campo 'nome' con valore 'null'").
+\end{itemize}
+\begin{lstlisting}[
+    language=Java,
+    caption={La classe base \texttt{AgroManagerException} che definisce la struttura di un errore.},
+    label={lst:agro_exception}
+]
+public class AgroManagerException extends Exception {
+    private final ErrorCode errorCode;
+    private final String userMessage;
+
+    public AgroManagerException(ErrorCode errorCode, String technicalMessage, String userMessage) {
+        super(technicalMessage); // Il technicalMessage è per lo sviluppatore
+        this.errorCode = errorCode;
+        this.userMessage = userMessage; // Il userMessage è per l'utente
+    }
+    
+    public String getUserMessage() {
+        return userMessage;
+    }
+    // ... altri getter ...
+}
+\end{lstlisting}
+
+La gerarchia suddivide gli errori in base alla loro origine e a chi è
+responsabile della loro risoluzione (l'utente o lo sviluppatore):
+
+\begin{itemize}
+	\item \textbf{ValidationException} ValidationException:
+	      Errori di input dell'utente. Sono errori "sicuri" da mostrare
+	      all'utente, che può correggerli (es. campo obbligatorio mancante).
+
+	\item \textbf{BusinessLogicException} BusinessLogicException:
+	      Violazioni delle regole di business. L'input è valido, ma l'azione
+	      viola una regola (es. "Voce duplicata", "Entità non trovata").
+
+	\item \textbf{DataAccessException} DataAccessException:
+	      Errori tecnici, critici e non recuperabili dall'utente (es. "Errore
+	      di connessione al database", "Query SQL fallita").
+\end{itemize}
+
+Il vantaggio principale di questa architettura emerge nei \texttt{Controller}.
+Come mostrato nel Listing 15, il \texttt{Controller} orchestra le operazioni
+all'interno di un blocco \texttt{try-catch} che gestisce queste eccezioni
+in modo differenziato.
+
+\begin{lstlisting}[
+    language=Java,
+    caption={Esempio di gestione differenziata delle eccezioni in un Controller.},
+    label={lst:controller_catch}
+]
+// Metodo nel FornitoreController
+private void onSalvaFornitore() {
+    try {
+        // 1. Prende i dati dalla View
+        Fornitore fornitore = fornitoreView.getDatiDalForm();
+        
+        // 2. Chiama il Service per l'operazione
+        fornitoreService.aggiungiFornitore(fornitore);
+        
+        // 3. Operazione riuscita: notifica l'utente
+        NotificationHelper.showSuccess("Successo", "Fornitore salvato correttamente.");
+        aggiornaVista(); // Aggiorna la tabella
+    
+    } catch (ValidationException | BusinessLogicException e) {
+        // --- GESTIONE ERRORE "SICURO" (per l'utente) ---
+        // L'utente ha sbagliato qualcosa. Mostro il suo messaggio.
+        NotificationHelper.showWarning("Dati non validi", e.getUserMessage());
+    
+    } catch (DataAccessException e) {
+        // --- GESTIONE ERRORE CRITICO (per lo sviluppatore) ---
+        // Errore tecnico. Mostro un messaggio generico all'utente
+        // e loggo i dettagli tecnici per il debug.
+        NotificationHelper.showError("Errore di Sistema", 
+            "Impossibile salvare. Contattare l'amministratore.");
+        
+        // Loggo l'eccezione completa per il debug
+        logger.error(e.getTechnicalMessage(), e); 
+    
+    } catch (Exception e) {
+        // Catch-all per errori imprevisti
+        NotificationHelper.showError("Errore Imprevisto", e.getMessage());
+        logger.error("Errore non gestito", e);
+    }
+}
+\end{lstlisting}
+
+Come si vede nello snippet, gli errori di validazione (gestibili dall'utente)
+vengono intercettati e usati per mostrare un avviso NotificationHelper,
+mentre un errore critico come \texttt{DataAccessException}
+viene usato per mostrare un messaggio di errore generico,
+registrando però l'errore tecnico per l'analisi.

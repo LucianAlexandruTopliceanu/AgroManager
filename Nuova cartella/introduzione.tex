@@ -1,0 +1,100 @@
+\section{Introduzione}
+
+\subsection{Statement}
+AgroManager è un sistema informatico progettato per la gestione e il tracciamento completo delle attività agricole. Il sistema si focalizza sul monitoraggio dell'intero ciclo di vita delle colture, dall'acquisto delle piante fino alla registrazione del raccolto, fornendo agli agricoltori strumenti integrati per:
+\begin{itemize}
+	\item Gestione terreno: Suddividere e tracciare diverse zone di coltivazione, registrandone le caratteristiche principali, come il tipo di terreno e la dimensione.
+	\item Gestione fornitori: Mantenere un registro centralizzato di tutti i fornitori, con i relativi dati di contatto e la partita IVA.
+	\item Gestione piante: Creare un database di tutte le varietà vegetali, includendo i costi, i fornitori e le note colturali.
+	\item Gestione delle piantagioni: Tenere traccia di ogni singola piantagione, monitorandone la quantità, la data di messa a dimora e l'evoluzione del suo stato nel tempo.
+	\item Gestione raccolti: Documentare con precisione ogni operazione di raccolta, associandola alla rispettiva piantagione e arricchendola con note.
+	\item Analisi dati: Trasformare i dati raccolti in report e statistiche sulla produttività, supportando decisioni data-driven per migliorare l'efficienza.
+\end{itemize}
+AgroManager punta a diventare uno strumento indispensabile per modernizzare l'attività agricola, migliorandone la tracciabilità, l'organizzazione operativa e, in ultima analisi, la redditività.
+
+\subsection{Tecnologie e strumenti utilizzati}
+\subsubsection{Linguaggio di programmazione}
+\begin{itemize}
+	\item \textbf{Java 17}: Versione LTS (Long Term Support) del linguaggio Java
+\end{itemize}
+\subsubsection{Framework e librerie}
+\begin{itemize}
+	\item \textbf{JavaFX 21.0.2}: Framework per la creazione dell'interfaccia grafica desktop
+	\item \textbf{PostgreSQL 42.7.7} (JDBC Driver): Driver per connessione al database PostgreSQL
+	\item \textbf{JUnit 5.8.1}: Framework per unit testing
+\end{itemize}
+\subsubsection{Database}
+\begin{itemize}
+	\item \textbf{PostgreSQL}: Database relazionale utilizzato per la persistenza dei dati
+	\item \textbf{Docker}: Piattaforma per l'esecuzione del container contenente il database (locale)
+\end{itemize}
+\subsubsection{Build tool}
+\begin{itemize}
+	\item \textbf{Gradle 8.x}: Sistema di automazione della build con gestione centralizzata delle dipendenze
+\end{itemize}
+\subsubsection{IDE e strumenti di sviluppo}
+\begin{itemize}
+	\item \textbf{IntelliJ IDEA}: IDE principale per lo sviluppo
+	\item \textbf{Git}: Version Control System
+	\item \textbf{Gradle Wrapper}:  Garantisce versione consistente di Gradle
+\end{itemize}
+\subsubsection{AI}
+\begin{itemize}
+	\item \textbf{Google Gemini}: AI utilizzata per la generazione di codice ripetitivo e per lo stile GUI
+\end{itemize}
+\subsubsection{Documentazione}
+\begin{itemize}
+	\item \textbf{Overleaf}: Web LaTeX editor
+	\item \textbf{PlantUML Editor}: Versione web di PlantUML per la creazione di diagrammi
+\end{itemize}
+
+\subsection{Architettura generale}
+AgroManager è strutturato secondo un'architettura a layer, garantendo la separazione delle responsabilità, la manutenibilità e la testabilità del codice. I principali strati sono:
+
+\begin{itemize}
+	\item \textbf{Presentation Layer}
+	      \begin{itemize}
+		      \item \textbf{Scopo:} È l'interfaccia utente (GUI). È la parte dell'applicazione con cui l'utente finale interagisce direttamente.
+		      \item \textbf{Componenti:}
+		            \begin{itemize}
+			            \item \textbf{View:} Mostra le informazioni all'utente
+			            \item \textbf{Controller:} Riceve l'input dell'utente (es. click del mouse, dati da un form) e decide cosa fare, comunicando con il layer sottostante.
+		            \end{itemize}
+	      \end{itemize}
+
+	\item \textbf{Business Logic Layer}
+	      \begin{itemize}
+		      \item \textbf{Scopo:} Contiene tutte le regole di business, i calcoli e i processi decisionali che definiscono come funziona l'applicazione.
+		      \item \textbf{Componenti:}
+		            \begin{itemize}
+			            \item \textbf{BusinessLogic / Service / Strategy:} Questi componenti implementano le funzionalità principali (es. Calcola produzione media, verifica validità dei dati, genera report). Ricevono richieste dal Presentation Layer e le elaborano.
+		            \end{itemize}
+	      \end{itemize}
+
+	\item \textbf{Data Access Layer}
+	      \begin{itemize}
+		      \item \textbf{Scopo:} Gestisce tutto ciò che riguarda la memorizzazione e il recupero dei dati. Fa da ponte tra la logica di business e il database.
+		      \item \textbf{Componenti:}
+		            \begin{itemize}
+			            \item \textbf{Database:} Il luogo dove i dati sono fisicamente memorizzati.
+			            \item \textbf{ORM (Object-Relational Mapping):} Uno strumento che aiuta a "tradurre" gli oggetti usati nell'applicazione in tabelle del database, e viceversa.
+			            \item \textbf{JDBC (Java Database Connectivity):} Una tecnologia specifica per connettersi ed eseguire comandi sul database.
+		            \end{itemize}
+	      \end{itemize}
+
+	\item \textbf{Domain Layer}
+	      \begin{itemize}
+		      \item \textbf{Scopo:} Questo layer definisce i concetti e i dati fondamentali.
+		      \item \textbf{Componenti:}
+		            \begin{itemize}
+			            \item \textbf{DomainModel:} Rappresenta le entità chiave del sistema con i loro attributi e relazioni.
+		            \end{itemize}
+	      \end{itemize}
+\end{itemize}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Diagram/layers_with_components.png}
+	\caption{Diagramma rappresentante l'architettura a strati del sistema AgroManager, con i relativi componenti, e le relazioni tra i strati. Le relazioni tratteggiate (cross-cutting) con il Domain Layer indicano che il cambiamento di un elemento può implicare cambiamenti anche negli altri layer.}\label{fig:layers_architecture}
+\end{figure}
+

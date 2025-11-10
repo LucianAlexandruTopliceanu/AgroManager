@@ -1,0 +1,115 @@
+\documentclass{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,left=3.5cm,right=3.5cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{crop,graphicx,amsmath,array,color,amssymb,fancyhdr,lineno}
+\usepackage{flushend,stfloats,amsthm,chngpage,times,lipsum,lastpage} 
+\usepackage{calc,listings,color,wrapfig,tabularx,longtable,enumitem}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{tcolorbox}
+\definecolor{shadecolor}{rgb}{0.86,0.86,0.86}
+\usepackage{float}
+\usepackage{calc}
+\usepackage[hidelinks]{hyperref}
+
+% Definizione del template per i casi d'uso
+\newcommand{\usecasetemplate}[9]{
+\begin{longtable}{|p{3.5cm}|p{11.5cm}|}
+\hline
+{\textbf{#1}} &{\textbf{#2}} \\
+\hline
+\textbf{Livello} & #3 \\
+\hline
+\textbf{Descrizione} & #4 \\
+\hline
+\textbf{Attori} & #5 \\
+\hline
+\textbf{Pre-condizioni} & #6 \\
+\hline
+\textbf{Post-condizioni} & #7 \\
+\hline
+\textbf{Normale svolgimento} & #8 \\
+\hline
+\textbf{Svolgimenti alternativi} & #9 \\
+\hline
+\end{longtable}
+\vspace{0.5cm}
+}
+
+% Definizioni per lo stile del modello relazionale
+
+% Definisco i colori per le chiavi
+\definecolor{pk_fornitore}{HTML}{E74C3C}   % Rosso
+\definecolor{pk_pianta}{HTML}{3498DB}      % Blu
+\definecolor{pk_zona}{HTML}{2ECC71}         % Verde
+\definecolor{pk_stato}{HTML}{F39C12}       % Arancione
+\definecolor{pk_piantagione}{HTML}{9B59B6}   % Viola
+\definecolor{pk_raccolto}{HTML}{1ABC9C}      % Teal
+
+% Comando per la Chiave Primaria (PK)
+% \pk{colore}{nome_colonna}
+\newcommand{\pk}[2]{\textcolor{#1}{\textbf{\uline{#2}}}}
+
+% Comando per la Chiave Esterna (FK)
+% \fk{colore_riferimento}{nome_colonna}
+\newcommand{\fk}[2]{\textcolor{#1}{\textit{#2}}}
+% --- CONFIGURAZIONE GLOBALE PER GLI SNIPPET DI CODICE ---
+\lstset{
+    language=Java,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{blue},
+    stringstyle=\color{purple},
+    commentstyle=\color{gray},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    captionpos=b,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate=
+        {à}{{\`a}}1 {á}{{\'a}}1
+        {è}{{\`e}}1 {é}{{\'e}}1
+        {ì}{{\`i}}1 {í}{{\'i}}1
+        {ò}{{\`o}}1 {ó}{{\'o}}1
+        {ù}{{\`u}}1 {ú}{{\'u}}1
+        {€}{{€}}1
+        {\_}{{\_}}1,
+    columns=flexible,
+    keepspaces=true
+}
+
+\pagestyle{fancy}
+\fancypagestyle{plain}{%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyhf{}%
+}
+
+\title{%
+    Applicativo Java AgroManager}
+\author{Lucian Alexandru Topliceanu}
+
+\begin{document}
+\include{title}
+
+\fancyhf{}
+\fancyhead[L]{Lucian Alexandru Topliceanu}
+\fancyhead[R]{Ingegneria del software}
+\fancyfoot[R]{ \large \bf \thepage\ \centering}%
+
+\newpage
+\tableofcontents
+\include{introduzione}
+\include{requisiti_design}
+\include{progettazione_implementazione}
+\include{dettagli_implementativi}
+\include{test}
+\include{sviluppi_futuri}
+
+
+\end{document}

@@ -1,0 +1,606 @@
+\section{Analisi dei requisiti e design funzionale}\label{sec:analisi_requisiti}
+\subsection{Use case}
+Il diagramma degli Use Case (Figura \ref{fig:use_case_diagram}) illustra le funzionalità principali del sistema AgroManager e le interazioni con l'attore. È stato identificato un singolo attore, il quale ha accesso a tutte le funzionalità.
+
+Le funzionalità principali, identificate come "User Goal", sono:
+\begin{itemize}
+	\item \textbf{Gestire Fornitori:} Inserimento, modifica, rimozione e filtro dei fornitori con validazioni complete.
+	\item \textbf{Gestire Piante:} Inserimento, modifica, rimozione e filtro delle varietà di piante.
+	\item \textbf{Gestire Zone Agricole:} Inserimento, modifica, rimozione e filtro delle zone di coltivazione.
+	\item \textbf{Gestire Piantagioni:} Inserimento, modifica, rimozione delle piantagioni con gestione degli stati del ciclo di vita.
+	\item \textbf{Gestire Raccolti:} Inserimento, modifica, rimozione e tracciamento delle attività di raccolta.
+	\item \textbf{Elaborare Dati e Report:} Analisi della produttività tramite strategie specializzate e generazione di report con salvataggio in formato TXT.
+	\item \textbf{Visualizzare Dashboard:} Monitoraggio in tempo reale dello stato del sistema con statistiche aggregate e azioni rapide.
+\end{itemize}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics [width=1\linewidth]{Images/Diagram/use_case_diagram.png}
+	\caption{Diagramma degli Use Case del sistema AgroManager.}
+	\label{fig:use_case_diagram}
+\end{figure}
+
+\newpage
+\subsection{Use case templates} Di seguito vengono presentati i template per alcuni dei principali casi d'uso individuati nell'applicativo. Le operazioni di base (come aggiungere, modificare, eliminare e filtrare) sono concettualmente identiche per tutte le entità gestite (Fornitori, Piante, Zone Agricole, ecc.). Per evitare ridondanze, verranno analizzati nel dettaglio solo i template relativi alla "Gestione Fornitore" (\hyperref[UC1]{UC1}) e alle sue sotto-funzionalità (\hyperref[UC1.1]{UC1.1}, \hyperref[UC1.2]{UC1.2}, \hyperref[UC1.3]{UC1.3}, \hyperref[UC1.4]{UC1.4}), considerandoli come modello rappresentativo anche per le altre sezioni gestionali.
+\subsubsection{UC1 - Gestire Fornitori}
+\label{UC1}
+\usecasetemplate
+{UC1}
+{Gestire Fornitori}
+{User Goal}
+{L'utente gestisce i fornitori attraverso l'interfaccia dell'applicativo}
+{Utente}
+{L'utente deve avere accesso al sistema AgroManager e il database deve essere operativo}
+{Le informazioni sui fornitori sono aggiornate nel sistema secondo le operazioni richieste}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente accede alla sezione "Fornitori" dal menu principale
+		\item Il sistema visualizza l'elenco dei fornitori esistenti in una tabella
+		\item L'utente può selezionare un fornitore dall'elenco
+		\item L'utente può scegliere una delle seguenti operazioni:
+		      \begin{itemize}[nosep]
+			      \item Aggiungere un nuovo fornitore (\hyperref[UC1.1]{UC1.1})
+			      \item Modificare un fornitore esistente (\hyperref[UC1.2]{UC1.2})
+			      \item Eliminare un fornitore selezionato (\hyperref[UC1.3]{UC1.3})
+			      \item Applicare filtri di ricerca per nome, città o email (\hyperref[UC1.4]{UC1.4})
+		      \end{itemize}
+		\item Il sistema esegue l'operazione richiesta
+		\item Il sistema aggiorna l'elenco dei fornitori
+	\end{enumerate}
+}
+{
+	\textbf{2a.} Errore di connessione al database:
+	\begin{itemize}[nosep]
+		\item[\textbf{2a.1}] Il sistema mostra un messaggio di errore "Sistema non operativo"
+		\item[\textbf{2a.2}] L'utente può riprovare l'operazione
+	\end{itemize}
+}
+
+\newpage
+\subsubsection{UC1.1 - Aggiungere Fornitore}
+\label{UC1.1}
+\usecasetemplate
+{UC1.1}
+{Aggiungere Fornitore}
+{User Goal}
+{L'utente registra un nuovo fornitore nel sistema per ampliare la rete di fornitori disponibili}
+{Utente}
+{L'utente si trova nella sezione Fornitori e il sistema è operativo}
+{Un nuovo fornitore è stato aggiunto al sistema e l'elenco fornitori è aggiornato}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente clicca sul pulsante "Nuovo Fornitore"
+		\item Il sistema apre il dialog di inserimento nuovo fornitore
+		\item L'utente inserisce il nome del fornitore (campo obbligatorio)
+		\item L'utente inserisce l'indirizzo del fornitore (campo obbligatorio)
+		\item L'utente inserisce il numero di telefono (campo obbligatorio)
+		\item L'utente può inserire email e partita IVA (campi opzionali)
+		\item L'utente clicca "Salva"
+		\item Il sistema valida i dati inseriti
+		\item Il sistema salva il nuovo fornitore nel database
+		\item Il sistema chiude il dialog e aggiorna l'elenco fornitori
+	\end{enumerate}
+}
+{
+	\textbf{7a.} Dati non validi:
+	\begin{itemize}[nosep]
+		\item[\textbf{7a.1}] Il sistema evidenzia i campi con errori (nome, indirizzo o telefono vuoti, email non valida se inserita, telefono troppo corto)
+		\item[\textbf{7a.2}] L'utente corregge i dati errati
+		\item[\textbf{7a.3}] L'utente clicca nuovamente "Salva"
+	\end{itemize}
+	\textbf{7b.} Fornitore duplicato:
+	\begin{itemize}[nosep]
+		\item[\textbf{7b.1}] Il sistema rileva che esiste già un fornitore con lo stesso nome
+		\item[\textbf{7b.2}] Il sistema mostra messaggio di errore "Fornitore già esistente"
+		\item[\textbf{7b.3}] L'utente modifica il nome del fornitore o annulla l'operazione
+	\end{itemize}
+	\textbf{6a.} L'utente annulla l'operazione:
+	\begin{itemize}[nosep]
+		\item[\textbf{6a.1}] L'utente clicca "Annulla" nel dialog
+		\item[\textbf{6a.2}] Il sistema chiude il dialog senza salvare i dati
+	\end{itemize}
+}
+\newpage
+\subsubsection{UC1.2 - Modificare Fornitore}
+\label{UC1.2}
+\usecasetemplate
+{UC1.2}
+{Modificare Fornitore}
+{User Goal}
+{L'utente aggiorna le informazioni di un fornitore esistente per mantenere i dati del sistema aggiornati}
+{Utente}
+{L'utente si trova nella sezione Fornitori, esiste almeno un fornitore nel sistema, e l'utente ha selezionato un fornitore dall'elenco}
+{Le informazioni del fornitore selezionato sono aggiornate e l'elenco fornitori riflette le modifiche}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente seleziona un fornitore dall'elenco dei fornitori
+		\item L'utente clicca sul pulsante "Modifica"
+		\item Il sistema apre il dialog di modifica precompilato con i dati attuali del fornitore
+		\item L'utente modifica i campi desiderati (nome, indirizzo, telefono, email, partita IVA)
+		\item L'utente clicca "Salva"
+		\item Il sistema valida i nuovi dati inseriti
+		\item Il sistema aggiorna il fornitore nel database
+		\item Il sistema chiude il dialog e aggiorna l'elenco fornitori
+	\end{enumerate}
+}
+{
+	\textbf{1a.} Nessun fornitore selezionato:
+	\begin{itemize}[nosep]
+		\item[\textbf{1a.1}] Il pulsante "Modifica" rimane disabilitato
+		\item[\textbf{1a.2}] L'utente deve selezionare un fornitore per abilitare la modifica
+	\end{itemize}
+	\textbf{6a.} Dati non validi:
+	\begin{itemize}[nosep]
+		\item[\textbf{6a.1}] Il sistema evidenzia i campi con errori di validazione
+		\item[\textbf{6a.2}] L'utente corregge i dati errati
+		\item[\textbf{6a.3}] L'utente clicca nuovamente "Salva"
+	\end{itemize}
+	\textbf{5a.} L'utente annulla le modifiche:
+	\begin{itemize}[nosep]
+		\item[\textbf{5a.1}] L'utente clicca "Annulla" nel dialog
+		\item[\textbf{5a.2}] Il sistema chiude il dialog senza salvare le modifiche
+	\end{itemize}
+}
+\newpage
+\subsubsection{UC1.3 - Eliminare Fornitore}
+\label{UC1.3}
+\usecasetemplate
+{UC1.3}
+{Eliminare Fornitore}
+{User Goal}
+{L'utente rimuove un fornitore non più necessario per mantenere l'anagrafica del sistema pulita e aggiornata}
+{Utente}
+{L'utente si trova nella sezione Fornitori, esiste almeno un fornitore nel sistema e l'utente ha selezionato un fornitore dall'elenco}
+{Il fornitore selezionato è rimosso permanentemente dal sistema e l'elenco fornitori riflette l'avvenuta rimozione}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente seleziona un fornitore dall'elenco dei fornitori
+		\item L'utente clicca sul pulsante "Elimina"
+		\item Il sistema mostra un dialog modale di conferma (es. "Sei sicuro di voler eliminare questo fornitore?")
+		\item L'utente clicca "Conferma"
+		\item Il sistema verifica i vincoli di integrità (es. che il fornitore non sia associato a piante esistenti)
+		\item Il sistema elimina il fornitore dal database
+		\item Il sistema chiude il dialog e aggiorna l'elenco fornitori
+	\end{enumerate}
+}
+{
+	\textbf{1a.} Nessun fornitore selezionato:
+	\begin{itemize}[nosep]
+		\item[\textbf{1a.1}] Il pulsante "Elimina" rimane disabilitato
+		\item[\textbf{1a.2}] L'utente deve selezionare un fornitore per abilitare l'eliminazione
+	\end{itemize}
+	\textbf{4a.} L'utente annulla l'eliminazione:
+	\begin{itemize}[nosep]
+		\item[\textbf{4a.1}] L'utente clicca "Annulla" nel dialog di conferma
+		\item[\textbf{4a.2}] Il sistema chiude il dialog senza eliminare il fornitore
+	\end{itemize}
+	\textbf{5a.} Il fornitore è referenziato (vincolo di integrità):
+	\begin{itemize}[nosep]
+		\item[\textbf{5a.1}] Il sistema rileva che il fornitore è associato a delle piante
+		\item[\textbf{5a.2}] Il sistema mostra un messaggio di errore (es. "Impossibile eliminare, il fornitore è utilizzato")
+		\item[\textbf{5a.3}] Il sistema chiude il dialog di conferma e l'eliminazione è annullata
+	\end{itemize}
+}
+
+\newpage
+\subsubsection{UC1.4 - Filtrare Fornitori}
+\label{UC1.4}
+\usecasetemplate
+{UC1.4}
+{Filtrare Fornitori}
+{User Goal}
+{L'utente utilizza i filtri per cercare e visualizzare un sottoinsieme di fornitori in base a criteri specifici, facilitando la consultazione}
+{Utente}
+{L'utente si trova nella sezione Fornitori ed esistono fornitori nel sistema da poter filtrare}
+{L'elenco dei fornitori mostra solo i record che corrispondono ai criteri di ricerca e i filtri applicati sono resi visibili all'utente}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente inserisce i criteri di ricerca in uno o più campi appositi (nome, città)
+		\item L'utente clicca sul pulsante "Applica Filtri" (o la ricerca si aggiorna automaticamente)
+		\item Il sistema interroga il database con i criteri forniti
+		\item Il sistema aggiorna l'elenco mostrando solo i fornitori che soddisfano i criteri
+		\item Il sistema mostra i filtri attivi (es. in appositi "tag" o mantenendo il testo nei campi)
+		\item L'utente può cliccare "Resetta Filtri" per tornare alla visualizzazione completa
+	\end{enumerate}
+}
+{
+	\textbf{3a.} Nessun risultato trovato:
+	\begin{itemize}[nosep]
+		\item[\textbf{3a.1}] Il sistema mostra un messaggio (es. "Nessun fornitore trovato per i criteri selezionati")
+		\item[\textbf{3a.2}] L'elenco dei fornitori viene mostrato vuoto
+		\item[\textbf{3a.3}] L'utente può modificare i criteri di ricerca e riprovare
+	\end{itemize}
+}
+\newpage
+
+\subsubsection{UC2 - Gestire Piantagioni}
+
+\usecasetemplate
+{UC2}
+{Gestire Piantagioni}
+{User Goal}
+{L'utente gestisce le piantagioni attive per organizzare e monitorare le coltivazioni}
+{Utente}
+{Il sistema è avviato e operativo, il database è accessibile, esistono zone e piante nel sistema}
+{Le informazioni sulle piantagioni sono aggiornate nel sistema secondo le operazioni richieste}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente accede alla sezione "Piantagioni" dal menu principale
+		\item Il sistema visualizza l'elenco delle piantagioni esistenti in una tabella
+		\item L'utente può selezionare una piantagione dall'elenco
+		\item L'utente può scegliere una delle seguenti operazioni:
+		      \begin{itemize}[nosep]
+			      \item Creare una nuova piantagione (UC2.1)
+			      \item Modificare una piantagione esistente (UC2.2)
+			      \item Eliminare una piantagione (UC2.3)
+			      \item Cambiare lo stato di una piantagione (UC2.4)
+			      \item Applicare filtri di ricerca per zona, pianta o periodo (UC2.5)
+		      \end{itemize}
+		\item Il sistema esegue l'operazione richiesta
+		\item Il sistema aggiorna l'elenco delle piantagioni
+	\end{enumerate}
+}
+{
+	\textbf{2a.} Errore di connessione al database:
+	\begin{itemize}[nosep]
+		\item[\textbf{2a.1}] Il sistema mostra un messaggio di errore "Sistema non operativo"
+		\item[\textbf{2a.2}] L'utente può riprovare l'operazione
+	\end{itemize}
+}
+\newpage
+\subsubsection{UC2.4 - Cambiare Stato Piantagione}
+
+\usecasetemplate
+{UC2.4}
+{Cambiare Stato Piantagione}
+{User Goal}
+{L'utente aggiorna lo stato del ciclo di vita di una piantagione per tracciare il progresso della coltivazione attraverso l'interfaccia dell'applicativo}
+{Utente}
+{L'utente si trova nella sezione Piantagioni, esiste almeno una piantagione nel sistema, e l'utente ha selezionato una piantagione dall'elenco}
+{Lo stato della piantagione è aggiornato con il nuovo stato del ciclo di vita, l'elenco piantagioni riflette il cambiamento, e la data di cambio stato è registrata nel sistema}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente seleziona una piantagione dall'elenco delle piantagioni
+		\item L'utente clicca sul pulsante "Cambia Stato"
+		\item Il sistema apre il dialog di cambio stato
+		\item Il sistema mostra lo stato attuale della piantagione e gli stati disponibili per la transizione
+		\item L'utente seleziona il nuovo stato dal menu a tendina
+		\item L'utente può aggiungere note opzionali nel campo commenti
+		\item L'utente clicca "Conferma" per applicare il cambio
+		\item Il sistema aggiorna lo stato della piantagione e registra la data del cambio
+		\item Il sistema chiude il dialog e aggiorna l'elenco piantagioni
+	\end{enumerate}
+}
+{
+	\textbf{4a.} Transizione di stato non valida:
+	\begin{itemize}[nosep]
+		\item[\textbf{4a.1}] Il sistema mostra solo gli stati raggiungibili dal stato attuale secondo le regole del ciclo di vita
+		\item[\textbf{4a.2}] L'utente può scegliere solo tra: stato successivo, sospensione o rimozione
+	\end{itemize}
+	\textbf{7a.} L'utente annulla il cambio stato:
+	\begin{itemize}[nosep]
+		\item[\textbf{7a.1}] L'utente clicca "Annulla" nel dialog
+		\item[\textbf{7a.2}] Il sistema chiude il dialog senza modificare lo stato della piantagione
+	\end{itemize}
+	\textbf{1a.} Nessuna piantagione selezionata:
+	\begin{itemize}[nosep]
+		\item[\textbf{1a.1}] Il pulsante "Cambia Stato" rimane disabilitato
+		\item[\textbf{1a.2}] L'utente deve selezionare una piantagione per abilitare il cambio stato
+	\end{itemize}
+}
+\newpage
+\subsubsection{UC3 - Elaborare Dati e Report}
+
+\usecasetemplate
+{UC3}
+{Elaborare Dati e Report}
+{User Goal}
+{L'utente analizza i dati di produzione e genera report per valutare le performance delle attività agricole}
+{Utente}
+{Il sistema è avviato e operativo, il database è accessibile, esistono dati di raccolti nel sistema}
+{I report richiesti sono generati e visualizzati, i dati possono essere esportati se necessario}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente accede alla sezione "Analisi \& Report" dal menu principale
+		\item Il sistema visualizza le opzioni di elaborazione disponibili
+		\item L'utente può scegliere una delle seguenti operazioni:
+		      \begin{itemize}[nosep]
+			      \item Generare report raccolti
+			      \item Calcolare statistiche produzione
+			      \item Visualizzare analisi dati con strategy pattern
+			      \item Esportare risultati in formato TXT
+		      \end{itemize}
+		\item Il sistema elabora i dati secondo l'opzione selezionata
+		\item Il sistema visualizza i risultati dell'elaborazione
+		\item L'utente può salvare o esportare i risultati
+	\end{enumerate}
+}
+{
+	\textbf{3a.} Nessun dato disponibile per elaborazione:
+	\begin{itemize}[nosep]
+		\item[\textbf{3a.1}] Il sistema mostra messaggio informativo "Nessun dato disponibile per l'elaborazione"
+		\item[\textbf{3a.2}] L'utente viene indirizzato alla gestione dati base (fornitori, piante, piantagioni)
+	\end{itemize}
+}
+\newpage
+\subsubsection{UC4 - Visualizzare Dashboard}
+
+\usecasetemplate
+{UC4}
+{Visualizzare Dashboard}
+{User Goal}
+{L'utente ottiene una vista d'insieme del sistema e dello stato delle attività agricole tramite una dashboard informativa}
+{Utente}
+{Il sistema è avviato e l'utente si trova nella schermata principale dell'applicazione}
+{La dashboard mostra informazioni aggiornate e l'utente ha una vista d'insieme dello stato del sistema}
+{
+	\begin{enumerate}[nosep]
+		\item L'utente apre l'applicazione AgroManager o clicca su "Dashboard" dal menu
+		\item Il sistema carica i dati di riepilogo dal database
+		\item Il sistema visualizza la dashboard con le seguenti informazioni:
+		      \begin{itemize}[nosep]
+			      \item Stato operativo del sistema (connessione database)
+			      \item Numero totale di fornitori, zone, piante registrate
+			      \item Statistiche delle piantagioni attive per stato
+			      \item Statistiche dei raccolti recenti
+			      \item Azioni rapide per accesso diretto alle funzionalità
+		      \end{itemize}
+		\item L'utente può navigare verso sezioni specifiche cliccando sui widget della dashboard o utilizzare le azioni rapide
+	\end{enumerate}
+}
+{
+	\textbf{2a.} Sistema non operativo (database non accessibile):
+	\begin{itemize}[nosep]
+		\item[\textbf{2a.1}] La dashboard mostra lo stato offline con indicatore e messaggio di errore
+		\item[\textbf{2a.2}] Le azioni rapide vengono disabilitate e mostrato messaggio "Connetti il database per accedere alle funzionalità"
+		\item[\textbf{2a.3}] Viene mostrato messaggio "Sistema in modalità limitata"
+	\end{itemize}
+}
+\newpage
+\subsection{Mockups} In questa sezione vengono illustrate le schermate (screenshot) dell'implementazione finale della GUI (Graphical User Interface). Il codice e lo stile dell'interfaccia sono stati generati mediante Google Gemini e successivamente rifiniti con opportune modifiche.
+
+I prompt utilizzati per generare ogni vista seguono una struttura comune. Per esempio, la \hyperref[fig:mockup_fornitori]{view Fornitore} è stata generata con un prompt simile al seguente (il prompt completo è riportato a scopo dimostrativo per illustrare la metodologia di lavoro):
+
+\begin{itemize}
+
+	\item \textbf{Contesto del Progetto}:
+	      Sto sviluppando un'applicazione JavaFX chiamata \textbf{AgroManager} per la gestione agricola seguendo il pattern architetturale \textbf{MVC (Model-View-Controller)}. Il progetto utilizza:
+	      \begin{itemize}
+		      \item \textbf{JavaFX} per l'interfaccia utente
+		      \item Pattern \textbf{MVC} con separazione netta delle responsabilità
+		      \item \textbf{DAO Pattern} per l'accesso ai dati
+		      \item \textbf{Service Layer} per la business logic
+		      \item \textbf{CSS styling} personalizzato per un'interfaccia moderna e professionale
+	      \end{itemize}
+
+	\item \textbf{Struttura del Progetto}:
+	      \begin{lstlisting}[language={}, basicstyle=\ttfamily, frame=none, numbers=none]
+src/main/java/
+- DomainModel/        # Entita del dominio
+- Controller/         # Controller MVC
+- View/               # Interfacce utente JavaFX
+- BusinessLogic/      # Servizi e logica di business
+- ORM/                # Data Access Objects
+\end{lstlisting}
+
+	\item \textbf{Modello di Dominio - Fornitore}:
+	      \begin{lstlisting}[language=Java]
+public class Fornitore {
+    private Integer id;
+    private String nome;              // REQUIRED
+    private String indirizzo;         // REQUIRED
+    private String numeroTelefono;    // REQUIRED
+    private String email;             // OPTIONAL
+    private String partitaIva;        // OPTIONAL
+    private LocalDateTime dataCreazione;
+    private LocalDateTime dataAggiornamento;
+
+    // Costruttori, getter e setter standard
+}
+\end{lstlisting}
+
+	\item \textbf{Requisiti Funzionali}:
+
+	      \textbf{FornitoreView (Vista Principale)}
+
+	      \begin{itemize}
+		      \item \textit{Layout e Struttura:}
+		            \begin{itemize}
+			            \item Header con titolo "Gestione Fornitori" e sottotitolo descrittivo
+			            \item Sezione ricerca con filtri per nome e città
+			            \item Barra delle azioni con pulsanti: Nuovo, Modifica, Elimina, Applica Filtri, Reset
+			            \item Tabella con colonne: ID, Nome, Indirizzo, Telefono, Email, P.IVA
+			            \item Design a card con ombreggiature e bordi arrotondati
+		            \end{itemize}
+
+		      \item \textit{Funzionalità Richieste:}
+		            \begin{itemize}
+			            \item Visualizzazione tabellare dei fornitori con selezione singola
+			            \item Filtri di ricerca in tempo reale
+			            \item Doppio click su riga per modifica rapida
+			            \item Abilitazione/disabilitazione pulsanti basata sulla selezione
+			            \item Conferma eliminazione con dialog personalizzato
+			            \item Messaggi di feedback per operazioni CRUD
+		            \end{itemize}
+
+		      \item \textit{Integrazione Controller:}
+		            \begin{itemize}
+			            \item Metodi setter per handler degli eventi: \texttt{setOnNuovoFornitore()}, \texttt{setOnModificaFornitore()}, ecc.
+			            \item Metodo \texttt{setFornitori()} per aggiornare i dati della tabella
+			            \item Metodo \texttt{getFornitoreSelezionato()} per ottenere l'elemento selezionato
+			            \item Metodo \texttt{getCriteriFiltro()} che restituisce un record con i filtri applicati
+		            \end{itemize}
+	      \end{itemize}
+
+	      \vspace{1em}
+	      \textbf{FornitoreDialog (Dialog Modale)}
+
+	      \begin{itemize}
+		      \item \textit{Layout e Struttura:}
+		            \begin{itemize}
+			            \item Dialog modale con titolo dinamico ("Nuovo Fornitore" / "Modifica Fornitore")
+			            \item Form con campi: Nome*, Indirizzo*, Telefono*, Email, Partita IVA
+			            \item Campi obbligatori marcati con asterisco (*)
+			            \item Pulsanti "Salva" e "Annulla" allineati a destra
+			            \item Placeholder text informativi per ogni campo
+		            \end{itemize}
+
+		      \item \textit{Validazione e Comportamento:}
+		            \begin{itemize}
+			            \item Validazione client-side per campi obbligatori
+			            \item Validazione formato email se compilato
+			            \item Popolamento automatico campi in modalità modifica
+			            \item Flag \texttt{confermato} per verificare se l'utente ha salvato
+			            \item Gestione errori con messaggi user-friendly
+		            \end{itemize}
+
+		      \item \textit{Integrazione Sistema:}
+		            \begin{itemize}
+			            \item Costruttore che accetta \texttt{Fornitore} nullable (null = nuovo, oggetto = modifica)
+			            \item Metodo \texttt{getFornitore()} per recuperare l'oggetto aggiornato
+			            \item Metodo \texttt{isConfermato()} per verificare se salvato
+			            \item Utilizzo di \texttt{NotificationHelper} per messaggi di errore
+		            \end{itemize}
+	      \end{itemize}
+
+	\item \textbf{Pattern di Integrazione MVC}:
+
+	      \begin{lstlisting}[language=Java]
+public class FornitoreController {
+    private final FornitoreService fornitoreService;    // Business Logic
+    private final FornitoreView fornitoreView;          // View
+
+    // Event handlers che collegano View e Service:
+    private void onNuovoFornitore() { /* Dialog + Service.aggiungi */ }
+    private void onModificaFornitore() { /* Dialog + Service.aggiorna */ }
+    private void onEliminaFornitore() { /* Conferma + Service.elimina */ }
+    private void onApplicaFiltri() { /* Service.getConFiltri */ }
+}
+\end{lstlisting}
+
+	\item \textbf{Stili CSS da Utilizzare}:
+	      Il progetto utilizza un sistema di classi CSS predefinite:
+	      \begin{itemize}
+		      \item \texttt{.main-container} - Container principale
+		      \item \texttt{.styled-card} - Card con ombreggiature
+		      \item \texttt{.card-title} - Titoli delle sezioni
+		      \item \texttt{.main-title}, \texttt{.subtitle} - Header principale
+		      \item \texttt{.btn-primary}, \texttt{.btn-secondary}, \texttt{.btn-danger} - Pulsanti stilizzati
+		      \item \texttt{.text-field-standard} - Campi di input
+		      \item \texttt{.field-label} - Etichette campi
+		      \item \texttt{.input-grid} - Griglia per form
+		      \item \texttt{.v-separator} - Separatori verticali
+	      \end{itemize}
+
+	\item \textbf{Pattern di Gestione Errori}:
+	      \begin{itemize}
+		      \item Utilizzare \texttt{NotificationHelper.showError()} per errori
+		      \item Utilizzare \texttt{NotificationHelper.showSuccess()} per conferme
+		      \item Utilizzare \texttt{NotificationHelper.showWarning()} per avvisi
+		      \item Gestire eccezioni specifiche: \texttt{ValidationException}, \texttt{DataAccessException}, \texttt{BusinessLogicException}
+	      \end{itemize}
+
+	\item \textbf{Richiesta Specifica}:
+	      Genera il codice completo per:
+	      \begin{itemize}
+		      \item \texttt{FornitoreView.java} - Vista principale con tabella, filtri e azioni
+		      \item \texttt{FornitoreDialog.java} - Dialog modale per CRUD
+		      \item Eventuali aggiornamenti \texttt{CSS} per stili specifici non presenti
+	      \end{itemize}
+
+	      Rispetta rigorosamente:
+	      \begin{itemize}
+		      \item Pattern MVC con separazione delle responsabilità
+		      \item Naming conventions Java standard
+		      \item Struttura del progetto esistente
+		      \item Stili CSS predefiniti
+		      \item Gestione eventi attraverso handler/callback
+		      \item Validazione robusta dell'input utente
+		      \item User experience fluida e intuitiva
+	      \end{itemize}
+
+	      Il codice deve essere:
+	      \begin{itemize}
+		      \item Production-ready con gestione errori completa
+		      \item Ben commentato e auto-documentante
+		      \item Responsive e accessibile
+		      \item Coerente con lo stile del progetto esistente
+	      \end{itemize}
+
+\end{itemize}
+
+\newpage
+\subsubsection{Dashboard}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/dashboard.png}
+	\caption{Mockup della Dashboard principale, punto di accesso dell'applicazione. Mostra le statistiche di riepilogo (Zone, Fornitori, Piante, ecc.) e i collegamenti alle "Azioni Rapide".}
+	\label{fig:mockup_dashboard}
+\end{figure}
+\newpage
+\subsubsection{Gestione Zone}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_zone.png}
+	\caption{Mockup della vista "Gestione Zone". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Zona, Modifica, ecc.) e la tabella "Elenco Zone".}
+	\label{fig:mockup_zone}
+\end{figure}
+\newpage
+\subsubsection{Gestione Fornitori}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_fornitori.png}
+	\caption{Mockup della vista "Gestione Fornitori". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuovo Fornitore, Modifica, ecc.) e la tabella "Elenco Fornitori".}
+	\label{fig:mockup_fornitori}
+\end{figure}
+\newpage
+\subsubsection{Gestione Piante}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_piante.png}
+	\caption{Mockup della vista "Gestione Piante". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Pianta, Modifica, ecc.) e la tabella "Elenco Piante".}
+	\label{fig:mockup_piante}
+\end{figure}
+\newpage
+\subsubsection{Gestione Piantagioni}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_piantagioni.png}
+	\caption{Mockup della vista "Gestione Piantagioni". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Piantagione, Modifica, ecc.) e la tabella "Elenco Piantagioni".}
+	\label{fig:mockup_piantagioni}
+\end{figure}
+\newpage
+\subsubsection{Gestione Raccolti}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_raccolti.png}
+	\caption{Mockup della vista "Gestione Raccolti". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuovo Raccolto, Modifica, ecc.) e la tabella "Elenco Raccolti".}
+	\label{fig:mockup_raccolti}
+\end{figure}
+\newpage
+\subsubsection{Analisi e Report}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/analisi_report.png}
+	\caption{Mockup della vista 'Analisi e Report'. L'interfaccia permette all'utente di configurare ed eseguire analisi sui dati.}
+	\label{fig:mockup_analisi}
+\end{figure}
+
+\newpage
+
+\subsection{Page navigation diagram}
+Il diagramma di navigazione delle pagine (Page Navigation Diagram) completa l'analisi funzionale, fornendo una visione d'insieme dei flussi di interazione dell'utente con l'interfaccia grafica. Questo diagramma definisce come l'utente si sposta tra le diverse viste dell'applicazione, validando la coerenza dei percorsi definiti negli Use Case e visualizzati nei Mockups.
+
+Come illustrato nella Figura \ref{fig:page_navigation_diagram}, il diagramma evidenzia l'architettura di navigazione "hub-and-spoke" dell'applicativo:
+\begin{itemize}
+	\item La \textbf{Dashboard} agisce come "hub" centrale, da cui l'utente può accedere a tutte le sezioni principali ("spokes").
+	\item Ciascuna sezione gestionale (es. "Gestione Zone", "Gestione Piantagioni") segue un pattern di interazione coerente, permettendo all'utente di tornare facilmente alla Dashboard.
+	\item Le operazioni CRUD (come "new/edit") vengono gestite tramite finestre di dialogo modali (es. "Zona Dialog"), che al termine ("save/cancel") riportano l'utente alla vista gestionale di provenienza.
+\end{itemize}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Diagram/page_navigation_diagram.png}
+	\caption{Diagramma di navigazione delle pagine (Page Navigation Diagram), che mostra i flussi utente tra la Dashboard principale e le varie sezioni gestionali dell'applicativo.}
+	\label{fig:page_navigation_diagram}
+\end{figure}
