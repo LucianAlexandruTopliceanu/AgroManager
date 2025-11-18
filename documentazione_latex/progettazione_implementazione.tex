@@ -14,15 +14,15 @@ Come mostrato in Figura~\ref{fig:package_diagram}, l'architettura è suddivisa n
 \begin{itemize}
 	\item \textbf{View:} Rappresenta l'interfaccia utente (GUI) del sistema, gestendo la presentazione dei dati e l'interazione con l'utente.
 
-	\item \textbf{Controller:} Agisce da mediatore tra la \texttt{View} e i layer sottostanti. Riceve gli eventi dall'interfaccia utente e invoca le operazioni appropriate.
+	\item \textbf{Controller:} Agisce da mediatore tra la \texttt{View} e i layer sottostanti. Riceve gli eventi dall'interfaccia utente e invoca le operazioni appropriate (parte dell'\hyperref[sec:mvc_pattern]{architettura MVC}).
 
 	\item \textbf{BusinessLogic:} Contiene la logica di business principale e orchestra le operazioni. Coordina i \texttt{Service} e le \texttt{Strategy} per eseguire le funzionalità richieste.
 
 	\item \textbf{Service:} Contiene classi specializzate (es. \texttt{FornitoreService}) che implementano la logica di business specifica per una singola entità o funzionalità.
 
-	\item \textbf{Strategy:} Contiene le implementazioni di algoritmi specifici (es. le strategie di calcolo per i report), seguendo lo Strategy Pattern.
+	\item \textbf{Strategy:} Contiene le implementazioni di algoritmi specifici (es. le strategie di calcolo per i report), seguendo lo \hyperref[sec:strategy_pattern]{Strategy Pattern}.
 
-	\item \textbf{ORM (Object-Relational Mapping):} Gestisce la mappatura e la comunicazione tra le classi del \texttt{DomainModel} e le tabelle del database (tramite i DAO).
+	\item \textbf{ORM (Object-Relational Mapping):} Gestisce la mappatura e la comunicazione tra le classi del \texttt{DomainModel} e le tabelle del database (tramite i \hyperref[sec:dao_pattern]{DAO}).
 
 	\item \textbf{DomainModel:} Contiene le classi POJO (Plain Old Java Objects) che rappresentano le entità principali del sistema (es. \texttt{Fornitore}, \texttt{Piantagione}).
 \end{itemize}
@@ -30,7 +30,7 @@ Come mostrato in Figura~\ref{fig:package_diagram}, l'architettura è suddivisa n
 \subsection{Class Diagram per package}
 Di seguito sono riportati i diagrammi delle classi per ciascun package descritto nella sezione precedente. Questi diagrammi illustrano la struttura interna di ogni componente architetturale.
 
-\subsubsection{DomainModel}\label{domain_model}
+\subsubsection{DomainModel}\label{sec:domain_model}
 Il package DomainModel definisce le entità fondamentali del sistema (POJO). Come mostrato in Figura~\ref{fig:domain_model}, esso include le classi Fornitore, Pianta, Zona, Piantagione, Raccolto e StatoPiantagione, che rappresentano i dati gestiti dall'applicazione.
 \begin{figure}[h]
 	\centering
@@ -39,10 +39,10 @@ Il package DomainModel definisce le entità fondamentali del sistema (POJO). Com
 \end{figure}
 
 \newpage
-\subsubsection{ORM}
-Il package ORM implementa il Data Access Object (DAO) pattern per l'accesso ai dati. Come visibile in Figura~\ref{fig:orm}, la sua struttura è composta da:
+\subsubsection{ORM}\label{sec:orm}
+Il package ORM implementa il \hyperref[sec:dao_pattern]{Data Access Object (DAO) pattern} per l'accesso ai dati. Come visibile in Figura~\ref{fig:orm}, la sua struttura è composta da:
 \begin{itemize}
-	\item Una classe astratta BaseDAO che implementa il Template Method Pattern per le operazioni CRUD comuni
+	\item Una classe astratta BaseDAO che implementa il \hyperref[sec:template_method]{Template Method Pattern} per le operazioni CRUD comuni
 	\item DAO concreti (es. FornitoreDAO, PiantagioneDAO) per ogni entità, che ereditano da BaseDAO
 	\item Una DAOFactory (Singleton) per centralizzare la creazione dei DAO
 	\item La classe DatabaseConnection (Singleton) che gestisce la connessione JDBC
@@ -54,7 +54,7 @@ Il package ORM implementa il Data Access Object (DAO) pattern per l'accesso ai d
 \end{figure}
 
 \newpage
-\subsubsection{BusinessLogic}
+\subsubsection{BusinessLogic}\label{sec:business_logic}
 Il package BusinessLogic (Figura~\ref{fig:business_logic}) agisce come Facade per l'intero layer di business. Espone i metodi principali (es. eseguiStrategiaConDati) e coordina le funzionalità dei package Service, Strategy ed Exception sottostanti.
 \begin{figure}[h]
 	\centering
@@ -63,7 +63,7 @@ Il package BusinessLogic (Figura~\ref{fig:business_logic}) agisce come Facade pe
 \end{figure}
 
 \newpage
-\subsubsection{BusinessLogic - Service}
+\subsubsection{BusinessLogic - Service}\label{sec:business_logic_service}
 Il package Service (Figura~\ref{fig:business_logic_service}) contiene la logica di business specifica. Include un service per ogni entità principale (es. PiantagioneService, RaccoltoService, FornitoreService) che gestisce la validazione e la logica operativa. Include inoltre un ErrorService centralizzato per la gestione delle notifiche e delle eccezioni.
 \begin{figure}[h]
 	\centering
@@ -72,12 +72,12 @@ Il package Service (Figura~\ref{fig:business_logic_service}) contiene la logica 
 \end{figure}
 
 \newpage
-\subsubsection{BusinessLogic - Strategy}
-Questo package (Figura~\ref{fig:business_logic_strategy}) implementa lo Strategy Pattern per l'elaborazione dei dati. Definisce:
+\subsubsection{BusinessLogic - Strategy}\label{sec:business_logic_strategy}
+Questo package (Figura~\ref{fig:business_logic_strategy}) implementa lo \hyperref[sec:strategy_pattern]{Strategy Pattern} per l'elaborazione dei dati. Definisce:
 \begin{itemize}
 	\item Un'interfaccia DataProcessingStrategy.
 	\item Implementazioni concrete per Calcolo, Statistiche e Report (es. ProduzioneTotaleStrategy, ReportRaccoltiStrategy).
-	\item Un DataProcessingContext e una StrategyFactory che gestiscono la creazione e l'esecuzione della strategia appropriata.
+	\item Una StrategyFactory che gestisce la creazione e l'esecuzione della strategia appropriata.
 \end{itemize}
 \begin{figure}[h]
 	\centering
@@ -86,8 +86,8 @@ Questo package (Figura~\ref{fig:business_logic_strategy}) implementa lo Strategy
 \end{figure}
 
 \newpage
-\subsubsection{BusinessLogic - Exception}
-Il package Exception (Figura~\ref{fig:business_logic_exception}) definisce una gerarchia di eccezioni custom per una gestione degli errori robusta e centralizzata. Tutte le eccezioni ereditano da una classe base AgroManagerException, suddivisa in eccezioni tecniche (es. DataAccessException) e di business (es. ValidationException, BusinessLogicException). L'ErrorCode enum centralizza i codici e i messaggi d'errore.
+\subsubsection{BusinessLogic - Exception}\label{sec:business_logic_exception}
+Il package Exception (Figura~\ref{fig:business_logic_exception}) definisce una gerarchia di eccezioni custom per una gestione degli errori robusta e centralizzata. Tutte le eccezioni ereditano da una classe base \hyperref[sec:errori_exception_hierarchy]{AgroManagerException}, suddivisa in eccezioni tecniche (es. DataAccessException) e di business (es. ValidationException, BusinessLogicException). L'ErrorCode enum centralizza i codici e i messaggi d'errore.
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{Images/Diagram/Class_diagram/Exception.png}
@@ -95,24 +95,24 @@ Il package Exception (Figura~\ref{fig:business_logic_exception}) definisce una g
 \end{figure}
 
 \newpage
-\subsubsection{Controller}
-Il package Controller (Figura~\ref{fig:controller}) implementa la parte C del pattern MVC. Ad ogni vista principale è associato un controller (es. FornitoreController, PiantagioneController) che gestisce gli eventi della GUI (es. onNuovoFornitore()) e invoca i metodi del BusinessLogic layer (tramite i suoi Service) per eseguire le azioni richieste.
+\subsubsection{Controller}\label{sec:controller}
+Il package Controller (Figura~\ref{fig:controller}) implementa la parte C del pattern \hyperref[sec:mvc_pattern]{MVC}. Ad ogni vista principale è associato un controller (es. FornitoreController, PiantagioneController) che gestisce gli eventi della GUI (es. onNuovoFornitore()) e invoca i metodi del BusinessLogic layer (tramite i suoi Service) per eseguire le azioni richieste (implementazione del pattern \hyperref[sec:observer_pattern]{Observer}).
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.7\linewidth]{Images/Diagram/Class_diagram/Controller.png}
 	\caption{Diagramma delle classi del package Controller}\label{fig:controller}
 \end{figure}
 \newpage
-\subsubsection{View}
-Il package View (Figura~\ref{fig:view}) contiene tutte le classi JavaFX che compongono l'interfaccia utente. È suddiviso logicamente in Main Views (le schermate principali come DashboardView e FornitoreView), Dialogs (le finestre modali per l'inserimento/modifica, es. FornitoreDialog, PiantagioneDialog) e Helpers (classi di utilità come NotificationHelper).
+\subsubsection{View}\label{sec:view}
+Il package View (Figura~\ref{fig:view}) contiene tutte le classi JavaFX che compongono l'interfaccia utente. È suddiviso logicamente in Main Views (le schermate principali come \hyperref[fig:mockup_dashboard]{DashboardView} e \hyperref[fig:mockup_fornitori]{FornitoreView}), Dialogs (le finestre modali per l'inserimento/modifica, es. \hyperref[fig:mockup_dialog_nuovo_fornitore]{FornitoreDialog}, \hyperref[fig:mockup_piantagioni]{PiantagioneDialog}) e Helpers (classi di utilità come NotificationHelper).
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.9\linewidth]{Images/Diagram/Class_diagram/View.png}
 	\caption{Diagramma delle classi del package View}\label{fig:view}
 \end{figure}
 \newpage
-\subsection{Progettazione Database}
-La progettazione del database deriva direttamente dalle entità identificate nel DomainModel (\hyperref[domain_model]{sezione 3.2.1}). La persistenza dei dati è gestita da un database relazionale PostgreSQL. La Figura~\ref{fig:er_diagram} mostra lo schema Entità-Relazione (E-R) del database, che evidenzia le tabelle principali e le loro associazioni.
+\subsection{Progettazione Database}\label{sec:progettazione_database}
+La progettazione del database deriva direttamente dalle entità identificate nel \hyperref[fig:domain_model]{DomainModel}. La persistenza dei dati è gestita da un database relazionale PostgreSQL, implementata tramite il \hyperref[sec:dao_pattern]{DAO Pattern}. La Figura~\ref{fig:er_diagram} mostra lo schema Entità-Relazione (E-R) del database, che evidenzia le tabelle principali e le loro associazioni.
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.7\linewidth]{Images/Diagram/Database/ER_Diagram.png}

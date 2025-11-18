@@ -57,8 +57,8 @@ AgroManager è strutturato secondo un'architettura a layer, garantendo la separa
 		      \item \textbf{Scopo:} È l'interfaccia utente (GUI). È la parte dell'applicazione con cui l'utente finale interagisce direttamente.
 		      \item \textbf{Componenti:}
 		            \begin{itemize}
-			            \item \textbf{View:} Mostra le informazioni all'utente
-			            \item \textbf{Controller:} Riceve l'input dell'utente (es. click del mouse, dati da un form) e decide cosa fare, comunicando con il layer sottostante.
+			            \item \hyperref[sec:view]{View}: Mostra le informazioni all'utente
+			            \item \hyperref[sec:controller]{Controller}: Riceve l'input dell'utente (es. click del mouse, dati da un form) e decide cosa fare, comunicando con il layer sottostante.
 		            \end{itemize}
 	      \end{itemize}
 
@@ -67,7 +67,7 @@ AgroManager è strutturato secondo un'architettura a layer, garantendo la separa
 		      \item \textbf{Scopo:} Contiene tutte le regole di business, i calcoli e i processi decisionali che definiscono come funziona l'applicazione.
 		      \item \textbf{Componenti:}
 		            \begin{itemize}
-			            \item \textbf{BusinessLogic / Service / Strategy:} Questi componenti implementano le funzionalità principali (es. Calcola produzione media, verifica validità dei dati, genera report). Ricevono richieste dal Presentation Layer e le elaborano.
+			            \item \hyperref[sec:business_logic]{BusinessLogic} / \hyperref[sec:business_logic_service]{Service} / \hyperref[sec:business_logic_strategy]{Strategy}: Questi componenti implementano le funzionalità principali (es. Calcola produzione media, verifica validità dei dati, genera report). Ricevono richieste dal Presentation Layer e le elaborano.
 		            \end{itemize}
 	      \end{itemize}
 
@@ -76,9 +76,9 @@ AgroManager è strutturato secondo un'architettura a layer, garantendo la separa
 		      \item \textbf{Scopo:} Gestisce tutto ciò che riguarda la memorizzazione e il recupero dei dati. Fa da ponte tra la logica di business e il database.
 		      \item \textbf{Componenti:}
 		            \begin{itemize}
-			            \item \textbf{Database:} Il luogo dove i dati sono fisicamente memorizzati.
-			            \item \textbf{ORM (Object-Relational Mapping):} Uno strumento che aiuta a "tradurre" gli oggetti usati nell'applicazione in tabelle del database, e viceversa.
-			            \item \textbf{JDBC (Java Database Connectivity):} Una tecnologia specifica per connettersi ed eseguire comandi sul database.
+			            \item \hyperref[sec:progettazione_database]{Database:} Il luogo dove i dati sono fisicamente memorizzati.
+			            \item \hyperref[sec:orm]{ORM (Object-Relational Mapping):} Uno strumento che aiuta a "tradurre" gli oggetti usati nell'applicazione in tabelle del database, e viceversa.
+			            \item JDBC (Java Database Connectivity): Una tecnologia specifica per connettersi ed eseguire comandi sul database.
 		            \end{itemize}
 	      \end{itemize}
 
@@ -87,7 +87,7 @@ AgroManager è strutturato secondo un'architettura a layer, garantendo la separa
 		      \item \textbf{Scopo:} Questo layer definisce i concetti e i dati fondamentali.
 		      \item \textbf{Componenti:}
 		            \begin{itemize}
-			            \item \textbf{DomainModel:} Rappresenta le entità chiave del sistema con i loro attributi e relazioni.
+			            \item \hyperref[sec:domain_model]{DomainModel}: Rappresenta le entità chiave del sistema con i loro attributi e relazioni.
 		            \end{itemize}
 	      \end{itemize}
 \end{itemize}

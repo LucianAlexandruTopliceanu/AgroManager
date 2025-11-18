@@ -4,15 +4,14 @@ Il diagramma degli Use Case (Figura \ref{fig:use_case_diagram}) illustra le funz
 
 Le funzionalità principali, identificate come "User Goal", sono:
 \begin{itemize}
-	\item \textbf{Gestire Fornitori:} Inserimento, modifica, rimozione e filtro dei fornitori con validazioni complete.
+	\item \textbf{Gestire Fornitori:} Inserimento, modifica, rimozione e filtro dei fornitori.
 	\item \textbf{Gestire Piante:} Inserimento, modifica, rimozione e filtro delle varietà di piante.
 	\item \textbf{Gestire Zone Agricole:} Inserimento, modifica, rimozione e filtro delle zone di coltivazione.
 	\item \textbf{Gestire Piantagioni:} Inserimento, modifica, rimozione delle piantagioni con gestione degli stati del ciclo di vita.
 	\item \textbf{Gestire Raccolti:} Inserimento, modifica, rimozione e tracciamento delle attività di raccolta.
-	\item \textbf{Elaborare Dati e Report:} Analisi della produttività tramite strategie specializzate e generazione di report con salvataggio in formato TXT.
+	\item \textbf{Elaborare Dati e Report:} Analisi della produttività tramite calcoli e statistiche specializzate e generazione di report con salvataggio in formato TXT.
 	\item \textbf{Visualizzare Dashboard:} Monitoraggio in tempo reale dello stato del sistema con statistiche aggregate e azioni rapide.
 \end{itemize}
-
 \begin{figure}[h!]
 	\centering
 	\includegraphics [width=1\linewidth]{Images/Diagram/use_case_diagram.png}
@@ -34,7 +33,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {Le informazioni sui fornitori sono aggiornate nel sistema secondo le operazioni richieste}
 {
 	\begin{enumerate}[nosep]
-		\item L'utente accede alla sezione "Fornitori" dal menu principale
+		\item L'utente accede alla sezione \hyperref[fig:mockup_fornitori]{Fornitori} dal menu principale
 		\item Il sistema visualizza l'elenco dei fornitori esistenti in una tabella
 		\item L'utente può selezionare un fornitore dall'elenco
 		\item L'utente può scegliere una delle seguenti operazioni:
@@ -51,7 +50,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {
 	\textbf{2a.} Errore di connessione al database:
 	\begin{itemize}[nosep]
-		\item[\textbf{2a.1}] Il sistema mostra un messaggio di errore "Sistema non operativo"
+		\item[\textbf{2a.1}] Il sistema mostra un \hyperref[fig:mockup_errore_db]{dialog di errore connessione al database}
 		\item[\textbf{2a.2}] L'utente può riprovare l'operazione
 	\end{itemize}
 }
@@ -65,12 +64,12 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {User Goal}
 {L'utente registra un nuovo fornitore nel sistema per ampliare la rete di fornitori disponibili}
 {Utente}
-{L'utente si trova nella sezione Fornitori e il sistema è operativo}
+{L'utente si trova nella sezione \hyperref[fig:mockup_fornitori]{Fornitori} e il sistema è operativo}
 {Un nuovo fornitore è stato aggiunto al sistema e l'elenco fornitori è aggiornato}
 {
 	\begin{enumerate}[nosep]
 		\item L'utente clicca sul pulsante "Nuovo Fornitore"
-		\item Il sistema apre il dialog di inserimento nuovo fornitore
+		\item Il sistema apre il \hyperref[fig:mockup_dialog_nuovo_fornitore]{dialog di inserimento} nuovo fornitore
 		\item L'utente inserisce il nome del fornitore (campo obbligatorio)
 		\item L'utente inserisce l'indirizzo del fornitore (campo obbligatorio)
 		\item L'utente inserisce il numero di telefono (campo obbligatorio)
@@ -84,14 +83,14 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {
 	\textbf{7a.} Dati non validi:
 	\begin{itemize}[nosep]
-		\item[\textbf{7a.1}] Il sistema evidenzia i campi con errori (nome, indirizzo o telefono vuoti, email non valida se inserita, telefono troppo corto)
+		\item[\textbf{7a.1}] Il sistema evidenzia i campi con errori (nome, indirizzo o telefono vuoti, email non valida se inserita, telefono troppo corto) e mostra un \hyperref[fig:mockup_errore_validazione]{dialog di errore di validazione}
 		\item[\textbf{7a.2}] L'utente corregge i dati errati
 		\item[\textbf{7a.3}] L'utente clicca nuovamente "Salva"
 	\end{itemize}
 	\textbf{7b.} Fornitore duplicato:
 	\begin{itemize}[nosep]
 		\item[\textbf{7b.1}] Il sistema rileva che esiste già un fornitore con lo stesso nome
-		\item[\textbf{7b.2}] Il sistema mostra messaggio di errore "Fornitore già esistente"
+		\item[\textbf{7b.2}] Il sistema mostra messaggio di errore "Fornitore già esistente" mediante un (\hyperref[fig:mockup_errore_duplicato]{dialog di errore duplicato})
 		\item[\textbf{7b.3}] L'utente modifica il nome del fornitore o annulla l'operazione
 	\end{itemize}
 	\textbf{6a.} L'utente annulla l'operazione:
@@ -109,13 +108,13 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {User Goal}
 {L'utente aggiorna le informazioni di un fornitore esistente per mantenere i dati del sistema aggiornati}
 {Utente}
-{L'utente si trova nella sezione Fornitori, esiste almeno un fornitore nel sistema, e l'utente ha selezionato un fornitore dall'elenco}
+{L'utente si trova nella sezione \hyperref[fig:mockup_fornitori]{Fornitoro}, esiste almeno un fornitore nel sistema, e l'utente ha selezionato un fornitore dall'elenco}
 {Le informazioni del fornitore selezionato sono aggiornate e l'elenco fornitori riflette le modifiche}
 {
 	\begin{enumerate}[nosep]
 		\item L'utente seleziona un fornitore dall'elenco dei fornitori
 		\item L'utente clicca sul pulsante "Modifica"
-		\item Il sistema apre il dialog di modifica precompilato con i dati attuali del fornitore
+		\item Il sistema apre il \hyperref[fig:mockup_dialog_modifica_fornitore]{dialog di modifica} precompilato con i dati attuali del fornitore
 		\item L'utente modifica i campi desiderati (nome, indirizzo, telefono, email, partita IVA)
 		\item L'utente clicca "Salva"
 		\item Il sistema valida i nuovi dati inseriti
@@ -150,13 +149,13 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {User Goal}
 {L'utente rimuove un fornitore non più necessario per mantenere l'anagrafica del sistema pulita e aggiornata}
 {Utente}
-{L'utente si trova nella sezione Fornitori, esiste almeno un fornitore nel sistema e l'utente ha selezionato un fornitore dall'elenco}
+{L'utente si trova nella sezione \hyperref[fig:mockup_fornitori]{Fornitoro}, esiste almeno un fornitore nel sistema e l'utente ha selezionato un fornitore dall'elenco}
 {Il fornitore selezionato è rimosso permanentemente dal sistema e l'elenco fornitori riflette l'avvenuta rimozione}
 {
 	\begin{enumerate}[nosep]
 		\item L'utente seleziona un fornitore dall'elenco dei fornitori
 		\item L'utente clicca sul pulsante "Elimina"
-		\item Il sistema mostra un dialog modale di conferma (es. "Sei sicuro di voler eliminare questo fornitore?")
+		\item Il sistema mostra un \hyperref[fig:mockup_dialog_elimina_fornitore]{dialog di conferma}
 		\item L'utente clicca "Conferma"
 		\item Il sistema verifica i vincoli di integrità (es. che il fornitore non sia associato a piante esistenti)
 		\item Il sistema elimina il fornitore dal database
@@ -177,11 +176,10 @@ Le funzionalità principali, identificate come "User Goal", sono:
 	\textbf{5a.} Il fornitore è referenziato (vincolo di integrità):
 	\begin{itemize}[nosep]
 		\item[\textbf{5a.1}] Il sistema rileva che il fornitore è associato a delle piante
-		\item[\textbf{5a.2}] Il sistema mostra un messaggio di errore (es. "Impossibile eliminare, il fornitore è utilizzato")
+		\item[\textbf{5a.2}] Il sistema mostra un \hyperref[fig:mockup_errore_db]{dialog di errore}
 		\item[\textbf{5a.3}] Il sistema chiude il dialog di conferma e l'eliminazione è annullata
 	\end{itemize}
 }
-
 \newpage
 \subsubsection{UC1.4 - Filtrare Fornitori}
 \label{UC1.4}
@@ -191,7 +189,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {User Goal}
 {L'utente utilizza i filtri per cercare e visualizzare un sottoinsieme di fornitori in base a criteri specifici, facilitando la consultazione}
 {Utente}
-{L'utente si trova nella sezione Fornitori ed esistono fornitori nel sistema da poter filtrare}
+{L'utente si trova nella sezione \hyperref[fig:mockup_fornitori]{Fornitori} ed esistono fornitori nel sistema da poter filtrare}
 {L'elenco dei fornitori mostra solo i record che corrispondono ai criteri di ricerca e i filtri applicati sono resi visibili all'utente}
 {
 	\begin{enumerate}[nosep]
@@ -199,16 +197,14 @@ Le funzionalità principali, identificate come "User Goal", sono:
 		\item L'utente clicca sul pulsante "Applica Filtri" (o la ricerca si aggiorna automaticamente)
 		\item Il sistema interroga il database con i criteri forniti
 		\item Il sistema aggiorna l'elenco mostrando solo i fornitori che soddisfano i criteri
-		\item Il sistema mostra i filtri attivi (es. in appositi "tag" o mantenendo il testo nei campi)
 		\item L'utente può cliccare "Resetta Filtri" per tornare alla visualizzazione completa
 	\end{enumerate}
 }
 {
 	\textbf{3a.} Nessun risultato trovato:
 	\begin{itemize}[nosep]
-		\item[\textbf{3a.1}] Il sistema mostra un messaggio (es. "Nessun fornitore trovato per i criteri selezionati")
-		\item[\textbf{3a.2}] L'elenco dei fornitori viene mostrato vuoto
-		\item[\textbf{3a.3}] L'utente può modificare i criteri di ricerca e riprovare
+		\item[\textbf{3a.1}] L'elenco dei fornitori viene mostrato vuoto
+		\item[\textbf{3a.2}] L'utente può modificare i criteri di ricerca e riprovare
 	\end{itemize}
 }
 \newpage
@@ -225,7 +221,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {Le informazioni sulle piantagioni sono aggiornate nel sistema secondo le operazioni richieste}
 {
 	\begin{enumerate}[nosep]
-		\item L'utente accede alla sezione "Piantagioni" dal menu principale
+		\item L'utente accede alla sezione \hyperref[fig:mockup_piantagioni]{Piantagioni} dal menu principale
 		\item Il sistema visualizza l'elenco delle piantagioni esistenti in una tabella
 		\item L'utente può selezionare una piantagione dall'elenco
 		\item L'utente può scegliere una delle seguenti operazioni:
@@ -243,7 +239,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {
 	\textbf{2a.} Errore di connessione al database:
 	\begin{itemize}[nosep]
-		\item[\textbf{2a.1}] Il sistema mostra un messaggio di errore "Sistema non operativo"
+		\item[\textbf{2a.1}] Il sistema mostra un \hyperref[fig:mockup_errore_db]{dialog di errore connessione al database}
 		\item[\textbf{2a.2}] L'utente può riprovare l'operazione
 	\end{itemize}
 }
@@ -256,13 +252,13 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {User Goal}
 {L'utente aggiorna lo stato del ciclo di vita di una piantagione per tracciare il progresso della coltivazione attraverso l'interfaccia dell'applicativo}
 {Utente}
-{L'utente si trova nella sezione Piantagioni, esiste almeno una piantagione nel sistema, e l'utente ha selezionato una piantagione dall'elenco}
+{L'utente si trova nella sezione \hyperref[fig:mockup_piantagioni]{Piantagioni}, esiste almeno una piantagione nel sistema, e l'utente ha selezionato una piantagione dall'elenco}
 {Lo stato della piantagione è aggiornato con il nuovo stato del ciclo di vita, l'elenco piantagioni riflette il cambiamento, e la data di cambio stato è registrata nel sistema}
 {
 	\begin{enumerate}[nosep]
 		\item L'utente seleziona una piantagione dall'elenco delle piantagioni
 		\item L'utente clicca sul pulsante "Cambia Stato"
-		\item Il sistema apre il dialog di cambio stato
+		\item Il sistema apre il \hyperref[fig:mockup_cambio_stato]{dialog di cambio stato}
 		\item Il sistema mostra lo stato attuale della piantagione e gli stati disponibili per la transizione
 		\item L'utente seleziona il nuovo stato dal menu a tendina
 		\item L'utente può aggiungere note opzionali nel campo commenti
@@ -272,11 +268,6 @@ Le funzionalità principali, identificate come "User Goal", sono:
 	\end{enumerate}
 }
 {
-	\textbf{4a.} Transizione di stato non valida:
-	\begin{itemize}[nosep]
-		\item[\textbf{4a.1}] Il sistema mostra solo gli stati raggiungibili dal stato attuale secondo le regole del ciclo di vita
-		\item[\textbf{4a.2}] L'utente può scegliere solo tra: stato successivo, sospensione o rimozione
-	\end{itemize}
 	\textbf{7a.} L'utente annulla il cambio stato:
 	\begin{itemize}[nosep]
 		\item[\textbf{7a.1}] L'utente clicca "Annulla" nel dialog
@@ -301,18 +292,17 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {I report richiesti sono generati e visualizzati, i dati possono essere esportati se necessario}
 {
 	\begin{enumerate}[nosep]
-		\item L'utente accede alla sezione "Analisi \& Report" dal menu principale
+		\item L'utente accede alla sezione \hyperref[fig:mockup_analisi]{Analisi e Report} dal menu principale
 		\item Il sistema visualizza le opzioni di elaborazione disponibili
 		\item L'utente può scegliere una delle seguenti operazioni:
 		      \begin{itemize}[nosep]
 			      \item Generare report raccolti
 			      \item Calcolare statistiche produzione
-			      \item Visualizzare analisi dati con strategy pattern
-			      \item Esportare risultati in formato TXT
+			      \item Visualizzare analisi dati con strategie
 		      \end{itemize}
 		\item Il sistema elabora i dati secondo l'opzione selezionata
 		\item Il sistema visualizza i risultati dell'elaborazione
-		\item L'utente può salvare o esportare i risultati
+		\item L'utente può salvare i risultati
 	\end{enumerate}
 }
 {
@@ -331,7 +321,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 {User Goal}
 {L'utente ottiene una vista d'insieme del sistema e dello stato delle attività agricole tramite una dashboard informativa}
 {Utente}
-{Il sistema è avviato e l'utente si trova nella schermata principale dell'applicazione}
+{Il sistema è avviato e l'utente si trova nella \hyperref[fig:mockup_dashboard]{schermata principale} dell'applicazione}
 {La dashboard mostra informazioni aggiornate e l'utente ha una vista d'insieme dello stato del sistema}
 {
 	\begin{enumerate}[nosep]
@@ -345,14 +335,14 @@ Le funzionalità principali, identificate come "User Goal", sono:
 			      \item Statistiche dei raccolti recenti
 			      \item Azioni rapide per accesso diretto alle funzionalità
 		      \end{itemize}
-		\item L'utente può navigare verso sezioni specifiche cliccando sui widget della dashboard o utilizzare le azioni rapide
+		\item L'utente può navigare verso sezioni specifiche cliccando sul menu della dashboard o utilizzare le azioni rapide
 	\end{enumerate}
 }
 {
 	\textbf{2a.} Sistema non operativo (database non accessibile):
 	\begin{itemize}[nosep]
-		\item[\textbf{2a.1}] La dashboard mostra lo stato offline con indicatore e messaggio di errore
-		\item[\textbf{2a.2}] Le azioni rapide vengono disabilitate e mostrato messaggio "Connetti il database per accedere alle funzionalità"
+		\item[\textbf{2a.1}] La dashboard passa in \hyperref[fig:mockup_dashbord_limitata]{modalità limitata}
+		\item[\textbf{2a.2}] Le azioni rapide vengono disabilitate
 		\item[\textbf{2a.3}] Viene mostrato messaggio "Sistema in modalità limitata"
 	\end{itemize}
 }
@@ -364,11 +354,11 @@ I prompt utilizzati per generare ogni vista seguono una struttura comune. Per es
 \begin{itemize}
 
 	\item \textbf{Contesto del Progetto}:
-	      Sto sviluppando un'applicazione JavaFX chiamata \textbf{AgroManager} per la gestione agricola seguendo il pattern architetturale \textbf{MVC (Model-View-Controller)}. Il progetto utilizza:
+	      Sto sviluppando un'applicazione JavaFX chiamata \textbf{AgroManager} per la gestione agricola seguendo il pattern architetturale \textbf{\hyperref[sec:mvc_pattern]{MVC (Model-View-Controller)}}. Il progetto utilizza:
 	      \begin{itemize}
 		      \item \textbf{JavaFX} per l'interfaccia utente
-		      \item Pattern \textbf{MVC} con separazione netta delle responsabilità
-		      \item \textbf{DAO Pattern} per l'accesso ai dati
+		      \item Pattern \textbf{\hyperref[sec:mvc_pattern]{MVC}} con separazione netta delle responsabilità
+		      \item \textbf{\hyperref[sec:dao_pattern]{DAO Pattern}} per l'accesso ai dati
 		      \item \textbf{Service Layer} per la business logic
 		      \item \textbf{CSS styling} personalizzato per un'interfaccia moderna e professionale
 	      \end{itemize}
@@ -420,7 +410,7 @@ public class Fornitore {
 			            \item Doppio click su riga per modifica rapida
 			            \item Abilitazione/disabilitazione pulsanti basata sulla selezione
 			            \item Conferma eliminazione con dialog personalizzato
-			            \item Messaggi di feedback per operazioni CRUD
+			            \item Messaggi di feedback per operazioni \textbf{CRUD}
 		            \end{itemize}
 
 		      \item \textit{Integrazione Controller:}
@@ -463,7 +453,7 @@ public class Fornitore {
 		            \end{itemize}
 	      \end{itemize}
 
-	\item \textbf{Pattern di Integrazione MVC}:
+	\item \textbf{Pattern di Integrazione \hyperref[sec:mvc_pattern]{MVC}}:
 
 	      \begin{lstlisting}[language=Java]
 public class FornitoreController {
@@ -504,13 +494,13 @@ public class FornitoreController {
 	      Genera il codice completo per:
 	      \begin{itemize}
 		      \item \texttt{FornitoreView.java} - Vista principale con tabella, filtri e azioni
-		      \item \texttt{FornitoreDialog.java} - Dialog modale per CRUD
+		      \item \texttt{FornitoreDialog.java} - Dialog modale per \textbf{CRUD}
 		      \item Eventuali aggiornamenti \texttt{CSS} per stili specifici non presenti
 	      \end{itemize}
 
 	      Rispetta rigorosamente:
 	      \begin{itemize}
-		      \item Pattern MVC con separazione delle responsabilità
+		      \item Pattern \hyperref[sec:mvc_pattern]{MVC} con separazione delle responsabilità
 		      \item Naming conventions Java standard
 		      \item Struttura del progetto esistente
 		      \item Stili CSS predefiniti
@@ -542,7 +532,7 @@ public class FornitoreController {
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_zone.png}
-	\caption{Mockup della vista "Gestione Zone". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Zona, Modifica, ecc.) e la tabella "Elenco Zone".}
+	\caption{Mockup della vista "Gestione Zone". Illustra l'interfaccia \textbf{CRUD} (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Zona, Modifica, ecc.) e la tabella "Elenco Zone".}
 	\label{fig:mockup_zone}
 \end{figure}
 \newpage
@@ -550,7 +540,7 @@ public class FornitoreController {
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_fornitori.png}
-	\caption{Mockup della vista "Gestione Fornitori". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuovo Fornitore, Modifica, ecc.) e la tabella "Elenco Fornitori".}
+	\caption{Mockup della vista "Gestione Fornitori". Illustra l'interfaccia \textbf{CRUD} (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuovo Fornitore, Modifica, ecc.) e la tabella "Elenco Fornitori".}
 	\label{fig:mockup_fornitori}
 \end{figure}
 \newpage
@@ -558,7 +548,7 @@ public class FornitoreController {
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_piante.png}
-	\caption{Mockup della vista "Gestione Piante". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Pianta, Modifica, ecc.) e la tabella "Elenco Piante".}
+	\caption{Mockup della vista "Gestione Piante". Illustra l'interfaccia \textbf{CRUD} (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Pianta, Modifica, ecc.) e la tabella "Elenco Piante".}
 	\label{fig:mockup_piante}
 \end{figure}
 \newpage
@@ -566,7 +556,7 @@ public class FornitoreController {
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{Images/Mockups/gestione_piantagioni.png}
-	\caption{Mockup della vista "Gestione Piantagioni". Illustra l'interfaccia CRUD (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Piantagione, Modifica, ecc.) e la tabella "Elenco Piantagioni".}
+	\caption{Mockup della vista "Gestione Piantagioni". Illustra l'interfaccia \textbf{CRUD} (Create, Read, Update, Delete) standard, composta da un pannello di "Ricerca", i pulsanti di azione (Nuova Piantagione, Modifica, ecc.) e la tabella "Elenco Piantagioni".}
 	\label{fig:mockup_piantagioni}
 \end{figure}
 \newpage
@@ -585,17 +575,72 @@ public class FornitoreController {
 	\caption{Mockup della vista 'Analisi e Report'. L'interfaccia permette all'utente di configurare ed eseguire analisi sui dati.}
 	\label{fig:mockup_analisi}
 \end{figure}
-
+\newpage
+\subsubsection{Dashbord azioni limitate}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/Mockups/database_offline.PNG}
+	\caption{Mockup della vista "Dashboard" con azioni limitate in seguito a una mancata connessione al database.}
+	\label{fig:mockup_dashbord_limitata}
+\end{figure}
+\newpage
+\subsubsection{Dialogs inserimento, modifica e rimozione}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/nuovo_fornitore_dialog.PNG}
+	\caption{Dialog per l'inserimento di un nuovo fornitore.}
+	\label{fig:mockup_dialog_nuovo_fornitore}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/modifica_fornitore_dialog.PNG}
+	\caption{Dialog per la modifica di un fornitore esistente, i campi vengono pre compilati da sistema con i dati del fornitore da modificare.}
+	\label{fig:mockup_dialog_modifica_fornitore}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/elimina_fornitore_dialog.PNG}
+	\caption{Dialog per la conferma della rimozione di un fornitore.}
+	\label{fig:mockup_dialog_elimina_fornitore}
+\end{figure}
+\newpage
+\subsubsection{Dialog cambio stato piantagione}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\linewidth]{Images/Mockups/dialog_cambio_stato_piantagione.png}
+\caption{Dialog per il cambio di stato di una piantagione.}
+\label{fig:mockup_cambio_stato}
+\end{figure}
+\subsubsection{Dialogs errori}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/errore_db.PNG}
+	\caption{Mockup del dialog di errore connessione al database.}
+	\label{fig:mockup_errore_db}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/errore_validazione.PNG}
+	\caption{Mockup del dialog di errore di validazione dei dati.}
+	\label{fig:mockup_errore_validazione}
+\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/errore_duplicato.PNG}
+	\caption{Mockup del dialog di errore in caso di aggiunta di un elemento già esistente.}
+	\label{fig:mockup_errore_duplicato}
+\end{figure}
 \newpage
 
+
 \subsection{Page navigation diagram}
-Il diagramma di navigazione delle pagine (Page Navigation Diagram) completa l'analisi funzionale, fornendo una visione d'insieme dei flussi di interazione dell'utente con l'interfaccia grafica. Questo diagramma definisce come l'utente si sposta tra le diverse viste dell'applicazione, validando la coerenza dei percorsi definiti negli Use Case e visualizzati nei Mockups.
+Il diagramma di navigazione delle pagine (Page Navigation Diagram) fornisce una visione d'insieme dei flussi di interazione dell'utente con l'interfaccia grafica. Questo diagramma definisce come l'utente si sposta tra le diverse viste dell'applicazione, validando la coerenza dei percorsi definiti negli Use Case e visualizzati nei Mockups.
 
 Come illustrato nella Figura \ref{fig:page_navigation_diagram}, il diagramma evidenzia l'architettura di navigazione "hub-and-spoke" dell'applicativo:
 \begin{itemize}
-	\item La \textbf{Dashboard} agisce come "hub" centrale, da cui l'utente può accedere a tutte le sezioni principali ("spokes").
-	\item Ciascuna sezione gestionale (es. "Gestione Zone", "Gestione Piantagioni") segue un pattern di interazione coerente, permettendo all'utente di tornare facilmente alla Dashboard.
-	\item Le operazioni CRUD (come "new/edit") vengono gestite tramite finestre di dialogo modali (es. "Zona Dialog"), che al termine ("save/cancel") riportano l'utente alla vista gestionale di provenienza.
+	\item La \textbf{\hyperref[fig:mockup_dashboard]{Dashboard}} agisce come "hub" centrale, da cui l'utente può accedere a tutte le sezioni principali ("spokes").
+	\item Ciascuna sezione gestionale (es. "\hyperref[fig:mockup_zone]{Gestione Zone}", "\hyperref[fig:mockup_piantagioni]{Gestione Piantagioni}") segue un pattern di interazione coerente, permettendo all'utente di tornare facilmente alla Dashboard.
+	\item Le operazioni CRUD (come "new/edit") vengono gestite tramite finestre di dialogo (es. \hyperref[fig:mockup_dialog_nuovo_fornitore]{"Nuovo Fornitore Dialog"}), che al termine ("save/cancel") riportano l'utente alla vista gestionale di provenienza.
 \end{itemize}
 
 \begin{figure}[h]

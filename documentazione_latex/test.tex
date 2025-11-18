@@ -1,15 +1,15 @@
 \section{Test}
-L'infrastruttura di test del progetto è stata sviluppata utilizzando \textbf{JUnit 5} per garantire l'affidabilità, la correttezza e la manutenibilità del codice. L'approccio segue una strategia multi-livello, suddividendo i test in tre categorie principali:
+L'infrastruttura di test del progetto è stata sviluppata utilizzando \textbf{JUnit 5} per garantire l'affidabilità, la correttezza e la manutenibilità del codice. L'approccio segue una strategia multi-livello, suddividendo i test in tre categorie principali che validano l'architettura implementata:
 
 \begin{itemize}
-	\item \textbf{Test Strutturali (Unit Test):} Focalizzati sulla verifica in \textbf{isolamento} dei singoli componenti (classi del Domain Model e logica di validazione dei Service), utilizzando \textit{mock object} per simulare le dipendenze esterne (come i DAO).
+	\item \textbf{Test Strutturali (Unit Test):} Focalizzati sulla verifica in \textbf{isolamento} dei singoli componenti (classi del \hyperref[fig:domain_model]{Domain Model} e logica di validazione dei \hyperref[fig:business_logic_service]{Service}), utilizzando \textit{mock object} per simulare le dipendenze esterne (come i \hyperref[sec:dao_pattern]{DAO}).
 
-	\item \textbf{Test di Integrazione (ORM):} Mirati a validare la corretta comunicazione tra l'applicazione e il database PostgreSQL. Verificano l'intero ciclo di vita CRUD (Create, Read, Update, Delete) e la correttezza delle query SQL.
+	\item \textbf{Test di Integrazione (ORM):} Mirati a validare la corretta comunicazione tra l'applicazione e il database PostgreSQL. Verificano l'intero ciclo di vita \textbf{CRUD} (Create, Read, Update, Delete) e la correttezza delle query SQL.
 
 	\item \textbf{Test Funzionali:} Verificano una \textit{feature} completa "verticalmente" attraverso più layer (es. la generazione di un report), assicurando che il risultato finale sia corretto.
 \end{itemize}
 
-Per tutti i test che richiedono l'accesso al database, viene attivata una modalità di test (\texttt{DatabaseConnection.setTestMode(true)}) che reindirizza le operazioni verso un database di test dedicato, garantendo l'isolamento dall'ambiente di produzione.
+Per tutti i test che richiedono l'accesso al database, viene attivata una modalità di test (DatabaseConnection.setTestMode(true)) che reindirizza le operazioni verso un database di test dedicato, garantendo l'isolamento dall'ambiente di produzione.
 
 \subsection{Test Strutturali (Unit Test)}
 Questi test "white-box" verificano la logica interna dei componenti senza dipendere dal database o da altri servizi.
@@ -54,7 +54,7 @@ Questo approccio permette di testare in modo granulare ogni singola regola di va
 
 \begin{lstlisting}[
     language=Java,
-    caption={Definizione di un Mock DAO interno alla classe di test per isolare il service.},
+    caption={Definizione di un \textbf{Mock DAO} interno alla classe di test per isolare il service.},
     label={lst:mock_dao_test}
 ]
 // Mock DAO che simula successo nelle operazioni
@@ -119,9 +119,8 @@ void testAggiungiPiantaFornitoreIdNull() {
 \end{lstlisting}
 
 \subsection{Test di Integrazione (ORM e Database)}
-Questi test validano l'intero strato \texttt{ORM}, assicurando che le classi DAO interagiscano correttamente con il database PostgreSQL. Testano la correttezza delle query SQL, la gestione delle \texttt{SQLException} e il mapping tra \texttt{ResultSet} e oggetti del dominio.
-
-Per garantire che i test siano \textbf{idempotenti} (cioè eseguibili più volte senza alterare lo stato del sistema), viene utilizzata una strategia di \textit{setup} e \textit{teardown}:
+Questi test validano l'intero strato \texttt{\hyperref[fig:orm]{ORM}}, assicurando che le classi \hyperref[sec:dao_pattern]{DAO} interagiscano correttamente con il database PostgreSQL. Testano la correttezza delle query SQL, la gestione delle \texttt{SQLException} e il mapping tra \texttt{ResultSet} e oggetti del dominio, verificando che l'implementazione sia coerente con lo \hyperref[fig:er_diagram]{schema E-R del database}.
+Per garantire che i test siano eseguibili più volte senza alterare lo stato del sistema, viene utilizzata una strategia di \textit{setup} e \textit{teardown}:
 \begin{itemize}
 	\item \texttt{@BeforeAll}: Attiva la modalità test del database.
 	\item \texttt{@BeforeEach}: Crea le entità necessarie (incluse le dipendenze da chiavi esterne, come \texttt{Fornitore} per \texttt{Pianta}) e le salva nel DB.
@@ -131,7 +130,7 @@ Per garantire che i test siano \textbf{idempotenti} (cioè eseguibili più volte
 
 \begin{lstlisting}[
     language=Java,
-    caption={Test di integrazione per il ciclo CRUD completo su PiantaDAO.},
+    caption={Test di integrazione per il ciclo \textbf{CRUD} completo su PiantaDAO.},
     label={lst:crud_test}
 ]
 @BeforeEach
@@ -203,9 +202,9 @@ void testUpdateBlocked() {
 \end{lstlisting}
 
 \subsection{Test Funzionali}
-I test funzionali verificano una \textit{feature} completa (come un caso d'uso) eseguendo il codice attraverso più layer. A differenza dei test unitari, questi test non usano mock ma interagiscono con i servizi reali e il database di test per validare il risultato finale.
+I test funzionali verificano una \textit{feature} completa (come un \hyperref[UC1]{caso d'uso}) eseguendo il codice attraverso più layer. A differenza dei test unitari, questi test non usano mock ma interagiscono con i servizi reali e il database di test per validare il risultato finale.
 
-Il test \texttt{ReportServiceTest} è un esempio di questa strategia. Verifica che la generazione dei report (un'operazione complessa che richiede l'esecuzione di \texttt{Strategy} e l'accesso ai dati tramite il \texttt{RaccoltoService}) produca un risultato corretto.
+Il test \texttt{ReportServiceTest} è un esempio di questa strategia. Verifica che la generazione dei report (un'operazione complessa che richiede l'esecuzione di \texttt{\hyperref[sec:strategy_pattern]{Strategy}} e l'accesso ai dati tramite il \texttt{RaccoltoService}) produca un risultato corretto.
 
 Il test include anche logica condizionale: se il database di test non contiene dati di raccolto (\texttt{hasRaccoltiDisponibili()}), il test viene contrassegnato come \textit{skipped}, evitando falsi negativi e rendendo la suite di test più robusta.
 

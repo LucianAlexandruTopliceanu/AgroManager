@@ -16,7 +16,7 @@ La classe MainApp implementa il bootstrap per l'applicativo. Agisce come depende
 	caption={Snippet del metodo start() in MainApp.},
 	label={lst:mainapp_start}
 ]{code/MainApp.java}
-La classe coordina l'inizializzazione di tutti i layer seguendo l'architettura MVC in modo asincrono per evitare Thread Blocking durante l'avvio dell'applicazione dovuto ai servizi database che bloccano l'Event Dispatch Thread di JavaFX, causando UI non responsive. Il metodo \texttt{start()} (Listing \ref{lst:mainapp_start}) avvia l'inizializzazione in un thread separato, mantenendo l'interfaccia utente reattiva.
+La classe coordina l'inizializzazione di tutti i layer seguendo l'architettura \textbf{MVC} in modo asincrono per evitare Thread Blocking durante l'avvio dell'applicazione dovuto ai servizi database che bloccano l'Event Dispatch Thread di JavaFX, causando UI non responsive. Il metodo \texttt{start()} (Listing \ref{lst:mainapp_start}) avvia l'inizializzazione in un thread separato, mantenendo l'interfaccia utente reattiva.
 \lstinputlisting[
 	language=Java,
 	firstline=9,
@@ -26,11 +26,11 @@ La classe coordina l'inizializzazione di tutti i layer seguendo l'architettura M
 ]{code/MainApp.java}
 I layer sono eseguiti nel seguente ordine per rispettare le dipendenze:
 \begin{itemize}
-	\item \textbf{Data Access Layer:} Vengono create le istanze dei DAO tramite la DAOFactory.
-	\item \textbf{Service Layer:} Vengono istanziati i Service, iniettando i DAO necessari (es. new ZonaService(DAOFactory.getZonaDAO())).
-	\item \textbf{Presentation Layer:} Vengono istanziati i Controller, iniettando i Service e le View corrispondenti (es. new ZonaController(zonaService, zonaView)).
+	\item \textbf{Data Access Layer:} Vengono create le istanze dei \hyperref[sec:dao_pattern]{DAO} tramite la \textbf{DAOFactory}.
+	\item \textbf{Service Layer:} Vengono istanziati i Service, iniettando i \hyperref[sec:dao_pattern]{DAO} necessari (es. new ZonaService(DAOFactory.getZonaDAO())).
+	\item \textbf{Presentation Layer:} Vengono istanziati i \hyperref[sec:controller]{Controller}, iniettando i \hyperref[sec:service]{Service} e le \hyperref[sec:view]{View} corrispondenti (es. new ZonaController(zonaService, zonaView)).
 \end{itemize}
-\subsubsection{Service Layer- Validazione e Business Logic}
+\subsubsection{Service Layer- Validazione e Business Logic}\label{sec:service}
 Il Service Layer implementa il business logic dell'architettura, separando le regole di dominio dalla persistenza e dalla presentazione. Ogni Service agisce come domain expert per la propria entità, implementando validation rules, business constraints e operazioni multi-entity. In particolare, i Service sono responsabili di:
 \begin{itemize}
 	\item Incapsulare la logica di business complessa.
@@ -54,25 +54,25 @@ La validazione segue un approccio defense-in-depth con controlli incrementali:
 \newpage
 \subsection{Design Patterns utilizzati}
 Nella realizzazione del progetto sono stati adottati diversi design patterns per migliorare la manutenibilità, la scalabilità e la leggibilità del codice. Di seguito sono descritti i principali pattern utilizzati insieme a esempi di codice.
-\subsubsection{Model-View-Controller (MVC)}
-L'architettura MVC è stata implementata per separare le responsabilità tra la gestione dei dati (Model), la logica di presentazione (View) e il controllo del flusso dell'applicazione (Controller). Questo approccio consente una maggiore modularità e facilita la manutenzione del codice.
+\subsubsection{Model-View-Controller (MVC)}\label{sec:mvc_pattern}
+L'architettura \textbf{MVC} è stata implementata per separare le responsabilità tra la gestione dei dati (Model), la logica di presentazione (View) e il controllo del flusso dell'applicazione (Controller). Questo approccio consente una maggiore modularità e facilita la manutenzione del codice.
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/mvc.png}
-	\caption{Architettura Model-View-Controller (MVC) dell'entità fornitore.}
+	\caption{Architettura \textbf{Model-View-Controller (MVC)} dell'entità fornitore.}
 	\label{fig:mvc_fornitore}
 \end{figure}
 
-Le dipendenze tra i componenti sono gestite in MainApp, che funge da entry point dell'applicazione. I DAO vengono iniettati nei Service, che a loro volta vengono iniettati nei Controller insieme alle View corrispondenti.
+Le dipendenze tra i componenti sono gestite in MainApp, che funge da entry point dell'applicazione. I \hyperref[sec:dao_pattern]{DAO} vengono iniettati nei Service, che a loro volta vengono iniettati nei Controller insieme alle View corrispondenti.
 \lstinputlisting[
 	language=Java,
 	firstline=39,
 	lastline=50,
-	caption={Snippet dell'inizializzazione dei componenti MVC in MainApp.},
+	caption={Snippet dell'inizializzazione dei componenti \textbf{MVC} in MainApp.},
 	label={lst:mvc_initialization}
 ]{code/MainApp.java}
 \newpage
-\subsubsection{Data Access Object (DAO)}
+\subsubsection{Data Access Object (DAO)}\label{sec:dao_pattern}
 Il pattern DAO è stato utilizzato per astrarre l'accesso ai dati e separare la logica di persistenza dal resto dell'applicazione. Ogni entità del dominio ha un DAO dedicato che gestisce le operazioni CRUD e le query specifiche.
 \begin{figure}[h]
 	\centering
@@ -89,8 +89,8 @@ La logica business non ha accesso diretto al database, ma garantisce la persiste
 	caption={Snippet della classe FornitoreService che garantisce la persistenza dei dati attraverso il FornitoreDAO.},
 	label={lst:fornitore_service_dao}
 ]{code/FornitoreService.java}
-\subsubsection{Template Method}
-Il BaseDAO implementa il Template Method Pattern per standardizzare le operazioni CRUD eliminando code duplication tra DAO specifici. La classe definisce le operazioni database delegando solo i dettagli alle sottoclassi, cio permette una riduzione delle duplicazioni di codice del $N\times M$ dove $N$ è il numero di entità e $M$ il numero di operazioni CRUD. In questo modo, ogni DAO specifico (es. FornitoreDAO) eredita da BaseDAO e implementa solo i metodi astratti per le query specifiche, mentre le operazioni comuni (es. apertura/chiusura connessione, gestione transazioni) sono centralizzate in BaseDAO.
+\subsubsection{Template Method}\label{sec:template_method}
+Il BaseDAO implementa il \textbf{Template Method Pattern} per standardizzare le operazioni CRUD eliminando code duplication tra DAO specifici. La classe definisce le operazioni database delegando solo i dettagli alle sottoclassi, cio permette una riduzione delle duplicazioni di codice del $N\times M$ dove $N$ è il numero di entità e $M$ il numero di operazioni CRUD. In questo modo, ogni DAO specifico (es. FornitoreDAO) eredita da BaseDAO e implementa solo i metodi astratti per le query specifiche, mentre le operazioni comuni (es. apertura/chiusura connessione, gestione transazioni) sono centralizzate in BaseDAO.
 \lstinputlisting[
 	language=Java,
 	firstline=1,
@@ -107,7 +107,7 @@ Per esempio, il metodo \texttt{create(T entity)} (Listing \ref{lst:base_dao}) de
 	label={lst:fornitore_dao}
 ]{code/FornitoreDAO.java}
 \subsubsection{Strategy}\label{sec:strategy_pattern}
-Il Strategy Pattern implementato per l'elaborazione dati agricoli fornisce un framework di computational algorithms intercambiabili. Il sistema consente di applicare diversi algoritmi allo stesso set di dati per ricavare insight specifici, garantendo un disaccoppiamento totale dai dettagli implementativi. Ogni algoritmo implementa l'interfaccia \texttt{DataProcessingStrategy} e può essere selezionato dinamicamente in fase di esecuzione in base alle esigenze dell'utente o del contesto.
+Il \hyperref[sec:strategy_pattern]{Strategy Pattern} implementato per l'elaborazione dati agricoli fornisce un framework di computational algorithms intercambiabili. Il sistema consente di applicare diversi algoritmi allo stesso set di dati per ricavare insight specifici, garantendo un disaccoppiamento totale dai dettagli implementativi. Ogni algoritmo implementa l'interfaccia \texttt{DataProcessingStrategy} e può essere selezionato dinamicamente in fase di esecuzione in base alle esigenze dell'utente o del contesto.
 \lstinputlisting[
 	language=Java,
 	firstline=1,
@@ -124,7 +124,7 @@ Per esempio, la classe \texttt{ProduzioneTotaleStrategy} (Listing \ref{lst:produ
 	label={lst:produzione_totale_strategy}
 ]{code/ProduzioneTotaleStrategy.java}
 \subsubsection{Factory}
-Il Factory Pattern è stato utilizzato per la creazione di oggetti Strategy e DAO, centralizzando la logica di istanziazione e promuovendo il principio di separazione delle responsabilità. I Factory forniscono metodi statici per ottenere istanze  specifiche, nascondendo i dettagli di creazione e configurazione.
+Il \textbf{Factory Pattern} è stato utilizzato per la creazione di oggetti Strategy e DAO, centralizzando la logica di istanziazione e promuovendo il principio di separazione delle responsabilità. I Factory forniscono metodi statici per ottenere istanze  specifiche, nascondendo i dettagli di creazione e configurazione.
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/factory.png}
@@ -132,7 +132,7 @@ Il Factory Pattern è stato utilizzato per la creazione di oggetti Strategy e DA
 	\label{fig:factory_pattern}
 \end{figure}
 
-La classe \texttt{BusinessLogic} (Listing \ref{lst:business_logic}) utilizza il Factory Pattern per selezionare e eseguire la strategia di elaborazione dati appropriata in base al tipo di analisi richiesto, garantendo un'architettura flessibile e facilmente estendibile. L'accesso ai DAO avviene tramite la DAOFactory, che incapsula la logica di creazione e configurazione dei DAO.
+La classe \texttt{BusinessLogic} (Listing \ref{lst:business_logic}) utilizza il \textbf{Factory Pattern} per selezionare e eseguire la \hyperref[sec:strategy_pattern]{strategia di elaborazione dati} appropriata in base al tipo di analisi richiesto, garantendo un'architettura flessibile e facilmente estendibile. L'accesso ai \hyperref[sec:dao_pattern]{DAO} avviene tramite la \textbf{DAOFactory}, che incapsula la logica di creazione e configurazione dei \hyperref[sec:dao_pattern]{DAO}.
 \lstinputlisting[
 	language=Java,
 	firstline=1,
@@ -141,7 +141,7 @@ La classe \texttt{BusinessLogic} (Listing \ref{lst:business_logic}) utilizza il 
 	label={lst:business_logic}
 ]{code/BusinessLogic.java}
 \subsubsection{Singleton}
-Il Singleton Pattern è stato adottato per garantire che alcune classi abbiano una sola istanza globale accessibile in modo controllato. Questo è particolarmente utile per componenti come la connessione al database, DAOFactory e l'ErrorService, dove un'unica istanza è sufficiente e desiderabile per gestire le operazioni di accesso ai dati e la gestione degli errori.
+Il \textbf{Singleton Pattern} è stato adottato per garantire che alcune classi abbiano una sola istanza globale accessibile in modo controllato. Questo è particolarmente utile per componenti come la connessione al database, \textbf{DAOFactory} e l'ErrorService, dove un'unica istanza è sufficiente e desiderabile per gestire le operazioni di accesso ai dati e la gestione degli errori.
 \lstinputlisting[
 	language=Java,
 	firstline=1,
@@ -149,8 +149,8 @@ Il Singleton Pattern è stato adottato per garantire che alcune classi abbiano u
 	caption={Snippet della classe DatabaseConnection che implementa il Singleton Pattern.},
 	label={lst:database_connection}
 ]{code/DatabaseConnection.java}
-\subsubsection{Observer}
-Il pattern Observer è stato implementato per facilitare la comunicazione tra componenti disaccoppiati, in particolare tra le View e i Controller. Questo pattern consente alle View di notificare automaticamente i Controller quando si verificano cambiamenti di stato, migliorando la reattività dell'interfaccia utente e mantenendo una separazione chiara delle responsabilità.
+\subsubsection{Observer}\label{sec:observer_pattern}
+Il pattern Observer è stato implementato per facilitare la comunicazione tra componenti disaccoppiati, in particolare tra le \hyperref[sec:view]{View} e i \hyperref[sec:controller]{Controller}. Questo pattern consente alle View di notificare automaticamente i Controller quando si verificano cambiamenti di stato, migliorando la reattività dell'interfaccia utente e mantenendo una separazione chiara delle responsabilità.
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{images/Diagram/Patterns/observer.png}
@@ -172,8 +172,8 @@ Nella classe FornitoreView viene mantenuta una lista di observer (implementata i
 	caption={Snippet della classe ControllerFornitore che implementa il pattern Observer, la classe si registra come observer della ViewFornitore.},
 	label={lst:observer_pattern_controller_fornitore}
 ]{code/ObserverPattern.java}
-\subsection{Gestione Errori e Exception Hierarchy}
-AgroManager implementa una gerarchia di eccezioni personalizzate (già introdotta visivamente nella Figura \ref{fig:business_logic_exception} a pagina \pageref{fig:business_logic_exception}). Ogni eccezione personalizzata AgroManagerException trasporta tre informazioni fondamentali:
+\subsection{Gestione Errori e Exception Hierarchy}\label{sec:errori_exception_hierarchy}
+AgroManager implementa una gerarchia di eccezioni personalizzate (già introdotta visivamente nella \hyperref[fig:business_logic_exception]{Figura \ref{fig:business_logic_exception}} a pagina \pageref{fig:business_logic_exception}). Ogni eccezione personalizzata AgroManagerException trasporta tre informazioni fondamentali:
 \begin{itemize}
 	\item \textbf{ErrorCode:} Un enum ErrorCode che classifica
 	      l'errore (es. \texttt{VALIDATION\_002}, \texttt{DB\_001}), centralizzando
@@ -222,7 +222,7 @@ responsabile della loro risoluzione (l'utente o lo sviluppatore):
 	      di connessione al database", "Query SQL fallita").
 \end{itemize}
 
-Il vantaggio principale di questa architettura emerge nei \texttt{Controller}.
+Il vantaggio principale di questa architettura emerge nei Controller (\hyperref[sec:mvc_pattern]{parte dell'architettura MVC}).
 Come mostrato nel Listing 15, il \texttt{Controller} orchestra le operazioni
 all'interno di un blocco \texttt{try-catch} che gestisce queste eccezioni
 in modo differenziato.
