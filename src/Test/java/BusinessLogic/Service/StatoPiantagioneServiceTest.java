@@ -12,10 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per StatoPiantagioneService - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("StatoPiantagioneService Test Suite")
 public class StatoPiantagioneServiceTest {
 

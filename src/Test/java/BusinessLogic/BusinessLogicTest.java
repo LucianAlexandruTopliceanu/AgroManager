@@ -8,10 +8,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per BusinessLogic - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("BusinessLogic Test Suite")
 public class BusinessLogicTest {
 

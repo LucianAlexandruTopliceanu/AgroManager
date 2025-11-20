@@ -8,10 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per FornitoreDAO - testa solo le funzionalità realmente implementate
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("FornitoreDAO Test Suite")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FornitoreDAOTest {

@@ -10,10 +10,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per PiantaDAO - testa solo le funzionalità realmente implementate
- * Test uniformi con logging pulito e strutturato
- */
 @DisplayName("PiantaDAO Test Suite")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PiantaDAOTest {

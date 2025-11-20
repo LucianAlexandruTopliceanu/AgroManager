@@ -9,10 +9,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per FornitoreService - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("FornitoreService Test Suite")
 public class FornitoreServiceTest {
 

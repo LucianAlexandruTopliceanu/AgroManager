@@ -11,10 +11,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per RaccoltoService - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("RaccoltoService Test Suite")
 public class RaccoltoServiceTest {
 

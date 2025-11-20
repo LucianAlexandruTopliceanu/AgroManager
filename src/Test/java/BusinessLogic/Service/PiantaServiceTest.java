@@ -11,10 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per PiantaService - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("PiantaService Test Suite")
 public class PiantaServiceTest {
 

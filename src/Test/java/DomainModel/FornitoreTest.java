@@ -6,10 +6,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per Fornitore - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @DisplayName("Fornitore Test Suite")
 public class FornitoreTest {
 

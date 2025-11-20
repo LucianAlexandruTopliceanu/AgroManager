@@ -8,10 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per StatoPiantagioneDAO - modalità sola lettura
- * Test uniformi con logging pulito e strutturato
- */
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("StatoPiantagioneDAO Test Suite")
 public class StatoPiantagioneDAOTest {

@@ -14,10 +14,7 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test per PiantagioneDAO con gestione migliorata delle duplicazioni
- * e logging uniforme seguendo le best practice
- */
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("PiantagioneDAO Test Suite")
 public class PiantagioneDAOTest {
