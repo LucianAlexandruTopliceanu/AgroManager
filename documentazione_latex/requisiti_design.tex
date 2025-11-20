@@ -1,8 +1,8 @@
 \section{Analisi dei requisiti e design funzionale}\label{sec:analisi_requisiti}
 \subsection{Use case}
-Il diagramma degli Use Case (Figura \ref{fig:use_case_diagram}) illustra le funzionalità principali del sistema AgroManager e le interazioni con l'attore. È stato identificato un singolo attore, il quale ha accesso a tutte le funzionalità.
+Il diagramma degli Use Case (Figura \ref{fig:use_case_diagram_slim}) illustra le funzionalità principali del sistema AgroManager e le interazioni con l'attore. È stato identificato un singolo attore, il quale ha accesso a tutte le funzionalità.
 
-Le funzionalità principali, identificate come "User Goal", sono:
+Le funzionalità principali, identificate, sono:
 \begin{itemize}
 	\item \textbf{Gestire Fornitori:} Inserimento, modifica, rimozione e filtro dei fornitori.
 	\item \textbf{Gestire Piante:} Inserimento, modifica, rimozione e filtro delle varietà di piante.
@@ -14,8 +14,16 @@ Le funzionalità principali, identificate come "User Goal", sono:
 \end{itemize}
 \begin{figure}[h!]
 	\centering
-	\includegraphics [width=1\linewidth]{Images/Diagram/use_case_diagram.png}
+	\includegraphics [width=1\linewidth]{Images/Diagram/use_case_diagram_slim.png}
 	\caption{Diagramma degli Use Case del sistema AgroManager.}
+	\label{fig:use_case_diagram_slim}
+\end{figure}
+\newpage
+Nella Figura \ref{fig:use_case_diagram} è riportato il diagramma degli Use Case dettagliato, che include i "User Goal" principali che rappresentano operazioni specifiche come l'aggiunta, la modifica, l'eliminazione e il filtraggio delle entità gestite dal sistema.
+\begin{figure}[h!]
+	\centering
+	\includegraphics [width=1\linewidth]{Images/Diagram/use_case_diagram.png}
+	\caption{Diagramma degli Use Case del sistema AgroManager dettagliato.}
 	\label{fig:use_case_diagram}
 \end{figure}
 
@@ -26,7 +34,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 \usecasetemplate
 {UC1}
 {Gestire Fornitori}
-{User Goal}
+{Summary}
 {L'utente gestisce i fornitori attraverso l'interfaccia dell'applicativo}
 {Utente}
 {L'utente deve avere accesso al sistema AgroManager e il database deve essere operativo}
@@ -214,7 +222,7 @@ Le funzionalità principali, identificate come "User Goal", sono:
 \usecasetemplate
 {UC2}
 {Gestire Piantagioni}
-{User Goal}
+{Summary}
 {L'utente gestisce le piantagioni attive per organizzare e monitorare le coltivazioni}
 {Utente}
 {Il sistema è avviato e operativo, il database è accessibile, esistono zone e piante nel sistema}
@@ -606,10 +614,10 @@ public class FornitoreController {
 \newpage
 \subsubsection{Dialog cambio stato piantagione}
 \begin{figure}[h]
-\centering
-\includegraphics[width=0.5\linewidth]{Images/Mockups/dialog_cambio_stato_piantagione.png}
-\caption{Dialog per il cambio di stato di una piantagione.}
-\label{fig:mockup_cambio_stato}
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/Mockups/dialog_cambio_stato_piantagione.png}
+	\caption{Dialog per il cambio di stato di una piantagione.}
+	\label{fig:mockup_cambio_stato}
 \end{figure}
 \subsubsection{Dialogs errori}
 \begin{figure}[h]
